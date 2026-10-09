@@ -56,6 +56,20 @@ def paragrafos_longos(texto, max_frases=None):
     return achadas
 
 
+def _ler_lexico(nome):
+    """Léxico em ``lexicos/``: uma entrada por linha, "palavra | dado |
+    fonte" (o dado é o verbo, a classe...); linha com # é comentário."""
+    entradas = {}
+    caminho = Path(__file__).parent / "lexicos" / nome
+    for linha in caminho.read_text(encoding="utf-8").splitlines():
+        linha = linha.strip()
+        if not linha or linha.startswith("#"):
+            continue
+        palavra, dado, _fonte = (c.strip() for c in linha.split("|", 2))
+        entradas[palavra] = dado
+    return entradas
+
+
 # Sigla: duas ou mais maiúsculas (dígito no meio vale), plural em "s"
 # minúsculo. Sigla com minúscula no meio ("CNPq", "UnB") fica de fora.
 _SIGLA = re.compile(r"(?<!\w)([A-ZÀ-Ý][A-ZÀ-Ý0-9]*[A-ZÀ-Ý][A-ZÀ-Ý0-9]*)(s?)(?!\w)")
@@ -72,6 +86,14 @@ _ENDERECO = re.compile(r"://|@")
 # minúscula no mesmo texto. Com quatro letras ou menos, sigla e palavra se
 # confundem (MAPA, o ministério, e "mapa"): a regra só vale de cinco em diante.
 _MINIMO_PALAVRA_COMUM = 5
+# Nome de cor em caixa alta ("VERMELHO - Emergência, LARANJA - Muito Urgente"),
+# que a regra acima não pega quando a cor não aparece em minúscula.
+_CORES = frozenset(_ler_lexico("cores.txt"))
+# Epígrafe de ato normativo, "grafada em caracteres maiúsculos" (LC 95/1998,
+# art. 4º): o "DE" e o mês da data ("RDC Nº 513, DE 27 DE MAIO DE 2021")
+# não são sigla. O "DE" do ano já sai como texto gritado ("MAIO DE 2021").
+_MESES = "JANEIRO FEVEREIRO MARÇO ABRIL MAIO JUNHO JULHO AGOSTO SETEMBRO OUTUBRO NOVEMBRO DEZEMBRO"
+_DATA_DE_EPIGRAFE = re.compile(r"\bDE\s+\d{1,2}º?\s+DE\s+(?:%s)\b" % "|".join(_MESES.split()))
 
 
 def _sem_acento(s):
@@ -236,6 +258,7 @@ def siglas_sem_nome(texto, ignorar=()):
     vem antes dela. Aceita o padrão "Nome por Extenso (SIGLA)", em que as
     letras da sigla aparecem, em ordem, nas iniciais do nome."""
     ignorar = {s.upper() for s in ignorar}
+    datas = [(d.start(), d.end()) for d in _DATA_DE_EPIGRAFE.finditer(texto)]
     vistas = set()
     achadas = []
     for m in _SIGLA.finditer(texto):
@@ -247,6 +270,8 @@ def siglas_sem_nome(texto, ignorar=()):
         if _eh_romano(sigla, texto, m.start()) or _em_texto_gritado(texto, m.start(), m.end()):
             continue
         if _em_endereco(texto, m.start(), m.end()) or _palavra_comum(texto, sigla):
+            continue
+        if sigla.lower() in _CORES or any(a <= m.start() and m.end() <= b for a, b in datas):
             continue
         vistas.add(sigla)
         if _nome_antes(texto, m.start(), m.end(), sigla):
@@ -317,20 +342,6 @@ def frases_intercaladas(texto):
                     "oração intercalada entre vírgulas: a frase fica mais clara em duas ou em ordem direta",
                 ))
     return achadas
-
-
-def _ler_lexico(nome):
-    """Léxico em ``lexicos/``: uma entrada por linha, "palavra | verbo |
-    fonte"; linha com # é comentário."""
-    entradas = {}
-    caminho = Path(__file__).parent / "lexicos" / nome
-    for linha in caminho.read_text(encoding="utf-8").splitlines():
-        linha = linha.strip()
-        if not linha or linha.startswith("#"):
-            continue
-        palavra, verbo, _fonte = (c.strip() for c in linha.split("|", 2))
-        entradas[palavra] = verbo
-    return entradas
 
 
 def _com_plural(nomes):

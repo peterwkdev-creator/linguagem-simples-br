@@ -87,7 +87,7 @@ Os detectores também se chamam um a um, em `linguagem_simples/detectores.py`.
 |---|---|---|---|
 | II | redigir frases curtas | frase longa | mais de 20 palavras |
 | III | desenvolver uma ideia por parágrafo | parágrafo longo, sinal de mais de uma ideia | mais de 8 frases |
-| VIII | redigir o nome completo antes das siglas | primeira vez que a sigla aparece sem o nome antes | — |
+| VIII | redigir o nome completo antes das siglas | primeira vez que a sigla aparece sem o nome antes | léxico de cores em `linguagem_simples/lexicos/`, com a fonte de cada palavra |
 | XII | redigir frases preferencialmente na voz ativa | verbo "ser" com particípio ("foi entregue pela empresa"), com ou sem quem faz a ação | — |
 | XIII | evitar frases intercaladas | trecho entre vírgulas no meio da frase que começa por pronome relativo (", que deve ser apresentado pelo requerente,") | — |
 | XIV | evitar o uso de substantivos no lugar de verbos | verbo de apoio com substantivo ("faça a identificação") e substantivo do léxico com complemento ("prevenção da Covid-19") | léxico em `linguagem_simples/lexicos/`, com a fonte de cada palavra |
@@ -136,9 +136,12 @@ estão em `tests/guias.py`, com a página e o hash do PDF.
   que tem o atributo `hidden`. O CSS não é aplicado: texto escondido por
   CSS entra. Elementos lado a lado sem espaço no HTML colam as palavras
   ("22:24Modificado").
-- VIII aponta palavra comum em caixa alta, de ênfase ou de cabeçalho de
-  tabela ("OFICIAL", "VALIDADE"): na página do passaporte no gov.br
-  (09/10), 6 dos 11 apontamentos do VIII.
+- VIII deixa de fora a palavra em caixa alta que aparece em minúscula no
+  mesmo texto (de cinco letras em diante), o nome de cor ("VERMELHO -
+  Emergência"), endereço ("GOV.BR") e o "DE" e o mês da data na epígrafe
+  de ato normativo ("RDC Nº 513, DE 27 DE MAIO DE 2021", que a LC 95/1998,
+  art. 4º, manda grafar em maiúsculas). Fora disso, palavra comum em caixa
+  alta ainda é apontada ("SENHA", "BUSCAR").
 - VIII reconhece o nome antes da sigla ligado a ela ("Nome (SIGLA)",
   "Nome - SIGLA", com uma ou mais letras de cada palavra e até duas
   palavras puladas) ou, em qualquer ponto antes, como nome próprio inteiro
@@ -207,6 +210,11 @@ Medido antes de um ajuste da regra da palavra comum, que tirava uma sigla
 verdadeira ("SISBI", por causa do link "inspecao/e-sisbi"); com o ajuste,
 o VIII aponta nestas páginas uma sigla a mais.
 
+Depois desta amostra, uma 3ª correção (nome de cor e data da epígrafe de
+ato normativo) tira 3 dos 12 erros dela e nenhum acerto: 36 / 45 = 80%
+(66% a 89%), número otimista, porque é a amostra que a motivou. Nas
+amostras 1 e 2 não muda nada.
+
 **Como se mediu.** 30 páginas sorteadas (semente 20261009) entre as 5.735
 páginas de serviço do sitemap do gov.br de 08/10/2026. Os 621 apontamentos
 viraram 431 sem os repetidos (o modelo do portal se repete em toda página);
@@ -267,6 +275,10 @@ Consultados em 09/10/2026:
 
 Texto da lei: publicação original no portal da Câmara dos Deputados, DOU de
 17/11/2025.
+
+Outras fontes: Dicionário Priberam da Língua Portuguesa (um verbete por
+palavra do léxico de cores) e Lei Complementar 95/1998, art. 4º, no portal
+do Planalto (epígrafe de ato normativo em maiúsculas).
 
 ## Licença
 

@@ -1,0 +1,18 @@
+# Inciso VIII: nome de cor, que em caixa alta não é sigla ("VERMELHO -
+# Emergência" na classificação de risco de um pronto-socorro).
+# Uma entrada por linha: palavra | classe | fonte. O feminino vem do verbete
+# do masculino. Consulta: 09/10/2026.
+vermelho | adjetivo e substantivo | Dicionário Priberam, verbete "vermelho"
+vermelha | adjetivo, feminino | Dicionário Priberam, verbete "vermelho"
+laranja | substantivo (cor) | Dicionário Priberam, verbete "laranja"
+amarelo | substantivo e adjetivo | Dicionário Priberam, verbete "amarelo"
+amarela | adjetivo, feminino | Dicionário Priberam, verbete "amarelo"
+verde | adjetivo de dois gêneros | Dicionário Priberam, verbete "verde"
+azul | adjetivo de dois gêneros | Dicionário Priberam, verbete "azul"
+roxo | adjetivo | Dicionário Priberam, verbete "roxo"
+roxa | adjetivo, feminino | Dicionário Priberam, verbete "roxo"
+branco | adjetivo | Dicionário Priberam, verbete "branco"
+branca | adjetivo, feminino | Dicionário Priberam, verbete "branco"
+preto | adjetivo | Dicionário Priberam, verbete "preto"
+preta | adjetivo, feminino | Dicionário Priberam, verbete "preto"
+cinza | substantivo (cor) | Dicionário Priberam, verbete "cinza"

@@ -198,6 +198,20 @@ class TestIncisoVIII(unittest.TestCase):
         self.assertEqual(self.siglas("Serviço da Senatran. Use o SENATRAN."), ["SENATRAN"])
         self.assertEqual(self.siglas("Use o SENATRAN. Secretaria Nacional de Trânsito — Senatran."), ["SENATRAN"])
 
+    # Os dois a seguir vêm dos erros da 3ª amostra (corpus/amostra-3.md, 09/10/2026).
+    def test_cor_em_caixa_alta(self):
+        texto = "Prioridade: VERMELHO - Emergência, AZUL - Não Urgente."
+        self.assertEqual(self.siglas(texto), [])
+        self.assertEqual(self.siglas("Bandeira VERMELHA no posto."), [])
+        self.assertEqual(self.siglas("Fila VERDE. Procure o SUS."), ["SUS"])
+
+    def test_data_de_epigrafe(self):
+        texto = "Leia a RDC Nº 513, DE 27 DE MAIO DE 2021, e a RDC Nº 1, DE 1º DE MARÇO DE 2020. Procure o SUS."
+        self.assertEqual(self.siglas(texto), ["RDC", "SUS"])
+        self.assertEqual(self.siglas("A ação vai DE 27 DE MAIO a junho."), [])
+        self.assertEqual(self.siglas("O prazo de 27 DE MAIO. Leia o DE 4."), ["DE", "MAIO"])
+        self.assertEqual(self.siglas("Leia o DE 4 DE SUS."), ["DE", "SUS"])
+
     def test_romano_caixa_alta_acento_e_plural(self):
         self.assertEqual(self.siglas("Leia o inciso XI, o capítulo CC e o século XX."), [])
         self.assertEqual(self.siglas("Dom Pedro II assinou."), [])
