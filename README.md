@@ -8,9 +8,9 @@ público, órgão e quem escreve para o cidadão.
 > O resultado aponta trechos para revisão. **Não é parecer jurídico** e não
 > certifica que um texto cumpre a lei.
 
-> **Em construção.** Ainda não há versão publicada. A precisão medida em 30
-> páginas de serviço do gov.br está em [Precisão medida](#precisão-medida),
-> com o método.
+> **Em construção.** Ainda não há versão publicada. A precisão medida em
+> duas amostras de 30 páginas de serviço do gov.br está em
+> [Precisão medida](#precisão-medida), com o método.
 
 ## Como usar
 
@@ -173,8 +173,21 @@ lista que o detector antes não via, e não criou nenhum:
 | II | 100% | 57 / 57 | 94% a 100% |
 | VIII | 87% | 34 / 39 | 73% a 94% |
 
-É a mesma amostra que mostrou os erros: até uma amostra nova, leia estes
-dois números como otimistas.
+É a mesma amostra que mostrou os erros; por isso estes dois números são
+otimistas.
+
+**Amostra nova, sem o viés da correção (09/10/2026, commit `e984809`).**
+Outras 30 páginas (semente 2026100902, sem as da primeira), só II e VIII,
+mesmo critério e duas passagens (119 dos 120 rótulos iguais). Estes são
+os números a usar:
+
+| Inciso | Precisão | Acertos / anotados | Intervalo de 95% (Wilson) | Fora da conta: defeito da leitura do HTML |
+|---|---|---|---|---|
+| II | 95% | 57 / 60 | 86% a 98% | 0 |
+| VIII | 79% | 38 / 48 | 66% a 88% | 12 |
+
+Os 12 de fora estão na lista "Serviços recomendados para você" e no quadro
+"Login Integrado" do portal, que a leitura do HTML inclui.
 
 **Como se mediu.** 30 páginas sorteadas (semente 20261009) entre as 5.735
 páginas de serviço do sitemap do gov.br de 08/10/2026. Os 621 apontamentos
@@ -196,6 +209,16 @@ rótulos iguais (86%), cada divergência resolvida com uma nota. Precisão não
   "Coordenação-Geral de Ingresso - CGI"). A correção reconhece 5 deles; o
   sexto pula quatro palavras do nome. Os outros 4 erros são abreviatura de
   mês ("DEZ") e palavra comum em caixa alta, que seguem.
+- VIII na amostra nova: dos 10 erros, 6 não são sigla (palavra em caixa
+  alta como "SISTEMA" e "SENHA", nome de portal, "BR" de "GOV.BR", pedaço
+  de URL) e 4 têm o nome antes numa forma que o detector não liga
+  ("Procuradoria-Geral da Fazenda Nacional" antes de "PGFN", "Senatran"
+  antes de "SENATRAN", o nome em inglês). O ganho da correção não aparece
+  fora da amostra que a motivou: 77% antes, 79% agora, dentro do
+  intervalo.
+- II na amostra nova: os 3 erros são título ou link colado à frase seguinte
+  sem ponto; um deles é o título da página somado aos "nomes populares" do
+  serviço, que o gov.br põe num `<span>` dentro do título.
 - XIV aponta substantivo que nomeia uma coisa, não uma ação: documento
   ("Documento de identificação", "Guia de Recolhimento da União") e nome de
   serviço ("Solicitar Análise de Fotoluminescência"). Use o XIV como lista
