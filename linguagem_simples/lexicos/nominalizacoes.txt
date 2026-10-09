@@ -1,0 +1,15 @@
+# Inciso XIV: substantivo que um guia oficial manda trocar pelo verbo.
+# Uma entrada por linha: substantivo | verbo | fonte (página do arquivo PDF).
+# Consulta: 09/10/2026. O plural (-ções, -mentos, -s) é gerado pelo código.
+obtenção | obter | CAPES, O uso da Linguagem Simples na CAPES (2026), p. 10
+solicitação | solicitar | CAPES (2026), p. 10
+identificação | identificar | CAPES (2026), p. 10; TJGO, Guia de Linguagem Simples, p. 12
+pagamento | pagar | CAPES (2026), p. 10
+processamento | processar | CAPES (2026), p. 10
+agendamento | agendar | CAPES (2026), p. 10; Anvisa, Guia de Linguagem Simples, p. 13
+recolhimento | recolher | Anvisa, Guia de Linguagem Simples, p. 13
+análise | analisar | Anvisa, Guia de Linguagem Simples, p. 13
+ampliação | ampliar | Anvisa, Guia de Linguagem Simples, p. 13
+prevenção | prevenir | TRE-AL, Linguagem Simples – Cartilha (2024), p. 15
+higienização | higienizar | TRE-AL (2024), p. 15
+encaminhamento | encaminhar | TRE-AL (2024), p. 15

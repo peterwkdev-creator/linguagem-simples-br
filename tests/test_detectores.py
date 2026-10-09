@@ -3,9 +3,13 @@ que o guia oficial dá como bom. E, em cada par do guia, o "antes" conta mais
 que o "depois"."""
 
 import unittest
+from pathlib import Path
 
-from linguagem_simples import limiares
-from linguagem_simples.detectores import frases_longas, paragrafos_longos, siglas_sem_nome
+from linguagem_simples import detectores, limiares
+from linguagem_simples.detectores import (
+    frases_intercaladas, frases_longas, paragrafos_longos, siglas_sem_nome,
+    substantivos_no_lugar_de_verbos, voz_passiva,
+)
 
 from . import guias
 
@@ -141,6 +145,144 @@ class TestIncisoVIII(unittest.TestCase):
         # "Anvisa") não se distingue de nome próprio sem um léxico com fonte.
         par = guias.SIGLA_ANVISA_LACEN
         self.assertGreater(len(self.siglas(par.antes)), len(self.siglas(par.depois)))
+
+
+def trechos(detector, texto):
+    return [o.trecho for o in detector(texto)]
+
+
+class TestIncisoXII(unittest.TestCase):
+    def test_plantado(self):
+        achadas = voz_passiva("O pedido foi analisado pela equipe.")
+        self.assertEqual([(o.inciso, o.trecho, o.inicio) for o in achadas], [("XII", "foi analisado", 9)])
+        self.assertIn("com agente", achadas[0].mensagem)
+        self.assertIn("sem agente", voz_passiva("Os documentos serão conferidos.")[0].mensagem)
+
+    def test_formas_e_particípios(self):
+        self.assertEqual(trechos(voz_passiva, "A obra foi concluída."), ["foi concluída"])
+        self.assertEqual(trechos(voz_passiva, "Se o pedido for aprovado, avise."), ["for aprovado"])
+        self.assertEqual(trechos(voz_passiva, "Foi rapidamente aprovado."), ["Foi rapidamente aprovado"])
+        self.assertEqual(trechos(voz_passiva, "O ofício tinha sido entregue."), ["sido entregue"])
+
+    def test_nao_e_passiva(self):
+        for texto in (
+            "O documento é válido.",            # adjetivo com acento antes de -ido
+            "A reunião é no sábado.",           # substantivo
+            "Ele mora em São Conrado.",         # nome próprio
+            "O pedido está aprovado.",          # estar, não ser
+            "A empresa entregou o documento.",  # voz ativa
+        ):
+            with self.subTest(texto):
+                self.assertEqual(voz_passiva(texto), [])
+
+    def test_por_meio_nao_e_agente(self):
+        self.assertIn("sem agente", voz_passiva("A entrega é feita por meio do portal.")[0].mensagem)
+
+    def test_agente_so_na_mesma_oracao(self):
+        self.assertIn("sem agente", voz_passiva("O pedido foi negado, por isso recorra.")[0].mensagem)
+
+    def test_texto_bom_e_par_do_guia(self):
+        for par in guias.PASSIVA:
+            with self.subTest(par.antes):
+                self.assertEqual(voz_passiva(par.depois), [])
+                self.assertEqual(len(voz_passiva(par.antes)), 1)
+
+    def test_texto_corrido_dos_guias_tem_passiva(self):
+        # Medido em 09/10/2026: o texto que os guias dão como bom em outras
+        # técnicas usa voz passiva. A lei diz "preferencialmente na voz
+        # ativa"; o detector aponta, quem lê decide.
+        self.assertEqual(trechos(voz_passiva, guias.TREAL_PARAGRAFOS), ["ser utilizadas"])
+        self.assertEqual(trechos(voz_passiva, guias.ANVISA_SEI_DEPOIS), ["ser punido"])
+        self.assertEqual(trechos(voz_passiva, guias.FRASE_ANVISA.depois), ["é feita", "ser notificados"])
+        self.assertEqual(trechos(voz_passiva, guias.SIGLA_CAPES.depois), ["será feito"])
+        self.assertEqual(trechos(voz_passiva, guias.FRASE_TJGO.depois), [])
+        self.assertEqual(trechos(voz_passiva, guias.FRASE_CAPES.depois), [])
+
+    @unittest.expectedFailure
+    def test_par_da_capes_sem_verbo_na_passiva(self):
+        # Limite conhecido: "é responsabilidade da CAPES" não é voz passiva
+        # na gramática, embora o guia o use como exemplo dela.
+        par = guias.PASSIVA_CAPES
+        self.assertGreater(len(voz_passiva(par.antes)), len(voz_passiva(par.depois)))
+
+
+class TestIncisoXIII(unittest.TestCase):
+    def test_plantado(self):
+        texto = "O prazo, que termina amanhã, vale para todos."
+        achadas = frases_intercaladas(texto)
+        self.assertEqual([(o.inciso, o.trecho) for o in achadas], [("XIII", "que termina amanhã")])
+        self.assertEqual(texto[achadas[0].inicio:achadas[0].fim], "que termina amanhã")
+
+    def test_relativos(self):
+        self.assertEqual(len(frases_intercaladas("O órgão, o qual responde ao ministério, decide.")), 1)
+        self.assertEqual(len(frases_intercaladas("O cidadão, cujo pedido foi negado, pode recorrer.")), 1)
+        self.assertEqual(len(frases_intercaladas("A sala, onde fica o arquivo, está fechada.")), 1)
+
+    def test_nao_e_intercalada(self):
+        for texto in (
+            "Traga o RG, o CPF e o comprovante.",       # lista
+            "O importante, nestes casos, é evitar.",   # sem relativo
+            "Leve o documento, que é obrigatório.",    # fecha a frase, não intercala
+            "Pague logo, que o prazo é de 1,5 dia.",   # vírgula de número não fecha o trecho
+        ):
+            with self.subTest(texto):
+                self.assertEqual(frases_intercaladas(texto), [])
+
+    def test_texto_bom_e_par_do_guia(self):
+        par = guias.INTERCALADA_CAPES
+        self.assertEqual((len(frases_intercaladas(par.antes)), len(frases_intercaladas(par.depois))), (1, 0))
+        for texto in (guias.TREAL_PARAGRAFOS, guias.ANVISA_SEI_DEPOIS, guias.FRASE_CAPES.depois,
+                      guias.FRASE_ANVISA.depois, guias.FRASE_TJGO.depois):
+            with self.subTest(texto[:30]):
+                self.assertEqual(frases_intercaladas(texto), [])
+
+
+class TestIncisoXIV(unittest.TestCase):
+    def test_plantado(self):
+        achadas = substantivos_no_lugar_de_verbos("Faça o pagamento da taxa.")
+        self.assertEqual([(o.inciso, o.trecho) for o in achadas], [("XIV", "Faça o pagamento")])
+        self.assertIn("pagar", achadas[0].mensagem)
+
+    def test_verbo_de_apoio_com_substantivo_fora_do_lexico(self):
+        achadas = substantivos_no_lugar_de_verbos("O órgão fará a avaliação do caso.")
+        self.assertEqual([o.trecho for o in achadas], ["fará a avaliação"])
+        self.assertNotIn("verbo:", achadas[0].mensagem)
+        self.assertEqual(len(substantivos_no_lugar_de_verbos("O fiscal fez o levantamento.")), 1)
+
+    def test_lexico_com_complemento_e_plural(self):
+        self.assertEqual(trechos(substantivos_no_lugar_de_verbos, "Solicitações de acesso."), ["Solicitações"])
+        self.assertEqual(trechos(substantivos_no_lugar_de_verbos, "A análise terminou."), [])
+        self.assertEqual(trechos(substantivos_no_lugar_de_verbos, "Os pagamentos do mês."), ["pagamentos"])
+
+    def test_lexico_tem_fonte_em_cada_entrada(self):
+        caminho = Path(detectores.__file__).parent / "lexicos" / "nominalizacoes.txt"
+        for linha in caminho.read_text(encoding="utf-8").splitlines():
+            if linha.strip() and not linha.startswith("#"):
+                with self.subTest(linha):
+                    palavra, verbo, fonte = (c.strip() for c in linha.split("|"))
+                    self.assertTrue(palavra and verbo)
+                    self.assertRegex(fonte, r"p\. \d+")
+
+    def test_texto_bom_e_pares_do_guia(self):
+        for par in guias.NOMINALIZACAO:
+            with self.subTest(par.antes):
+                self.assertGreater(len(substantivos_no_lugar_de_verbos(par.antes)), 0)
+                self.assertEqual(substantivos_no_lugar_de_verbos(par.depois), [])
+        for texto in (guias.TREAL_PARAGRAFOS, guias.ANVISA_SEI_DEPOIS, guias.FRASE_CAPES.depois,
+                      guias.FRASE_ANVISA.depois, guias.FRASE_TJGO.depois):
+            with self.subTest(texto[:30]):
+                self.assertEqual(substantivos_no_lugar_de_verbos(texto), [])
+
+    def test_apoio_com_substantivo_que_nao_e_de_verbo(self):
+        self.assertEqual(substantivos_no_lugar_de_verbos("Faça a prova e o curso."), [])
+
+    def test_ordem_do_texto(self):
+        achadas = substantivos_no_lugar_de_verbos("Solicitação de bolsa: faça o pagamento.")
+        self.assertEqual([o.trecho for o in achadas], ["Solicitação", "faça o pagamento"])
+
+    def test_apoio_nao_conta_duas_vezes(self):
+        achadas = substantivos_no_lugar_de_verbos("Farão a análise do pedido de ampliação da vacina.")
+        self.assertEqual([o.trecho for o in achadas], ["Farão a análise", "ampliação"])
 
 
 if __name__ == "__main__":

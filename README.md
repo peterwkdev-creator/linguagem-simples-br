@@ -60,6 +60,7 @@ for resultado in conferir(texto):
     for ocorrencia in resultado.ocorrencias:
         print(ocorrencia.inciso, ocorrencia.inicio, ocorrencia.mensagem)
 # VIII 10 INSS: primeira ocorrência sem o nome completo antes
+# XII 30 voz passiva sem agente: a frase não diz quem faz a ação
 ```
 
 Os detectores também se chamam um a um, em `linguagem_simples/detectores.py`.
@@ -71,8 +72,11 @@ Os detectores também se chamam um a um, em `linguagem_simples/detectores.py`.
 | II | redigir frases curtas | frase longa | mais de 20 palavras |
 | III | desenvolver uma ideia por parágrafo | parágrafo longo, sinal de mais de uma ideia | mais de 8 frases |
 | VIII | redigir o nome completo antes das siglas | primeira vez que a sigla aparece sem o nome antes | — |
+| XII | redigir frases preferencialmente na voz ativa | verbo "ser" com particípio ("foi entregue pela empresa"), com ou sem quem faz a ação | — |
+| XIII | evitar frases intercaladas | trecho entre vírgulas no meio da frase que começa por pronome relativo (", que deve ser apresentado pelo requerente,") | — |
+| XIV | evitar o uso de substantivos no lugar de verbos | verbo de apoio com substantivo ("faça a identificação") e substantivo do léxico com complemento ("prevenção da Covid-19") | léxico em `linguagem_simples/lexicos/`, com a fonte de cada palavra |
 
-Os outros 15 incisos aparecem no relatório com a classe de cada um:
+Os outros 12 incisos aparecem no relatório com a classe de cada um:
 **automático** (dá para contar; detector ainda não escrito), **sinal** (dá
 para apontar, quem lê decide) ou **fora do alcance** (X e XVIII: só uma
 pessoa confere). O inciso XI vem desligado por padrão.
@@ -99,6 +103,18 @@ estão em `tests/guias.py`, com a página e o hash do PDF.
 - Com o padrão de 20 palavras, o "depois" da CAPES e o da Anvisa ainda
   têm uma frase acima de 20 (de 21 a 23 palavras); os dois guias aceitam até
   25. Com `--max-palavras 25`, nada aparece.
+- XII aponta toda voz passiva com "ser", e a lei diz "preferencialmente":
+  o texto que os guias dão como bom também tem passiva sem agente ("podem
+  ser utilizadas", TRE-AL; "pode ser punido", Anvisa). A mensagem diz se a
+  frase tem ou não quem faz a ação; quem lê decide.
+- XII não pega a passiva com "-se" ("recomenda-se"). O par da CAPES
+  ("é responsabilidade da CAPES") fica de fora: não tem verbo na passiva.
+- XIII só pega o trecho entre vírgulas com pronome relativo; entre
+  travessões, não.
+- XIV conhece só as palavras que os guias trazem (12, com o plural); fora
+  delas, só aponta "fazer" ou "promover" com substantivo em -ção ou -mento.
+- XV e XVI ainda sem detector: os guias dão um exemplo de cada, pouco para
+  um léxico com fonte.
 - Lê texto e Markdown. HTML ainda não.
 
 ## Guias usados

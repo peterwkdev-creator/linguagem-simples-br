@@ -140,3 +140,50 @@ TREAL_FONTE = Fonte(
     "TRE-AL, Linguagem Simples – Cartilha (2024)", 14, TREAL,
     "b503e8c5dd7d32b08624811b7f7635afb7beb40ed0c31a0c7a0cd82b018d3cdf",
 )
+
+
+_CAPES_SHA = "be94ff5edd1c2fc83b4dae942262ab386fa11f58c74159579cc28ad9d3f472b9"
+_ANVISA_SHA = "104e55792cedd2d813acbc7aec7176e1e3ef285f1a5d8cb0c4a5dc05bb20fb60"
+_TJGO_SHA = "8a53da863265c86396c419c9004217c34716d5c74700d5f6aa0f8647d885ad32"
+_TREAL_SHA = "b503e8c5dd7d32b08624811b7f7635afb7beb40ed0c31a0c7a0cd82b018d3cdf"
+_CAPES_10 = Fonte("CAPES, O uso da Linguagem Simples na CAPES (2026)", 10, CAPES, _CAPES_SHA)
+_ANVISA_13 = Fonte("Anvisa, Guia de Linguagem Simples, 1ª ed.", 13, ANVISA, _ANVISA_SHA)
+_ANVISA_14 = Fonte("Anvisa, Guia de Linguagem Simples, 1ª ed.", 14, ANVISA, _ANVISA_SHA)
+_TJGO_12 = Fonte("TJGO, Guia de Linguagem Simples do TJGO", 12, TJGO, _TJGO_SHA)  # rótulo em ícone, conferido na página
+_TREAL_15 = Fonte("TRE-AL, Linguagem Simples – Cartilha (2024)", 15, TREAL, _TREAL_SHA)  # conferido na página
+
+# Inciso XII.
+PASSIVA = (
+    Par(_ANVISA_14, "A documentação completa foi entregue pela empresa.",
+        "A empresa entregou a documentação completa."),
+    Par(_ANVISA_14, "O Sistema Nacional de Vigilância Sanitária (SNVS) é coordenado pela Anvisa.",
+        "A Anvisa coordena o Sistema Nacional de Vigilância Sanitária (SNVS)."),
+    Par(_ANVISA_14, "Dez lotes do medicamento serão interditados pela Anvisa.",
+        "A Anvisa interditará dez lotes do medicamento."),
+)
+# A CAPES põe este par em "Prefira a voz ativa", mas o "antes" não tem verbo
+# na voz passiva: "é responsabilidade" é verbo de ligação com substantivo.
+PASSIVA_CAPES = Par(_CAPES_10, "A gestão do programa é responsabilidade da CAPES.",
+                    "A CAPES é responsável pela gestão do programa.")
+
+# Inciso XIII.
+INTERCALADA_CAPES = Par(
+    _CAPES_10, "O documento, que deve ser apresentado pelo requerente, é obrigatório.",
+    "O requerente deve apresentar o documento obrigatório.",
+)
+
+# Inciso XIV.
+NOMINALIZACAO = (
+    Par(_CAPES_10, "Obtenção de bolsa de pós-graduação no país.", "Obter bolsa de pós-graduação no país."),
+    Par(_ANVISA_13, "O Sistema Parlatório permite o agendamento de audiências presenciais ou virtuais.",
+        "O Sistema Parlatório permite agendar audiências presenciais ou virtuais."),
+    Par(_ANVISA_13, "A Anvisa determinou que o fabricante promova o recolhimento do estoque do produto.",
+        "A Anvisa determinou que o fabricante recolha o estoque do produto."),
+    Par(_ANVISA_13, "As áreas responsáveis farão a análise do pedido de ampliação da indicação da vacina.",
+        "As áreas responsáveis analisarão o pedido para ampliar a indicação da vacina."),
+    Par(_TJGO_12, "Faça a identificação do réu.", "Identifique o réu."),
+    Par(_TREAL_15, "Para a prevenção da Covid-19, recomenda-se a higienização das mãos.",
+        "Para prevenir a Covid-19, higienize as mãos."),
+    Par(_TREAL_15, "Fazer o encaminhamento do eleitor ao cartório eleitoral.",
+        "Encaminhar o eleitor ao cartório eleitoral."),
+)

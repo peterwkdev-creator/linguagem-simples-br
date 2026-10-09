@@ -46,7 +46,8 @@ class TestRelatorio(unittest.TestCase):
         self.assertEqual([e["X"], e["XVIII"]], [NAO_CONFERIDO] * 2)
         self.assertEqual(e["XI"], DESLIGADO)
         self.assertEqual(e["I"], SEM_DETECTOR)
-        self.assertEqual(e["XII"], SEM_DETECTOR)
+        self.assertEqual([e["XII"], e["XIII"], e["XIV"]], [CONFERIDO] * 3)
+        self.assertEqual([e["XV"], e["XVI"]], [SEM_DETECTOR] * 2)
 
     def test_ligar_e_desligar(self):
         e = estados(conferir(LONGA, ligar=["xi"], desligar=["II"]))
@@ -98,18 +99,17 @@ class TestRelatorio(unittest.TestCase):
         x = next(i for i in d["incisos"] if i["inciso"] == "X")
         self.assertNotIn("ocorrencias", x)
 
-    def test_texto_bom_do_guia_nao_tem_ocorrencia(self):
-        for texto in (guias.TREAL_PARAGRAFOS, guias.FRASE_TJGO.depois):
-            with self.subTest(texto[:30]):
-                self.assertEqual(sum(len(r.ocorrencias) for r in conferir(texto)), 0)
-        # A Anvisa aceita até 25 palavras: com o limiar dela, nada; com o
-        # padrão de 20, a 1ª frase do "depois" (23 palavras, medido em
-        # 09/10/2026) aparece, como nos pares da CAPES e da Anvisa.
-        anvisa = guias.ANVISA_SEI_DEPOIS
-        self.assertEqual(sum(len(r.ocorrencias) for r in conferir(anvisa, max_palavras=25)), 0)
-        achadas = [(r.inciso.numero, o.medida) for r in conferir(anvisa) for o in r.ocorrencias]
-        self.assertEqual(achadas, [("II", 23)])
+    def test_texto_bom_do_guia(self):
+        # Medido em 09/10/2026, com os padrões: o texto que o guia dá como
+        # bom só aparece na voz passiva (XII) e, na Anvisa, que aceita até 25
+        # palavras, numa frase de 23 (II).
+        def achados(texto, **opcoes):
+            return [(r.inciso.numero, o.trecho) for r in conferir(texto, **opcoes) for o in r.ocorrencias]
 
+        self.assertEqual(achados(guias.FRASE_TJGO.depois), [])
+        self.assertEqual(achados(guias.TREAL_PARAGRAFOS), [("XII", "ser utilizadas")])
+        self.assertEqual(achados(guias.ANVISA_SEI_DEPOIS, max_palavras=25), [("XII", "ser punido")])
+        self.assertEqual([n for n, _ in achados(guias.ANVISA_SEI_DEPOIS)], ["II", "XII"])
 
 class TestLinhaDeComando(unittest.TestCase):
     def rodar(self, *args, entrada=None):
