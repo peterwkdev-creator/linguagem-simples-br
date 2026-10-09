@@ -66,6 +66,12 @@ _ANTES_DE_ROMANO = frozenset(
 )
 _PALAVRA_SIMPLES = re.compile(r"\w+")
 _SEQUENCIA_MAIUSCULA = 3  # palavras em caixa alta seguidas: é texto gritado, não sigla
+# Endereço: URL ("https://...%C2%BA") ou e-mail; o domínio se vê pelo ponto.
+_ENDERECO = re.compile(r"://|@")
+# Palavra comum em caixa alta ("SISTEMA SIMEC") se reconhece por aparecer em
+# minúscula no mesmo texto. Com quatro letras ou menos, sigla e palavra se
+# confundem (MAPA, o ministério, e "mapa"): a regra só vale de cinco em diante.
+_MINIMO_PALAVRA_COMUM = 5
 
 
 def _sem_acento(s):
@@ -103,6 +109,34 @@ def _em_texto_gritado(texto, inicio, fim):
     while b + 1 < len(linha) and _caixa_alta(linha[b + 1].group()):
         b += 1
     return b - a + 1 >= _SEQUENCIA_MAIUSCULA
+
+
+def _em_endereco(texto, inicio, fim):
+    """O trecho faz parte de um endereço: URL, e-mail ou domínio ("GOV.BR")."""
+    a = inicio
+    while a > 0 and not texto[a - 1].isspace():
+        a -= 1
+    b = fim
+    while b < len(texto) and not texto[b].isspace():
+        b += 1
+    if _ENDERECO.search(texto, a, b):
+        return True
+    ponto_antes = inicio >= 2 and texto[inicio - 1] == "." and texto[inicio - 2].isalnum()
+    ponto_depois = fim + 1 < len(texto) and texto[fim] == "." and texto[fim + 1].isalnum()
+    return ponto_antes or ponto_depois
+
+
+def _palavra_comum(texto, sigla):
+    """A "sigla" aparece em minúscula no texto, solta e fora de endereço: é
+    palavra comum escrita em caixa alta ("SISTEMA SIMEC" e "o sistema").
+    Colada a hífen ou barra é nome de sistema ou caminho
+    ("inspecao/e-sisbi"), e não conta."""
+    if len(sigla) < _MINIMO_PALAVRA_COMUM:
+        return False
+    for m in re.finditer(r"(?<![\w/-])%s(?![\w/-])" % re.escape(sigla.lower()), texto):
+        if not _em_endereco(texto, m.start(), m.end()):
+            return True
+    return False
 
 
 def _iniciais_batem(sigla, palavras_nome):
@@ -148,9 +182,11 @@ _LIGA_TRAVESSAO = re.compile(r"\s[-–—]\s*$")
 _CONECTIVOS = frozenset("de da do das dos e em para".split())
 # Palavra que só tem maiúscula por abrir a frase: "A Guia de Recolhimento".
 _ABRE_FRASE = _CONECTIVOS | frozenset("a o as os na no nas nos ao à pela pelo um uma".split())
-# Palavras com maiúscula separadas só por espaço, com um conectivo entre elas.
+# Palavras com maiúscula separadas só por espaço, com um conectivo entre elas;
+# o hífen separa palavras ("Procuradoria-Geral", "Coordenação-geral").
+_PALAVRA_MAIUSCULA = r"[A-ZÀ-Ý][a-zà-ÿA-ZÀ-Ý]*(?:-[a-zà-ÿA-ZÀ-Ý]+)*"
 _NOME_PROPRIO = re.compile(
-    r"[A-ZÀ-Ý][a-zà-ÿA-ZÀ-Ý]*(?:[ \t]+(?:(?:%s)[ \t]+)?[A-ZÀ-Ý][a-zà-ÿA-ZÀ-Ý]*)*" % "|".join(_CONECTIVOS))
+    r"%s(?:[ \t]+(?:(?:%s)[ \t]+)?%s)*" % (_PALAVRA_MAIUSCULA, "|".join(_CONECTIVOS), _PALAVRA_MAIUSCULA))
 
 
 def _nome_antes(texto, inicio, fim, sigla):
@@ -175,10 +211,10 @@ def _nome_proprio_antes(antes, sigla):
     sigla: "Informar Mudança de Endereço de Curso" não serve a MEC."""
     letras = "".join(c for c in _sem_acento(sigla).upper() if c.isalpha())
     for m in _NOME_PROPRIO.finditer(antes):
-        nome = m.group().split()
+        nome = re.split(r"[ \t-]+", m.group())
         if nome[0].lower() in _ABRE_FRASE:
             nome = nome[1:]
-        if "".join(_sem_acento(p)[0] for p in nome if p[0].isupper()) == letras:
+        if "".join(_sem_acento(p)[0].upper() for p in nome if p not in _CONECTIVOS) == letras:
             return True
     return False
 
@@ -187,6 +223,12 @@ def _nome_depois(texto, fim, sigla):
     """A sigla vem antes e o nome por extenso depois, entre parênteses?"""
     m = re.match(r"\s*\(([^()]{3,200})\)", texto[fim:])
     return bool(m) and _iniciais_batem(sigla, _PALAVRA_SIMPLES.findall(m.group(1)))
+
+
+def _outra_caixa_antes(texto, inicio, sigla):
+    """A mesma sigla escrita antes em outra caixa: "Secretaria Nacional de
+    Trânsito — Senatran" serve ao SENATRAN que vem depois."""
+    return re.compile(r"(?<!\w)%s(?!\w)" % re.escape(sigla), re.I).finditer(texto, 0, inicio)
 
 
 def siglas_sem_nome(texto, ignorar=()):
@@ -204,8 +246,12 @@ def siglas_sem_nome(texto, ignorar=()):
             continue  # palavra em caixa alta ("NÃO", "ATENÇÃO"), não sigla
         if _eh_romano(sigla, texto, m.start()) or _em_texto_gritado(texto, m.start(), m.end()):
             continue
+        if _em_endereco(texto, m.start(), m.end()) or _palavra_comum(texto, sigla):
+            continue
         vistas.add(sigla)
         if _nome_antes(texto, m.start(), m.end(), sigla):
+            continue
+        if any(_nome_antes(texto, a.start(), a.end(), sigla) for a in _outra_caixa_antes(texto, m.start(), sigla)):
             continue
         if _nome_depois(texto, m.end(), sigla):
             mensagem = f"{sigla}: o nome completo vem depois da sigla; a lei pede antes"

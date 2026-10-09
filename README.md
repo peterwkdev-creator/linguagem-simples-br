@@ -189,6 +189,24 @@ os números a usar:
 Os 12 de fora estão na lista "Serviços recomendados para você" e no quadro
 "Login Integrado" do portal, que a leitura do HTML inclui.
 
+**Terceira amostra, depois da 2ª correção do VIII (09/10/2026).** A 2ª
+correção tira do VIII o que não é sigla (endereço, como o "BR" de
+"GOV.BR"; palavra que aparece em minúscula no mesmo texto) e liga o nome
+com hífen ("Procuradoria-Geral") e a sigla escrita antes em outra caixa
+("Senatran" antes de "SENATRAN"). Na 2ª amostra, que a motivou, o VIII foi
+a 90% (38 / 42), número otimista. Em outras 30 páginas (semente
+2026100903, sem as das duas primeiras), só o VIII, mesmo critério e duas
+passagens (49 dos 60 rótulos iguais; as 11 divergências, todas na lista
+de recomendados). Este é o número do VIII a usar:
+
+| Inciso | Precisão | Acertos / anotados | Intervalo de 95% (Wilson) | Fora da conta: defeito da leitura do HTML |
+|---|---|---|---|---|
+| VIII | 75% | 36 / 48 | 61% a 85% | 12 |
+
+Medido antes de um ajuste da regra da palavra comum, que tirava uma sigla
+verdadeira ("SISBI", por causa do link "inspecao/e-sisbi"); com o ajuste,
+o VIII aponta nestas páginas uma sigla a mais.
+
 **Como se mediu.** 30 páginas sorteadas (semente 20261009) entre as 5.735
 páginas de serviço do sitemap do gov.br de 08/10/2026. Os 621 apontamentos
 viraram 431 sem os repetidos (o modelo do portal se repete em toda página);
@@ -216,6 +234,13 @@ rótulos iguais (86%), cada divergência resolvida com uma nota. Precisão não
   antes de "SENATRAN", o nome em inglês). O ganho da correção não aparece
   fora da amostra que a motivou: 77% antes, 79% agora, dentro do
   intervalo.
+- VIII na 3ª amostra: dos 12 erros, 7 são palavra comum ou rótulo em
+  caixa alta que não aparece em minúscula na página ("VERMELHO", "BUSCAR",
+  "DEZ", "DE") e 5 têm o nome antes numa forma que o detector não liga
+  ("Receita Federal" antes de "RFB", nome colado à sigla sem separador).
+  A 2ª correção também não sobe a precisão fora da amostra que a motivou
+  (79% antes, 75% agora, dentro do intervalo): o que ela tira está quase
+  todo na lista de recomendados, que já ficava fora da conta.
 - II na amostra nova: os 3 erros são título ou link colado à frase seguinte
   sem ponto; um deles é o título da página somado aos "nomes populares" do
   serviço, que o gov.br põe num `<span>` dentro do título.

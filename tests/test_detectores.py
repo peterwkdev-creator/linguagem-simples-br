@@ -165,6 +165,39 @@ class TestIncisoVIII(unittest.TestCase):
         # Na amostra, "Complementar do Exército - Rua ... Pituba, Salvador/BA - CEP".
         self.assertEqual(self.siglas("Colégio Estadual na Rua Nova do Porto - CEP"), ["CEP"])
 
+    # Os casos a seguir vêm dos erros da 2ª amostra (corpus/amostra-2.md,
+    # 09/10/2026).
+    def test_endereco_nao_tem_sigla(self):
+        self.assertEqual(self.siglas("Avalie o serviço no Portal GOV.BR"), [])
+        self.assertEqual(self.siglas("Veja https://exemplo.gov.br/resolu%C3%A7%C3%A3o-n%C2%BA-1"), [])
+        self.assertEqual(self.siglas("Escreva para SAC@exemplo.gov.br."), [])
+        self.assertEqual(self.siglas("Procure o INSS. Depois, o MEC."), ["INSS", "MEC"])
+
+    def test_palavra_comum_em_caixa_alta(self):
+        self.assertEqual(self.siglas("SISTEMA SIMEC. Entre no sistema."), ["SIMEC"])
+        self.assertEqual(self.siglas("SISTEMA SIMEC."), ["SISTEMA", "SIMEC"])
+        self.assertEqual(self.siglas("Acesse SISTEMA. Veja www.sistema.gov.br."), ["SISTEMA"])
+        self.assertEqual(self.siglas("Acesse SISTEMA. Veja https://exemplo.gov.br?busca=sistema"), ["SISTEMA"])
+        # Na 3ª amostra, "e-SISBI" e o link "(inspecao/e-sisbi)".
+        self.assertEqual(self.siglas("Use o SISBI. Acesse (inspecao/e-sisbi)."), ["SISBI"])
+        self.assertEqual(self.siglas("Use o SISBI. Acesse sisbi-web ou sisbi/consulta."), ["SISBI"])
+        # Com quatro letras, sigla e palavra se confundem: MAPA continua.
+        self.assertEqual(self.siglas("Fale com o MAPA. Veja o mapa."), ["MAPA"])
+
+    def test_nome_com_hifen(self):
+        texto = "Fale com a Procuradoria-Geral da Fazenda Nacional.\n\nProposta da PGFN."
+        self.assertEqual(self.siglas(texto), [])
+        self.assertEqual(self.siglas("Fale com a Procuradoria-geral da Fazenda Nacional.\n\nA PGFN."), [])
+        self.assertEqual(self.siglas("Fale com a Procuradoria Geral.\n\nProposta da PGFN."), ["PGFN"])
+        self.assertEqual(self.siglas("Use o e-Fazenda Nacional.\n\nProposta da PGFN."), ["PGFN"])
+
+    def test_nome_ligado_a_sigla_em_outra_caixa(self):
+        texto = "Serviço da Secretaria Nacional de Trânsito — Senatran. Use o SENATRAN."
+        self.assertEqual(self.siglas(texto), [])
+        self.assertEqual(self.siglas("SECRETARIA NACIONAL DE TRÂNSITO — SENATRAN\n\nUse o SENATRAN."), [])
+        self.assertEqual(self.siglas("Serviço da Senatran. Use o SENATRAN."), ["SENATRAN"])
+        self.assertEqual(self.siglas("Use o SENATRAN. Secretaria Nacional de Trânsito — Senatran."), ["SENATRAN"])
+
     def test_romano_caixa_alta_acento_e_plural(self):
         self.assertEqual(self.siglas("Leia o inciso XI, o capítulo CC e o século XX."), [])
         self.assertEqual(self.siglas("Dom Pedro II assinou."), [])
