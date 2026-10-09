@@ -116,16 +116,71 @@ def _iniciais_batem(sigla, palavras_nome):
     return i == len(letras)
 
 
+def _prefixos_batem(sigla, palavras_nome):
+    """As letras da sigla saem, em ordem, do começo das palavras do nome,
+    uma ou mais de cada ("CEntro de Pesquisa Em Medicina" serve a CEPEM;
+    "circuito fechado de TV" serve a CFTV). Depois da primeira letra, o nome
+    pula no máximo duas palavras que não sejam conectivo ("Departamento de
+    Operações de Comércio Exterior" serve a DECEX; "Coordenação-Geral de
+    Autorização para Transferência, Cisão e Retirada", a CGTR)."""
+    letras = "".join(c for c in _sem_acento(sigla).upper() if c.isalpha())
+    estados = {(0, 0)}  # (letras da sigla já saídas do nome, palavras puladas)
+    for palavra in palavras_nome:
+        p = _sem_acento(palavra).upper()
+        novos = set()
+        for i, pulos in estados:
+            if i == 0 or palavra in _CONECTIVOS:
+                novos.add((i, pulos))
+            elif pulos < 2:
+                novos.add((i, pulos + 1))
+            k = 1
+            while k <= len(p) and p[:k] == letras[i:i + k]:
+                novos.add((i + k, pulos))
+                k += 1
+        estados = novos
+    return any(i == len(letras) for i, _ in estados)
+
+
+# Sigla ligada ao nome que vem antes: "Nome (SIGLA)", "Nome (curva SIGLA)"
+# ou "Nome - SIGLA" (o hífen de "e-MEC" não liga).
+_LIGA_PARENTESE = re.compile(r"\((?:\s*[a-zà-ÿ]+){0,2}\s*$")
+_LIGA_TRAVESSAO = re.compile(r"\s[-–—]\s*$")
+_CONECTIVOS = frozenset("de da do das dos e em para".split())
+# Palavra que só tem maiúscula por abrir a frase: "A Guia de Recolhimento".
+_ABRE_FRASE = _CONECTIVOS | frozenset("a o as os na no nas nos ao à pela pelo um uma".split())
+# Palavras com maiúscula separadas só por espaço, com um conectivo entre elas.
+_NOME_PROPRIO = re.compile(
+    r"[A-ZÀ-Ý][a-zà-ÿA-ZÀ-Ý]*(?:[ \t]+(?:(?:%s)[ \t]+)?[A-ZÀ-Ý][a-zà-ÿA-ZÀ-Ý]*)*" % "|".join(_CONECTIVOS))
+
+
 def _nome_antes(texto, inicio, fim, sigla):
-    """A ocorrência está entre parênteses logo depois do nome por extenso?"""
-    antes = texto[:inicio].rstrip()
-    depois = texto[fim:].lstrip()
-    if not (antes.endswith("(") and depois.startswith(")")):
-        return False
-    janela = 3 * len(sigla) + 3
-    comeco_frase = max(antes.rfind("."), antes.rfind("\n"))
-    nome = _PALAVRA_SIMPLES.findall(antes[comeco_frase + 1:-1])[-janela:]
-    return _iniciais_batem(sigla, nome)
+    """O nome por extenso vem antes: ligado à sigla (entre parênteses ou com
+    travessão) ou, em qualquer ponto antes, como nome próprio cujas
+    iniciais são as letras da sigla ("Guia de Recolhimento da União")."""
+    antes = texto[:inicio]
+    m = _LIGA_TRAVESSAO.search(antes)
+    if not m and texto[fim:].lstrip().startswith(")"):
+        m = _LIGA_PARENTESE.search(antes)
+    if m:
+        cabeca = antes[:m.start()]
+        comeco_frase = max(cabeca.rfind("."), cabeca.rfind("\n"))
+        if _prefixos_batem(sigla, _PALAVRA_SIMPLES.findall(cabeca[comeco_frase + 1:])):
+            return True
+    return _nome_proprio_antes(antes, sigla)
+
+
+def _nome_proprio_antes(antes, sigla):
+    """Um nome próprio inteiro (palavras com maiúscula ligadas por conectivo,
+    sem pontuação nem quebra de linha no meio) cujas iniciais são as letras da
+    sigla: "Informar Mudança de Endereço de Curso" não serve a MEC."""
+    letras = "".join(c for c in _sem_acento(sigla).upper() if c.isalpha())
+    for m in _NOME_PROPRIO.finditer(antes):
+        nome = m.group().split()
+        if nome[0].lower() in _ABRE_FRASE:
+            nome = nome[1:]
+        if "".join(_sem_acento(p)[0] for p in nome if p[0].isupper()) == letras:
+            return True
+    return False
 
 
 def _nome_depois(texto, fim, sigla):

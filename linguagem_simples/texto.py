@@ -19,7 +19,7 @@ ABREVIATURAS = frozenset(
 )
 
 _SEPARA_BLOCO = re.compile(r"\r?\n[ \t]*(?:\r?\n[ \t]*)+")
-_MARCA_ITEM = re.compile(r"[ \t]*(?:[-*•–]|\d{1,3}[.)]|[a-z][)])[ \t]+")
+_MARCA_ITEM = re.compile(r"[ \t]*(?:[-*•·–]|\d{1,3}[.)]|[a-z][)])[ \t]+")
 _MARCA_TITULO = re.compile(r"[ \t]*#{1,6}[ \t]+")
 # Fim de frase: pontuação final (com aspas ou parêntese de fecho) seguida de
 # espaço e de início de frase, ou do fim do bloco.

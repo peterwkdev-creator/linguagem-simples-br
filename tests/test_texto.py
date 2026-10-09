@@ -36,6 +36,13 @@ class TestBlocos(unittest.TestCase):
             (ITEM, "item dois"),
         ])
 
+    def test_ponto_medio_marca_item(self):
+        # Assim as páginas de serviço do gov.br listam as diretrizes de atendimento.
+        texto = "Diretrizes:\n· Urbanidade;\n· Respeito; e\n· Ética"
+        self.assertEqual([(b.tipo, b.em(texto)) for b in blocos(texto)], [
+            (PARAGRAFO, "Diretrizes:"), (ITEM, "Urbanidade;"), (ITEM, "Respeito; e"), (ITEM, "Ética"),
+        ])
+
     def test_texto_vazio(self):
         self.assertEqual(blocos(""), [])
         self.assertEqual(blocos("\n\n  \n"), [])

@@ -111,6 +111,8 @@ class TestIncisoVIII(unittest.TestCase):
 
     def test_nome_que_nao_corresponde_as_letras(self):
         self.assertEqual(self.siglas("Leve o documento (RG)."), ["RG"])
+        achadas = siglas_sem_nome("Leve o RG (original e cópia).")
+        self.assertIn("sem o nome completo antes", achadas[0].mensagem)
 
     def test_iniciais_em_ordem_com_palavras_no_meio(self):
         texto = (
@@ -118,6 +120,50 @@ class TestIncisoVIII(unittest.TestCase):
             "Sistema Único de Saúde (SUS)."
         )
         self.assertEqual(self.siglas(texto), [])
+
+    # Os casos a seguir vêm dos erros da amostra anotada (corpus/amostra.md,
+    # 09/10/2026): o nome vinha antes, numa forma que o detector não via.
+    def test_mais_de_uma_letra_da_mesma_palavra(self):
+        self.assertEqual(self.siglas("Centro de Pesquisa em Medicina Tropical (CEPEM)."), [])
+        self.assertEqual(self.siglas("Câmeras de circuito fechado de TV (CFTV)."), ["TV"])
+        self.assertEqual(self.siglas("Centro de Medicina (CEPEM)."), ["CEPEM"])
+
+    def test_palavra_antes_da_sigla_no_parentese(self):
+        self.assertEqual(self.siglas("A curva de ponto de ebulição verdadeiro (curva PEV)."), [])
+        self.assertEqual(self.siglas("O ponto de ebulição verdadeiro (a nova curva PEV)."), ["PEV"])
+        self.assertEqual(self.siglas("O ponto de ebulição verdadeiro (PEV, em graus)."), ["PEV"])
+
+    def test_nome_ligado_so_na_mesma_frase_e_perto(self):
+        self.assertEqual(self.siglas("Fale com o Centro de Pesquisa. Em Medicina (CEPEM) atende."), ["CEPEM"])
+        self.assertEqual(self.siglas("Cadastro Geral de um conjunto de pessoas que pedem o ingresso na escola - CGI"), ["CGI"])
+
+    def test_nome_e_sigla_com_travessao(self):
+        self.assertEqual(self.siglas("Coordenação-Geral de Ingresso - CGI"), [])
+        self.assertEqual(self.siglas("Coordenação-Geral de Autorização para Transferência, Cisão e Retirada – CGTR"), [])
+        self.assertEqual(self.siglas("Obter diploma ou 2ª via de diploma - IFTO"), ["IFTO"])
+        self.assertEqual(self.siglas("Ingresso - CGI"), ["CGI"])
+
+    def test_nome_proprio_em_qualquer_ponto_antes(self):
+        self.assertEqual(self.siglas("Pagar a Guia de Recolhimento da União.\n\nEmita a GRU."), [])
+        self.assertEqual(self.siglas("Pagar a guia de recolhimento da união.\n\nEmita a GRU."), ["GRU"])
+        self.assertEqual(self.siglas("Pagar a Guia de Pagamento e Recolhimento da União. Emita a GRU."), ["GRU"])
+        self.assertEqual(self.siglas("Emita a GRU. Pague a Guia de Recolhimento da União."), ["GRU"])
+        self.assertEqual(self.siglas("A Guia de Recolhimento da União vence hoje. Emita a GRU."), [])
+        # O nome tem de estar inteiro: na amostra, o fluxo "Informar Mudança de
+        # Endereço de Curso" fazia passar o MEC da página.
+        self.assertEqual(self.siglas("Use “Informar Mudança de Endereço de Curso” no sistema do MEC."), ["MEC"])
+        self.assertEqual(self.siglas("Use Mudança, Endereço e Curso no sistema do MEC."), ["MEC"])
+        self.assertEqual(self.siglas("Guia\nRecolhimento\nUnião.\n\nEmita a GRU."), ["GRU"])
+
+    def test_hifen_dentro_da_palavra_nao_liga(self):
+        # Na amostra, "Sistema e-MEC" e "Brasília-DF".
+        self.assertEqual(self.siglas("Informar Mudança de Endereço de Curso do Sistema e-MEC."), ["MEC"])
+
+    def test_nome_ligado_pula_no_maximo_duas_palavras(self):
+        self.assertEqual(self.siglas("Departamento de Operações de Comércio Exterior – DECEX"), [])
+        self.assertEqual(self.siglas("Lei Geral de Proteção de Dados Pessoais - LGPD"), [])
+        # Na amostra, "Complementar do Exército - Rua ... Pituba, Salvador/BA - CEP".
+        self.assertEqual(self.siglas("Colégio Estadual na Rua Nova do Porto - CEP"), ["CEP"])
 
     def test_romano_caixa_alta_acento_e_plural(self):
         self.assertEqual(self.siglas("Leia o inciso XI, o capítulo CC e o século XX."), [])
