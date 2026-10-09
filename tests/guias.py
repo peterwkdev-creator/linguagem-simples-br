@@ -3,7 +3,7 @@
 Cada par traz o "antes" e o "depois" que o próprio guia dá. O texto foi
 tirado do PDF com ``pdftotext`` em 09/10/2026 (quebra de linha desfeita,
 hífen de fim de linha juntado, ligadura "ﬁ" escrita "fi") e conferido no PDF. O SHA-256 é o do PDF
-baixado; o índice completo está em ``corpus/fontes.md`` do projeto.
+baixado; a lista dos guias está no README.
 """
 
 from dataclasses import dataclass
