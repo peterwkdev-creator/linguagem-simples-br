@@ -21,7 +21,10 @@ pasta do repositório:
 python -m linguagem_simples texto.txt
 ```
 
-O arquivo é texto ou Markdown em UTF-8; `-` lê da entrada padrão. O
+O arquivo é texto, Markdown ou HTML; `-` lê da entrada padrão. HTML é
+reconhecido pela extensão (`.html`, `.htm`), pelo começo do arquivo
+(`<!doctype html>` ou `<html>`) ou pela opção `--html`. Texto e Markdown em
+UTF-8; HTML em UTF-8 ou no charset que a página declara. O
 relatório lista os 18 incisos, na ordem da lei, cada um com a classe e o que
 aconteceu:
 
@@ -40,7 +43,8 @@ X. organizar o texto a fim de que as informações mais importantes apareçam pr
 
 | Opção | O que faz |
 |---|---|
-| `--json` | relatório em JSON, com início, fim, linha e coluna de cada trecho |
+| `--json` | relatório em JSON, com início, fim, linha e coluna de cada trecho no arquivo lido |
+| `--html` | lê como HTML um arquivo que não tem extensão `.html` |
 | `--max-palavras N` | inciso II: palavras por frase (padrão 20) |
 | `--max-frases N` | inciso III: frases por parágrafo (padrão 8) |
 | `--ignorar-sigla SIGLA` | inciso VIII: sigla que o público já conhece (repetível) |
@@ -61,6 +65,18 @@ for resultado in conferir(texto):
         print(ocorrencia.inciso, ocorrencia.inicio, ocorrencia.mensagem)
 # VIII 10 INSS: primeira ocorrência sem o nome completo antes
 # XII 30 voz passiva sem agente: a frase não diz quem faz a ação
+```
+
+Para HTML, `ler_html` tira o texto e guarda onde cada trecho está na
+página; o relatório recebe a página no lugar do texto e dá linha e coluna
+no HTML:
+
+```python
+from linguagem_simples.pagina import ler_html
+from linguagem_simples.relatorio import conferir, como_texto
+
+pagina = ler_html("<main><p>Procure o <b>INSS</b>.</p></main>")
+print(como_texto(conferir(pagina.texto), pagina))
 ```
 
 Os detectores também se chamam um a um, em `linguagem_simples/detectores.py`.
@@ -115,7 +131,14 @@ estão em `tests/guias.py`, com a página e o hash do PDF.
   delas, só aponta "fazer" ou "promover" com substantivo em -ção ou -mento.
 - XV e XVI ainda sem detector: os guias dão um exemplo de cada, pouco para
   um léxico com fonte.
-- Lê texto e Markdown. HTML ainda não.
+- HTML: se a página tem `<main>`, só o que está dentro dele conta; sem
+  `<main>`, a página inteira, menos menu (`<nav>`), código, formulário e o
+  que tem o atributo `hidden`. O CSS não é aplicado: texto escondido por
+  CSS entra. Elementos lado a lado sem espaço no HTML colam as palavras
+  ("22:24Modificado").
+- VIII aponta palavra comum em caixa alta, de ênfase ou de cabeçalho de
+  tabela ("OFICIAL", "VALIDADE"): na página do passaporte no gov.br
+  (09/10), 6 dos 11 apontamentos do VIII.
 
 ## Guias usados
 

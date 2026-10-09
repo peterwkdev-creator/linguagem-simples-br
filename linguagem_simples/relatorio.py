@@ -12,6 +12,7 @@ from .detectores import (
     substantivos_no_lugar_de_verbos, voz_passiva,
 )
 from .incisos import FONTE_LEI, FORA_DO_ALCANCE, INCISOS, POR_NUMERO, Inciso
+from .pagina import Pagina
 
 AVISO = (
     "O resultado aponta trechos para revisão. Não é parecer jurídico e não "
@@ -81,8 +82,18 @@ def linha_coluna(texto, posicao):
     return linha, coluna
 
 
+def no_arquivo(o, texto):
+    """Início, fim, linha e coluna de uma ocorrência no arquivo lido. Com
+    uma ``Pagina`` no lugar do texto, a posição é a do HTML."""
+    if isinstance(texto, Pagina):
+        inicio, fim = texto.na_fonte(o.inicio, o.fim)
+        return (inicio, fim) + linha_coluna(texto.fonte, inicio)
+    return (o.inicio, o.fim) + linha_coluna(texto, o.inicio)
+
+
 def como_dict(resultados, texto):
-    """Relatório pronto para ``json.dumps``."""
+    """Relatório pronto para ``json.dumps``. ``texto`` é o texto conferido
+    ou a ``Pagina`` de onde ele saiu."""
     incisos = []
     for r in resultados:
         item = {
@@ -101,9 +112,9 @@ def como_dict(resultados, texto):
 
 
 def _ocorrencia(o, texto):
-    linha, coluna = linha_coluna(texto, o.inicio)
+    inicio, fim, linha, coluna = no_arquivo(o, texto)
     return {
-        "inicio": o.inicio, "fim": o.fim, "linha": linha, "coluna": coluna,
+        "inicio": inicio, "fim": fim, "linha": linha, "coluna": coluna,
         "trecho": o.trecho, "mensagem": o.mensagem, "medida": o.medida,
     }
 
@@ -121,7 +132,7 @@ def como_texto(resultados, texto):
     for r in resultados:
         linhas += ["", f"{r.inciso.numero}. {r.inciso.texto}", "   " + _situacao(r)]
         for o in r.ocorrencias:
-            linha, coluna = linha_coluna(texto, o.inicio)
+            _, _, linha, coluna = no_arquivo(o, texto)
             linhas.append(f"   - linha {linha}, coluna {coluna}: {o.mensagem}: “{_curto(o.trecho)}”")
     return "\n".join(linhas)
 
