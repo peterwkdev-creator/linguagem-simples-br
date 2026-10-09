@@ -8,9 +8,9 @@ público, órgão e quem escreve para o cidadão.
 > O resultado aponta trechos para revisão. **Não é parecer jurídico** e não
 > certifica que um texto cumpre a lei.
 
-> **Em construção.** Ainda não há versão publicada. A precisão de cada
-> detector vai aparecer aqui depois de medida, com o método. Hoje não há
-> número de precisão.
+> **Em construção.** Ainda não há versão publicada. A precisão medida em 30
+> páginas de serviço do gov.br está em [Precisão medida](#precisão-medida),
+> com o método.
 
 ## Como usar
 
@@ -139,6 +139,48 @@ estão em `tests/guias.py`, com a página e o hash do PDF.
 - VIII aponta palavra comum em caixa alta, de ênfase ou de cabeçalho de
   tabela ("OFICIAL", "VALIDADE"): na página do passaporte no gov.br
   (09/10), 6 dos 11 apontamentos do VIII.
+
+## Precisão medida
+
+Dos trechos que cada detector aponta, quantos uma pessoa, lendo o trecho na
+página, confirma. Medido em 09/10/2026, no commit `041d83e`, com os padrões
+de fábrica:
+
+| Inciso | Precisão | Acertos / anotados | Intervalo de 95% (Wilson) | Fora da conta: defeito da leitura do HTML |
+|---|---|---|---|---|
+| II | 95% | 57 / 60 | 86% a 98% | 0 |
+| VIII | 77% | 34 / 44 | 63% a 87% | 16 |
+| XII | 100% | 59 / 59 | 94% a 100% | 1 |
+| XIII | amostra pequena | 1 / 3 | 6% a 79% | 0 |
+| XIV | 45% | 23 / 51 | 32% a 59% | 9 |
+
+III não apontou nada nas 30 páginas: sem número.
+
+**Como se mediu.** 30 páginas sorteadas (semente 20261009) entre as 5.735
+páginas de serviço do sitemap do gov.br de 08/10/2026. Os 621 apontamentos
+viraram 431 sem os repetidos (o modelo do portal se repete em toda página);
+de cada inciso, até 60 sorteados. Duas passagens: a segunda às cegas, sem
+ver a primeira, com o mesmo critério escrito antes de anotar; 208 dos 243
+rótulos iguais (86%), cada divergência resolvida com uma nota. Precisão não
+é cobertura: o que o detector deixa passar não entrou nesta conta.
+
+**O que os números dizem:**
+
+- XII acerta a voz passiva; se cada uma deve mudar, a lei deixa a quem
+  escreve ("preferencialmente").
+- II erra quando a frase apresenta uma lista com marcador "·" no mesmo
+  parágrafo: a lista conta como parte da frase.
+- VIII: 6 dos 10 erros têm o nome por extenso antes da sigla, numa forma
+  que o detector não reconhece ("circuito fechado de TV (CFTV)",
+  "Coordenação-Geral de Ingresso - CGI"); os outros são abreviatura de mês
+  ("DEZ") e palavra comum em caixa alta.
+- XIV aponta substantivo que nomeia uma coisa, não uma ação: documento
+  ("Documento de identificação", "Guia de Recolhimento da União") e nome de
+  serviço ("Solicitar Análise de Fotoluminescência"). Use o XIV como lista
+  para revisar, não como erro certo.
+- Nas páginas do gov.br, a lista "Serviços recomendados para você" está
+  dentro do `<main>` e entra no texto lido: dos 60 apontamentos do VIII
+  anotados, 16 vinham dela.
 
 ## Guias usados
 
