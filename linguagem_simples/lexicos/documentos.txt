@@ -1,0 +1,24 @@
+# Inciso XIV: nome de documento, papel ou informação. Com "de" sem artigo
+# logo depois, o substantivo do léxico de nominalizações diz que documento
+# é, não uma ação ("Guia de Recolhimento da União", "Documento de
+# identificação", "comprovante de pagamento"): não se troca por verbo.
+# Uma entrada por linha: palavra | acepção | fonte. O plural vem do verbete
+# do singular. Consulta: 09/10/2026.
+guia | documento que acompanha a entrega ou a apresentação de pessoas ou coisas | Dicionário Priberam, verbete "guia", substantivo feminino, acepção 3
+guias | plural | Dicionário Priberam, verbete "guia"
+formulário | modelo ou impresso para determinado fim, com campos que devem ser preenchidos | Dicionário Priberam, verbete "formulário", acepção 3
+formulários | plural | Dicionário Priberam, verbete "formulário"
+carteirinha | [Brasil] documento identificativo | Dicionário Priberam, verbete "carteirinha", acepção 2
+carteirinhas | plural | Dicionário Priberam, verbete "carteirinha"
+comprovante | documento que comprova ("perdeu o comprovante de pagamento") | Dicionário Priberam, verbete "comprovante", acepção 2
+comprovantes | plural | Dicionário Priberam, verbete "comprovante"
+documento | declaração escrita que tem caráter comprovativo | Dicionário Priberam, verbete "documento", acepção 1
+documentos | plural | Dicionário Priberam, verbete "documento"
+ofício | carta ou comunicação oficial | Dicionário Priberam, verbete "ofício", acepção 6
+ofícios | plural | Dicionário Priberam, verbete "ofício"
+selo | pequeno pedaço de papel usado como prova de pagamento de imposto ou taxa | Dicionário Priberam, verbete "selo", acepção 4
+selos | plural | Dicionário Priberam, verbete "selo"
+cartão | retângulo de papel grosso, de plástico ou de outro material | Dicionário Priberam, verbete "cartão", acepção 2
+cartões | plural | Dicionário Priberam, verbete "cartão"
+dado | informação relativa a um indivíduo ("dados pessoais") | Dicionário Priberam, verbete "dado", acepção 11
+dados | plural | Dicionário Priberam, verbete "dado"

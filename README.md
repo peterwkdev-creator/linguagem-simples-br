@@ -129,6 +129,8 @@ estão em `tests/guias.py`, com a página e o hash do PDF.
   travessões, não.
 - XIV conhece só as palavras que os guias trazem (12, com o plural); fora
   delas, só aponta "fazer" ou "promover" com substantivo em -ção ou -mento.
+  Não aponta a palavra depois de nome de documento com "de" ("Guia de
+  Recolhimento"): o nome do documento não se troca por verbo.
 - XV e XVI ainda sem detector: os guias dão um exemplo de cada, pouco para
   um léxico com fonte.
 - HTML: se a página tem `<main>`, só o que está dentro dele conta; sem
@@ -244,6 +246,25 @@ do ABC". Nestas páginas, as duas correções tiram 7 apontamentos, todos
 erros, e nenhum acerto. Mesmo assim, a precisão fica dentro do intervalo
 da 3ª amostra, longe dos 86% otimistas.
 
+**Correção do XIV (09/10/2026).** Na 1ª amostra, 16 dos 28 erros do XIV
+eram nome de documento: o substantivo vinha depois de "de", sem artigo
+("Guia de Recolhimento da União", "Documento de identificação",
+"comprovante de pagamento"). A correção deixa de apontar o substantivo
+quando a palavra antes do "de" é nome de documento, papel ou informação
+(guia, formulário, carteirinha, comprovante, documento, ofício, selo,
+cartão, dados; léxico com a acepção do Dicionário Priberam).
+"Pedido de ampliação da indicação" (Anvisa) segue apontado. Nas mesmas 30
+páginas e com os mesmos rótulos, ela tira 23 apontamentos, 16 deles
+anotados, todos erros, e nenhum acerto:
+
+| Inciso | Precisão | Acertos / anotados | Intervalo de 95% (Wilson) |
+|---|---|---|---|
+| XIV | 66% | 23 / 35 | 49% a 79% |
+
+Número otimista: é a amostra que motivou a correção. Nas 120 páginas das
+quatro amostras, ela tira 30 apontamentos, todos nome de documento, e não
+cria nenhum.
+
 **Como se mediu.** 30 páginas sorteadas (semente 20261009) entre as 5.735
 páginas de serviço do sitemap do gov.br de 08/10/2026. Os 621 apontamentos
 viraram 431 sem os repetidos (o modelo do portal se repete em toda página);
@@ -289,10 +310,11 @@ rótulos iguais (86%), cada divergência resolvida com uma nota. Precisão não
 - II na amostra nova: os 3 erros são título ou link colado à frase seguinte
   sem ponto; um deles é o título da página somado aos "nomes populares" do
   serviço, que o gov.br põe num `<span>` dentro do título.
-- XIV aponta substantivo que nomeia uma coisa, não uma ação: documento
-  ("Documento de identificação", "Guia de Recolhimento da União") e nome de
-  serviço ("Solicitar Análise de Fotoluminescência"). Use o XIV como lista
-  para revisar, não como erro certo.
+- XIV aponta substantivo que nomeia uma coisa, não uma ação. Nome de
+  documento com "de" ("Guia de Recolhimento da União") saiu na correção;
+  ficam o nome de serviço ("Solicitar Análise de Fotoluminescência") e o
+  documento com outra palavra antes do "de" ("Formulário padronizado de
+  solicitação"). Use o XIV como lista para revisar, não como erro certo.
 - Nas páginas do gov.br, a lista "Serviços recomendados para você" está
   dentro do `<main>` e entra no texto lido: dos 60 apontamentos do VIII
   anotados, 16 vinham dela.

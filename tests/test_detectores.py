@@ -406,6 +406,27 @@ class TestIncisoXIV(unittest.TestCase):
         achadas = substantivos_no_lugar_de_verbos("Farão a análise do pedido de ampliação da vacina.")
         self.assertEqual([o.trecho for o in achadas], ["Farão a análise", "ampliação"])
 
+    def test_nome_de_documento_antes(self):
+        for texto in ("Guia de Recolhimento da União", "Documento de identificação da criança",
+                      "Anexe o comprovante de pagamento da taxa.", "Dados de identificação do solicitante",
+                      "Cartões de Pagamento da Defesa Civil", "Baixe os formulários de solicitação do serviço."):
+            with self.subTest(texto):
+                self.assertEqual(substantivos_no_lugar_de_verbos(texto), [])
+        self.assertEqual(trechos(substantivos_no_lugar_de_verbos, "durante o tempo de análise da documentação"),
+                         ["análise"])
+        self.assertEqual(trechos(substantivos_no_lugar_de_verbos, "Junte a guia do pagamento da taxa."), ["pagamento"])
+        self.assertEqual(trechos(substantivos_no_lugar_de_verbos, "Envie o comprovante de residência e a análise do laudo."),
+                         ["análise"])
+
+    def test_lexico_de_documentos_tem_fonte(self):
+        caminho = Path(detectores.__file__).parent / "lexicos" / "documentos.txt"
+        for linha in caminho.read_text(encoding="utf-8").splitlines():
+            if linha.strip() and not linha.startswith("#"):
+                with self.subTest(linha):
+                    palavra, acepcao, fonte = (c.strip() for c in linha.split("|"))
+                    self.assertTrue(palavra and acepcao)
+                    self.assertRegex(fonte, r'^Dicionário Priberam, verbete "\w+"')
+
 
 if __name__ == "__main__":
     unittest.main()

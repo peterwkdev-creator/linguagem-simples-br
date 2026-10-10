@@ -389,6 +389,13 @@ _APOIO = re.compile(
 _NOMINAL = re.compile(r"\w+(?:ção|ções|mento|mentos)")
 _COMPLEMENTO = re.compile(r"\s+(?i:de|do|da|dos|das)\b")
 _PALAVRA_LEXICO = re.compile(r"\w+")
+# Nome de documento logo antes, com "de" sem artigo ("Guia de Recolhimento da
+# União", "Documento de identificação"): o substantivo diz que documento é, não
+# uma ação. "Pedido de ampliação da indicação" segue apontado (Anvisa, p. 13):
+# pedido não é documento.
+_DOCUMENTOS = frozenset(_ler_lexico("documentos.txt"))
+_DOCUMENTO_ANTES = re.compile(r"(\w+)[ \t]+(?i:de)[ \t]+\Z")
+_JANELA_DOCUMENTO = 40
 
 
 def substantivos_no_lugar_de_verbos(texto):
@@ -410,6 +417,9 @@ def substantivos_no_lugar_de_verbos(texto):
     for m in _PALAVRA_LEXICO.finditer(texto):
         nome = m.group().lower()
         if nome in _NOMINALIZACOES and m.start() not in cobertos and _COMPLEMENTO.match(texto, m.end()):
+            antes = _DOCUMENTO_ANTES.search(texto, max(0, m.start() - _JANELA_DOCUMENTO), m.start())
+            if antes and antes.group(1).lower() in _DOCUMENTOS:
+                continue
             achadas.append(Ocorrencia(
                 "XIV", m.start(), m.end(), m.group(),
                 f"substantivo no lugar de verbo (verbo: {_NOMINALIZACOES[nome]})",
