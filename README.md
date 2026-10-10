@@ -92,6 +92,9 @@ Os detectores também se chamam um a um, em `linguagem_simples/detectores.py`.
 | XIII | evitar frases intercaladas | trecho entre vírgulas no meio da frase que começa por pronome relativo (", que deve ser apresentado pelo requerente,") | — |
 | XIV | evitar o uso de substantivos no lugar de verbos | verbo de apoio com substantivo ("faça a identificação") e substantivo do léxico com complemento ("prevenção da Covid-19") | léxico em `linguagem_simples/lexicos/`, com a fonte de cada palavra |
 
+O XIII é **sinal**, não automático: acerta 31% das vezes (abaixo), então
+aponta trechos para quem lê decidir. Os outros cinco são automáticos.
+
 Os outros 12 incisos aparecem no relatório com a classe de cada um:
 **automático** (dá para contar; detector ainda não escrito), **sinal** (dá
 para apontar, quem lê decide) ou **fora do alcance** (X e XVIII: só uma
@@ -292,7 +295,8 @@ Em 23 dos 29 erros, a oração apontada está no fim da frase. O detector
 toma a vírgula seguinte como o fim da intercalação, mas o que vem depois
 dela ainda pertence à oração ("Ofício de exigência, que será encaminhado
 via SEI, por e-mail, para o interessado"). Use o XIII como lista para
-revisar, não como erro certo.
+revisar, não como erro certo. Por isso o relatório passou a dar ao XIII a
+classe **sinal**.
 
 **Como se mediu.** 30 páginas sorteadas (semente 20261009) entre as 5.735
 páginas de serviço do sitemap do gov.br de 08/10/2026. Os 621 apontamentos

@@ -49,6 +49,15 @@ class TestRelatorio(unittest.TestCase):
         self.assertEqual([e["XII"], e["XIII"], e["XIV"]], [CONFERIDO] * 3)
         self.assertEqual([e["XV"], e["XVI"]], [SEM_DETECTOR] * 2)
 
+    def test_xiii_e_sinal_e_roda(self):
+        # 31% de precisão (amostra 6): o XIII aponta para quem lê decidir.
+        texto = "O documento, que deve ser apresentado pelo requerente, fica no protocolo."
+        por = {r.inciso.numero: r for r in conferir(texto)}
+        self.assertEqual((por["XIII"].inciso.classe, por["XIII"].estado), ("sinal", CONFERIDO))
+        self.assertEqual(len(por["XIII"].ocorrencias), 1)
+        self.assertEqual([por[n].inciso.classe for n in ("II", "XII", "XIV")], ["automático"] * 3)
+        self.assertIn("sinal; ", como_texto(conferir(texto), texto).split("XIII. ")[1].splitlines()[1])
+
     def test_ligar_e_desligar(self):
         e = estados(conferir(LONGA, ligar=["xi"], desligar=["II"]))
         self.assertEqual(e["XI"], SEM_DETECTOR)

@@ -63,7 +63,7 @@ INCISOS = (
         ligado_por_padrao=False,
     ),
     Inciso("XII", "redigir frases preferencialmente na voz ativa", AUTOMATICO),
-    Inciso("XIII", "evitar frases intercaladas", AUTOMATICO),
+    Inciso("XIII", "evitar frases intercaladas", SINAL),
     Inciso("XIV", "evitar o uso de substantivos no lugar de verbos", AUTOMATICO),
     Inciso("XV", "evitar redundâncias e palavras desnecessárias", AUTOMATICO),
     Inciso("XVI", "evitar palavras imprecisas", AUTOMATICO),
