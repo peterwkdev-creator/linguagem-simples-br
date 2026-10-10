@@ -12,7 +12,7 @@ público, órgão e quem escreve para o cidadão.
 ![Um texto de órgão colado na página; um clique marca a frase longa, a voz passiva e a oração intercalada, e lista os 18 incisos](docs/vitrine.gif)
 
 **[Experimente no navegador](https://peterwkdev-creator.github.io/linguagem-simples-br/)**:
-cole o texto e clique. A página roda esta mesma biblioteca no seu
+cole o texto, ou o HTML de uma página, e clique. A página roda esta mesma biblioteca no seu
 navegador (Pyodide); o texto não sai do seu computador. Na primeira visita
 ela baixa cerca de 6 MB e fica pronta em 1,7 s (medido em 10/10/2026, numa
 conexão rápida). Depois disso, conferir o texto do exemplo leva uns 5 ms.

@@ -1,12 +1,12 @@
 {
   "titulo": "Linguagem Simples: conferir um texto",
-  "descricao": "Cole um texto de órgão público e veja, trecho por trecho, onde ele foge da Lei nº 15.263/2025 (Política Nacional de Linguagem Simples).",
+  "descricao": "Cole um texto de órgão público, ou o HTML de uma página, e veja, trecho por trecho, onde ele foge da Lei nº 15.263/2025 (Política Nacional de Linguagem Simples). O que começa por uma tag (<) se lê como HTML: aí entram também os links, as imagens e as tabelas (inciso XVII).",
   "lang": "pt-BR",
   "pacote": "linguagem_simples",
   "campos": [
     {
       "nome": "texto",
-      "rotulo": "Texto a conferir",
+      "rotulo": "Texto ou HTML a conferir",
       "tipo": "textarea",
       "exemplo": "Outrossim, cumpre salientar que o requerente deverá, impreterivelmente, providenciar a documentação pertinente no prazo de 30 dias, sob pena de indeferimento do pleito, conforme disposto no art. 5º da Lei nº 9.784/1999.\n\nO atendimento é feito de segunda a sexta. Traga o documento com foto."
     }
