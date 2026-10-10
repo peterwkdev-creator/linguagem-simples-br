@@ -137,7 +137,8 @@ class Contrato(unittest.TestCase):
             "campo marcado inexistente": lambda c: c.update(campo_marcado="outro"),
             "chave errada": lambda c: c.update(titlo="x"),
             "chave de campo errada": lambda c: c["campos"][0].update(rotlo="x"),
-            "aceita fora de arquivo": lambda c: c["campos"][0].update(aceita=".txt"),
+            # o 1º campo pode ser de arquivo, e aí o aceita vale (CM, 10/10)
+            "aceita fora de arquivo": lambda c: c["campos"][0].update(tipo="textarea", aceita=".txt"),
             "repositório sem https": lambda c: c.update(repositorio="github.com/x"),
             "campos vazio": lambda c: c.update(campos=[]),
             "link javascript:": lambda c: c.update(links=[{"texto": "x", "href": "javascript:alert(1)"}]),

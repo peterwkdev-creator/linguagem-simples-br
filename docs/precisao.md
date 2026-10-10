@@ -176,6 +176,36 @@ apontamentos. Em várias páginas, o "Acesse o site" é o endereço escrito
 que o portal transformou em link com esse texto: continua acerto, porque é
 o que o leitor de tela lê.
 
+**Cobertura do XVII nas 150 páginas (10/10/2026).** A precisão diz quanto
+do que o XVII aponta é vago; a cobertura diz quanto do que é vago ele
+aponta. Nas mesmas 150 páginas, no corpo do serviço, há 1.799 links com
+606 nomes distintos. O critério do eMAG 3.5 é o nome lido sozinho, fora da
+página, então o mesmo nome tem o mesmo rótulo em toda página: anotaram-se
+os 606 (sem sorteio), em duas passagens às cegas, sem saber quais o
+detector aponta (599 dos 606 rótulos iguais):
+
+| Inciso | Nomes vagos | Apontados | Cobertura | Intervalo de 95% (Wilson) | Pelos links |
+|---|---|---|---|---|---|
+| XVII | 43 | 8 | 19% | 10% a 33% | 136 de 805 (17%) |
+
+O léxico é uma lista fechada de 14 expressões ("saiba mais", "clique
+aqui", "acesse o site"...): pega as formas mais comuns e não apontou nenhum
+nome que diz o destino, mas deixa passar a maior parte dos vagos:
+
+- as quatro abas do modelo do gov.br ("O que é?", "Quem pode utilizar este
+  serviço?", "Etapas para a realização deste serviço", "Outras
+  Informações"), em todas as páginas, 600 dos 805 links vagos; sem elas
+  (conta feita depois de ver o resultado), 8 de 39 nomes (21%) e 136 de
+  205 links (66%);
+- verbo sem objeto ("Consultar", "Acompanhar", "Preencher", "Emitir");
+- plataforma no lugar do destino ("Android", "Apple", "iOS");
+- só o tipo do destino ("formulário", "guia", "orientações");
+- o apontar fora da forma exata ("Clique aqui para saber mais.", "Acesse
+  o sistema").
+
+Ou seja: quando o XVII aponta, quase sempre acerta; quando não aponta, o
+link ainda pode ser vago.
+
 **Como se mediu.** 30 páginas sorteadas (semente 20261009) entre as 5.735
 páginas de serviço do sitemap do gov.br de 08/10/2026. Os 621 apontamentos
 viraram 431 sem os repetidos (o modelo do portal se repete em toda página);

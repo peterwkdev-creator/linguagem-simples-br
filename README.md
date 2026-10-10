@@ -131,7 +131,10 @@ cegas:
 
 III não apontou nada nas 30 páginas da primeira amostra: sem número.
 Precisão não é cobertura: o que o detector deixa passar não entra nesta
-conta. Cada amostra, o método e o que os erros mostram estão em
+conta. Do XVII, a cobertura também foi medida: dos 43 nomes de link vagos
+nas 150 páginas, ele aponta 8 (**19%**, de 10% a 33%). O léxico dele é uma
+lista fechada: "Consultar", "Android" ou "O que é?" passam sem marca. Cada
+amostra, o método e o que os erros mostram estão em
 [docs/precisao.md](docs/precisao.md).
 
 ## Mais exemplos
