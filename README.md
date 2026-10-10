@@ -152,7 +152,9 @@ estão em `tests/guias.py`, com a página e o hash do PDF.
   Pessoa Física" e a PF de Polícia Federal). Fora disso aponta:
   "Coordenação-Geral de Autorização para Transferência Fusão, Cisão,
   Incorporação e Retirada - CGTR" pula quatro palavras do nome. Abreviatura de mês ("31 DEZ")
-  também é apontada.
+  também é apontada, e a sigla cujas letras não saem das iniciais do nome
+  que vem antes: a sigla em inglês ("Serviços de Tráfego Aéreo (ATS)") e a
+  que pega sílabas ("Cadastro de Imóveis Rurais (CAFIR)").
 
 ## Precisão medida
 
@@ -204,7 +206,7 @@ com hífen ("Procuradoria-Geral") e a sigla escrita antes em outra caixa
 a 90% (38 / 42), número otimista. Em outras 30 páginas (semente
 2026100903, sem as das duas primeiras), só o VIII, mesmo critério e duas
 passagens (49 dos 60 rótulos iguais; as 11 divergências, todas na lista
-de recomendados). Este é o número do VIII a usar:
+de recomendados):
 
 | Inciso | Precisão | Acertos / anotados | Intervalo de 95% (Wilson) | Fora da conta: defeito da leitura do HTML |
 |---|---|---|---|---|
@@ -225,8 +227,22 @@ do Brasil" antes de "RFB"), o nome colado à sigla ("Divisão de Cooperação
 e Intercâmbio DICIN") e o nome com "no", "na", "nos" ou "nas" ("Saúde e
 Segurança no Trabalho" antes de "SST"). Tira mais 3 erros da 3ª amostra e
 nenhum acerto: 36 / 42 = 86% (72% a 93%), também otimista. Nas amostras 1
-e 2 não muda nada. A 4ª amostra mede as duas correções fora das amostras
-que as motivaram.
+e 2 não muda nada.
+
+**Quarta amostra, depois da 3ª e da 4ª correções (09/10/2026).** Outras
+30 páginas (semente 2026100904, sem as 120 sorteadas antes), só o VIII,
+mesmo critério e duas passagens. Desta vez o critério já dizia, antes de
+anotar, que item do fim da página é defeito da leitura, e os 60 rótulos
+das duas passagens saíram iguais. Este é o número do VIII a usar:
+
+| Inciso | Precisão | Acertos / anotados | Intervalo de 95% (Wilson) | Fora da conta: defeito da leitura do HTML |
+|---|---|---|---|---|
+| VIII | 78% | 38 / 49 | 64% a 87% | 10 |
+
+Um item ficou fora da conta como dúvida: "ABC", em "Universidade Federal
+do ABC". Nestas páginas, as duas correções tiram 7 apontamentos, todos
+erros, e nenhum acerto. Mesmo assim, a precisão fica dentro do intervalo
+da 3ª amostra, longe dos 86% otimistas.
 
 **Como se mediu.** 30 páginas sorteadas (semente 20261009) entre as 5.735
 páginas de serviço do sitemap do gov.br de 08/10/2026. Os 621 apontamentos
@@ -262,6 +278,14 @@ rótulos iguais (86%), cada divergência resolvida com uma nota. Precisão não
   A 2ª correção também não sobe a precisão fora da amostra que a motivou
   (79% antes, 75% agora, dentro do intervalo): o que ela tira está quase
   todo na lista de recomendados, que já ficava fora da conta.
+- VIII na 4ª amostra: dos 11 erros, 2 são palavra comum em caixa alta
+  ("NORMATIVA", "BUSCAR"). Os outros 9 têm o nome antes. Em 8 deles, as
+  letras da sigla não saem das iniciais do nome: sigla em inglês ("Torres
+  de Controle de Aeródromo (TWR)") ou que pega sílabas ("CAFIR",
+  "JJAER"). No 9º, o nome é o começo de um nome maior ("Domicílio
+  Tributário Eletrônico do Simples Nacional e MEI – DTE"). Cada amostra
+  nova traz formas novas de escrever o nome antes da sigla: nas quatro
+  medidas sem viés, a precisão fica entre 75% e 79% (77%, 79%, 75%, 78%).
 - II na amostra nova: os 3 erros são título ou link colado à frase seguinte
   sem ponto; um deles é o título da página somado aos "nomes populares" do
   serviço, que o gov.br põe num `<span>` dentro do título.
