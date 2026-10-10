@@ -4,6 +4,20 @@ A versão segue `linguagem_simples.__version__`; cada uma tem uma tag
 `vX.Y.Z` no commit que a publicou. O formato do relatório e as opções da
 linha de comando só mudam numa versão 2; detector novo sai numa 1.x.
 
+## 1.2.0 — 10/10/2026
+
+- XVII: o léxico de links vagos passa de 14 para 46 entradas, todas com
+  fonte no eMAG 3.1, Recomendação 3.5: formas da mesma regra ("acesse",
+  "ver detalhes", "mais informações"), verbo sem o objeto ("Consultar",
+  "Solicitar") e o aparelho no lugar do destino ("Android", "iOS").
+  "Mais informações" e "Iniciar", sozinhos no link, passam a ser
+  apontados.
+- Cobertura do XVII medida pela primeira vez: nas 150 páginas, 19% dos
+  nomes de link vagos com o léxico da 1.1.0; em 30 páginas novas, 28%
+  (12–51) com o léxico novo, que seguiu sem apontar nome que diz o
+  destino. Método e números em `docs/precisao.md`.
+- Lei reconferida em 10/10/2026 (ficha do Senado): sem alteração.
+
 ## 1.1.0 — 10/10/2026
 
 - Detector do inciso XVII (acessibilidade, classe **sinal**), pelo eMAG

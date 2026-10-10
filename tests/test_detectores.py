@@ -507,11 +507,14 @@ class TestIncisoXVII(unittest.TestCase):
 
     def test_texto_do_link_inteiro_maiuscula_e_pontuacao(self):
         for texto in ("Saiba mais", "SAIBA MAIS", " saiba  mais. ", "Clique aqui!", "» Leia mais",
-                      "<b>Aqui</b>", "neste link", "Acesse o site", "mais"):
+                      "<b>Aqui</b>", "neste link", "Acesse o site", "mais", "mais informações",
+                      "Clique aqui para saber mais.", "(acesse)", "Consultar", "Inscreva-se", "Android", "iOS"):
             with self.subTest(texto):
                 self.assertEqual([t for t, _ in xvii(f'<a href="x">{texto}</a>')], ["link"])
-        for texto in ("Saiba mais sobre o cadastro", "Leia mais notícias", "Aquiraz", "mais informações",
-                      "Clique aqui para agendar", "Iniciar"):
+        # verbo com o objeto e loja com o nome dizem o destino
+        for texto in ("Saiba mais sobre o cadastro", "Leia mais notícias", "Aquiraz", "Mais informações sobre o FGTS",
+                      "Clique aqui para agendar", "Consultar a situação do CPF", "Google Play", "Apple Store",
+                      "Acessibilidade", "Webinário"):
             with self.subTest(texto):
                 self.assertEqual(xvii(f'<a href="x">{texto}</a>'), [])
 
@@ -573,16 +576,18 @@ class TestIncisoXVII(unittest.TestCase):
     def test_lexico_de_links_tem_fonte(self):
         caminho = Path(detectores.__file__).parent / "lexicos" / "links-vagos.txt"
         linhas = [l for l in caminho.read_text(encoding="utf-8").splitlines() if l.strip() and not l.startswith("#")]
-        self.assertEqual(len(linhas), 14)
-        origens = []
+        self.assertEqual(len(linhas), 46)
+        origens, textos = [], []
         for linha in linhas:
             with self.subTest(linha):
                 texto, origem, fonte = (c.strip() for c in linha.split("|"))
                 self.assertEqual(texto, texto.casefold())
-                self.assertIn(origem, ("lista", "regra"))
+                self.assertIn(origem, ("lista", "regra", "verbo", "plataforma"))
                 self.assertTrue(fonte.startswith("eMAG 3.1, Recomendação 3.5"))
                 origens.append(origem)
-        self.assertEqual(origens.count("lista"), 6)
+                textos.append(texto)
+        self.assertEqual([origens.count(o) for o in ("lista", "regra", "verbo", "plataforma")], [6, 16, 19, 5])
+        self.assertEqual(len(set(textos)), len(textos))
 
 
 if __name__ == "__main__":

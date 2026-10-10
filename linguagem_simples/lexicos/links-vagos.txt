@@ -8,6 +8,13 @@
 # Origem "regra": a expressão não está na lista, mas é o núcleo de uma que
 # está ("aqui" de "clique aqui") ou troca só o substantivo genérico de
 # "acesse a lista"; isolada, também não diz o destino.
+# Origem "verbo": o verbo de "acesse a lista" sem o objeto, ou outro verbo
+# de pedir serviço sem o objeto ("Consultar"): diz o que fazer, não com o quê.
+# Origem "plataforma": o nome do aparelho ou do meio ("Android", "Web") no
+# lugar do destino, como nos pares "Android | iOS" das páginas de aplicativo.
+# As origens "verbo" e "plataforma" e as "regra" de "acesse" em diante
+# entraram em 10/10/2026, depois da medição da cobertura nas 150 páginas
+# (`docs/precisao.md`): saíram dos links vagos que ela achou.
 # O link só conta se o texto inteiro for a expressão (maiúscula, espaço e
 # pontuação nas pontas não contam): "Saiba mais sobre o cadastro" fica de fora.
 clique aqui | lista | eMAG 3.1, Recomendação 3.5, observação: "Não se deve fazer a utilização de links do tipo “clique aqui”, “leia mais”, “mais”, “saiba mais”, “veja mais”, “acesse a lista”"
@@ -24,3 +31,35 @@ este link | regra | eMAG 3.1, Recomendação 3.5: idem
 neste link | regra | eMAG 3.1, Recomendação 3.5: idem
 acesse o link | regra | eMAG 3.1, Recomendação 3.5: "acesse a lista" com outro substantivo genérico
 acesse o site | regra | eMAG 3.1, Recomendação 3.5: idem
+acesse | regra | eMAG 3.1, Recomendação 3.5: núcleo de "acesse a lista"
+acesse o sistema | regra | eMAG 3.1, Recomendação 3.5: "acesse a lista" com outro substantivo genérico
+clique aqui para saber mais | regra | eMAG 3.1, Recomendação 3.5: "clique aqui" e "saiba mais" juntos, sem o destino
+veja | regra | eMAG 3.1, Recomendação 3.5: núcleo de "veja mais"
+ver mais | regra | eMAG 3.1, Recomendação 3.5: "veja mais" no infinitivo
+ver detalhes | regra | eMAG 3.1, Recomendação 3.5: "veja mais" com substantivo genérico
+mais informações | regra | eMAG 3.1, Recomendação 3.5: "saiba mais" com substantivo genérico
+confira | regra | eMAG 3.1, Recomendação 3.5: "veja" com outro verbo
+acessar | verbo | eMAG 3.1, Recomendação 3.5: verbo sem o objeto
+consultar | verbo | eMAG 3.1, Recomendação 3.5: verbo sem o objeto
+consulte | verbo | eMAG 3.1, Recomendação 3.5: verbo sem o objeto
+acompanhar | verbo | eMAG 3.1, Recomendação 3.5: verbo sem o objeto
+acompanhe | verbo | eMAG 3.1, Recomendação 3.5: verbo sem o objeto
+solicitar | verbo | eMAG 3.1, Recomendação 3.5: verbo sem o objeto
+solicite | verbo | eMAG 3.1, Recomendação 3.5: verbo sem o objeto
+emitir | verbo | eMAG 3.1, Recomendação 3.5: verbo sem o objeto
+emita | verbo | eMAG 3.1, Recomendação 3.5: verbo sem o objeto
+preencher | verbo | eMAG 3.1, Recomendação 3.5: verbo sem o objeto
+preencha | verbo | eMAG 3.1, Recomendação 3.5: verbo sem o objeto
+inscrever-se | verbo | eMAG 3.1, Recomendação 3.5: verbo sem o objeto
+inscreva-se | verbo | eMAG 3.1, Recomendação 3.5: verbo sem o objeto
+agendar | verbo | eMAG 3.1, Recomendação 3.5: verbo sem o objeto
+agende | verbo | eMAG 3.1, Recomendação 3.5: verbo sem o objeto
+entrar | verbo | eMAG 3.1, Recomendação 3.5: verbo sem o objeto
+iniciar | verbo | eMAG 3.1, Recomendação 3.5: verbo sem o objeto
+baixar | verbo | eMAG 3.1, Recomendação 3.5: verbo sem o objeto
+baixe | verbo | eMAG 3.1, Recomendação 3.5: verbo sem o objeto
+android | plataforma | eMAG 3.1, Recomendação 3.5: o aparelho ou o meio, não o destino
+ios | plataforma | eMAG 3.1, Recomendação 3.5: o aparelho ou o meio, não o destino
+apple | plataforma | eMAG 3.1, Recomendação 3.5: o aparelho ou o meio, não o destino
+web | plataforma | eMAG 3.1, Recomendação 3.5: o aparelho ou o meio, não o destino
+internet | plataforma | eMAG 3.1, Recomendação 3.5: o aparelho ou o meio, não o destino

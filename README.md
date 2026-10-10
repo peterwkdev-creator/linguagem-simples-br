@@ -30,7 +30,7 @@ só aponta trechos para quem lê decidir. Intervalos em
 Python 3.11 ou mais novo; só a biblioteca padrão, sem outra dependência.
 
 ```bash
-pip install "git+https://github.com/peterwkdev-creator/linguagem-simples-br@v1.1.0"
+pip install "git+https://github.com/peterwkdev-creator/linguagem-simples-br@v1.2.0"
 ```
 
 Também roda sem instalar, de dentro da pasta do repositório.
@@ -83,7 +83,7 @@ a página.
 | XIII | evitar frases intercaladas | trecho entre vírgulas no meio da frase que começa por pronome relativo (", que deve ser apresentado pelo requerente,") | — |
 | XIV | evitar o uso de substantivos no lugar de verbos | verbo de apoio com substantivo ("faça a identificação") e substantivo do léxico com complemento ("prevenção da Covid-19") | léxico em `linguagem_simples/lexicos/`, com a fonte de cada palavra |
 | XV | evitar redundâncias e palavras desnecessárias | expressão do léxico com palavras sobrando ("compareça pessoalmente", "a fim de", "de acordo com") e a forma que o guia sugere | léxico em `linguagem_simples/lexicos/redundancias.txt`: 29 entradas do TRE-AL, do CJF e da CAPES, com a página |
-| XVII | usar linguagem acessível à pessoa com deficiência (Lei 13.146/2015) | no HTML, link de texto vago ("clique aqui", "saiba mais"), imagem sem `alt` e tabela sem célula de cabeçalho (`th`); no texto e no Markdown, só o link vago | eMAG 3.1, recomendações 3.5, 3.6 e 3.10; léxico em `linguagem_simples/lexicos/links-vagos.txt`: 14 entradas |
+| XVII | usar linguagem acessível à pessoa com deficiência (Lei 13.146/2015) | no HTML, link de texto vago ("clique aqui", "saiba mais"), imagem sem `alt` e tabela sem célula de cabeçalho (`th`); no texto e no Markdown, só o link vago | eMAG 3.1, recomendações 3.5, 3.6 e 3.10; léxico em `linguagem_simples/lexicos/links-vagos.txt`: 46 entradas |
 
 O XIII e o XVII são **sinal**, não automáticos: o XIII acerta 31% das
 vezes, e o XVII confere só três pontos do que a Lei 13.146/2015 pede;
@@ -131,9 +131,11 @@ cegas:
 
 III não apontou nada nas 30 páginas da primeira amostra: sem número.
 Precisão não é cobertura: o que o detector deixa passar não entra nesta
-conta. Do XVII, a cobertura também foi medida: dos 43 nomes de link vagos
-nas 150 páginas, ele aponta 8 (**19%**, de 10% a 33%). O léxico dele é uma
-lista fechada: "Consultar", "Android" ou "O que é?" passam sem marca. Cada
+conta. Do XVII, a cobertura também foi medida: em 30 páginas novas, dos
+18 nomes de link vagos, ele aponta 5 (**28%**, de 12% a 51%), sem apontar
+nenhum nome que diz o destino. O léxico dele é uma lista fechada (46
+expressões na 1.2.0): "Acesse o serviço", "Protocolar" ou as abas "O que
+é?" do modelo do gov.br passam sem marca. Cada
 amostra, o método e o que os erros mostram estão em
 [docs/precisao.md](docs/precisao.md).
 

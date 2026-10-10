@@ -206,6 +206,29 @@ nome que diz o destino, mas deixa passar a maior parte dos vagos:
 Ou seja: quando o XVII aponta, quase sempre acerta; quando não aponta, o
 link ainda pode ser vago.
 
+**Léxico maior do XVII, em 30 páginas novas (1.2.0, 10/10/2026).** Dos
+vagos que passaram, saíram 32 entradas novas, todas pela regra do eMAG
+3.5: formas da mesma regra ("acesse", "ver detalhes", "mais
+informações"), verbo sem o objeto ("Consultar", "Solicitar") e o aparelho
+no lugar do destino ("Android", "iOS"). Nas 150 páginas de onde saíram, o
+número é otimista: 23 de 43 nomes vagos (53%), e os 23 apontados são
+vagos. Para o número sem esse viés, 30 páginas novas foram sorteadas
+antes de baixar (5.535 páginas de serviço que nenhuma amostra tinha
+usado). Os 194 nomes de link delas foram anotados do mesmo jeito (192 dos
+194 rótulos iguais):
+
+| Léxico | Nomes apontados | Vagos entre eles | Nomes vagos | Cobertura | Intervalo de 95% (Wilson) | Pelos links |
+|---|---|---|---|---|---|---|
+| 1.1.0 (14 entradas) | 3 | 3 | 18 | 17% | 6% a 39% | 27 de 166 |
+| 1.2.0 (46 entradas) | 5 | 5 | 18 | 28% | 12% a 51% | 29 de 166 |
+
+O léxico novo seguiu sem apontar nome que diz o destino (5 de 5; amostra
+pequena para dar precisão). O ganho é pequeno: a lista fechada cresce
+devagar contra a variedade dos nomes. Passaram "Acesse o serviço",
+"Acesso ao Sistema", "Protocolar", "Requerimento" e as quatro abas do
+modelo do gov.br (120 dos 166 links vagos; sem elas, depois de ver o
+resultado, 5 de 14 nomes, 36%).
+
 **Como se mediu.** 30 páginas sorteadas (semente 20261009) entre as 5.735
 páginas de serviço do sitemap do gov.br de 08/10/2026. Os 621 apontamentos
 viraram 431 sem os repetidos (o modelo do portal se repete em toda página);
