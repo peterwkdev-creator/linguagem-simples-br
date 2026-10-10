@@ -7,9 +7,10 @@ from pathlib import Path
 
 from linguagem_simples import detectores, limiares
 from linguagem_simples.detectores import (
-    frases_intercaladas, frases_longas, paragrafos_longos, redundancias, siglas_sem_nome,
-    substantivos_no_lugar_de_verbos, voz_passiva,
+    acessibilidade, frases_intercaladas, frases_longas, paragrafos_longos, redundancias,
+    siglas_sem_nome, substantivos_no_lugar_de_verbos, voz_passiva,
 )
+from linguagem_simples.pagina import ler_html
 
 from . import guias
 
@@ -479,6 +480,109 @@ class TestIncisoXV(unittest.TestCase):
                 expressao, forma, fonte = (c.strip() for c in linha.split("|"))
                 self.assertTrue(expressao and forma)
                 self.assertRegex(fonte, r"^(?:TRE-AL p\. 1[67] \(1[45]\)|CJF p\. 9|CAPES p\. 11 \(10\))")
+
+
+def xvii(html):
+    """Mensagem e trecho de cada achado do XVII no HTML."""
+    return [(o.mensagem.split()[0], o.trecho) for o in acessibilidade(ler_html(html))]
+
+
+class TestIncisoXVII(unittest.TestCase):
+    def test_plantado(self):
+        html = ('<p>Para o formulário, <a href="f.pdf">clique aqui</a>.</p><img src="mapa.png">'
+                "<table><tr><td>Taxa</td><td>R$ 10</td></tr></table>")
+        pagina = ler_html(html)
+        achadas = acessibilidade(pagina)
+        self.assertEqual([(o.mensagem.split()[0], o.trecho) for o in achadas],
+                         [("link", "clique aqui"), ("imagem", '<img src="mapa.png">'), ("tabela", "Taxa\n\nR$ 10")])
+        self.assertEqual([o.inciso for o in achadas], ["XVII"] * 3)
+        link, imagem, tabela = achadas
+        self.assertIn("eMAG 3.5", link.mensagem)
+        self.assertIn("eMAG 3.6", imagem.mensagem)
+        self.assertIn("eMAG 3.10", tabela.mensagem)
+        self.assertEqual(link.no_html, (html.index("<a "), html.index("</a>") + 4))
+        self.assertEqual(pagina.texto[link.inicio:link.fim], "clique aqui")
+        self.assertEqual(imagem.no_html, (html.index("<img"), html.index("<table")))
+        self.assertEqual(tabela.no_html, (html.index("<table"), len(html)))
+
+    def test_texto_do_link_inteiro_maiuscula_e_pontuacao(self):
+        for texto in ("Saiba mais", "SAIBA MAIS", " saiba  mais. ", "Clique aqui!", "» Leia mais",
+                      "<b>Aqui</b>", "neste link", "Acesse o site", "mais"):
+            with self.subTest(texto):
+                self.assertEqual([t for t, _ in xvii(f'<a href="x">{texto}</a>')], ["link"])
+        for texto in ("Saiba mais sobre o cadastro", "Leia mais notícias", "Aquiraz", "mais informações",
+                      "Clique aqui para agendar", "Iniciar"):
+            with self.subTest(texto):
+                self.assertEqual(xvii(f'<a href="x">{texto}</a>'), [])
+
+    def test_nome_do_link(self):
+        # aria-label vale como texto do link; title não (eMAG 3.5)
+        self.assertEqual(xvii('<a href="x" aria-label="Saiba mais sobre a conta gov.br">Saiba mais</a>'), [])
+        self.assertEqual(xvii('<a href="x" aria-label="Saiba mais">Conta gov.br</a>'),
+                         [("link", "Conta gov.br")])
+        self.assertEqual(len(xvii('<a href="x" title="Saiba mais sobre a conta gov.br">Saiba mais</a>')), 1)
+        self.assertEqual(xvii('<a href="x" aria-labelledby="t">Saiba mais</a>'), [])
+        # o alt da imagem dentro do link entra no texto dele
+        self.assertEqual(xvii('<a href="x"><img src="i.png" alt="Aqui"></a>'), [("link", "")])
+        self.assertEqual(xvii('<a href="x"><img src="i.png" alt="Formulário de inscrição"></a>'), [])
+        # âncora sem href não é link
+        self.assertEqual(xvii('<a name="topo">aqui</a>'), [])
+
+    def test_imagem_e_tabela_dispensadas(self):
+        bons = ('<img src="a.png" alt="">', '<img src="a.png" role="presentation">',
+                '<img src="a.png" role="none">', '<img src="a.png" aria-hidden="true">',
+                '<img src="a.png" aria-label="Mapa">', '<img src="a.png" aria-labelledby="legenda">',
+                '<table role=" Presentation "><tr><td>a</td></tr></table>',
+                '<table><tr><th scope="row">Taxa</th><td>R$ 10</td></tr></table>')
+        for html in bons:
+            with self.subTest(html):
+                self.assertEqual(xvii(html), [])
+
+    def test_trecho_sem_o_espaco_das_pontas(self):
+        pagina = ler_html('<p>Veja<a href="x"> aqui </a>de novo.</p>')
+        (o,) = acessibilidade(pagina)
+        self.assertEqual((o.trecho, pagina.texto[o.inicio:o.fim]), ("aqui", "aqui"))
+
+    def test_fechamento_sem_abertura(self):
+        self.assertEqual(xvii("<p>Texto</table></a>.</p>"), [])
+
+    def test_tabela_dentro_de_tabela(self):
+        html = "<table><tr><th>A</th><td><table><tr><td>b</td></tr></table></td></tr></table>"
+        self.assertEqual(xvii(html), [("tabela", "b")])
+        html = "<table><tr><td>a</td><td><table><tr><th>B</th></tr></table></td></tr></table>"
+        self.assertEqual(xvii(html), [("tabela", "a\n\nB")])
+
+    def test_so_o_que_o_leitor_le(self):
+        html = ('<nav><a href="x">Saiba mais</a></nav><div hidden><img src="a.png"></div>'
+                '<main><a href="y">aqui</a></main><footer><a href="z">aqui</a></footer>')
+        self.assertEqual(xvii(html), [("link", "aqui")])
+
+    def test_markdown(self):
+        texto = "Veja [clique aqui](https://a.gov.br), [o edital](e.pdf) e ![aqui](i.png)."
+        self.assertEqual(trechos(acessibilidade, texto), ["[clique aqui](https://a.gov.br)"])
+        self.assertEqual(trechos(acessibilidade, "[Saiba  mais](s.html)"), ["[Saiba  mais](s.html)"])
+        self.assertEqual(acessibilidade("Clique aqui para ver."), [])
+
+    def test_texto_bom_e_par_do_guia(self):
+        par = guias.LINK_EMAG
+        self.assertEqual((len(xvii(par.antes)), len(xvii(par.depois))), (1, 0))
+        for html in guias.BONS_EMAG:
+            with self.subTest(html[:30]):
+                self.assertEqual(xvii(html), [])
+
+    def test_lexico_de_links_tem_fonte(self):
+        caminho = Path(detectores.__file__).parent / "lexicos" / "links-vagos.txt"
+        linhas = [l for l in caminho.read_text(encoding="utf-8").splitlines() if l.strip() and not l.startswith("#")]
+        self.assertEqual(len(linhas), 14)
+        origens = []
+        for linha in linhas:
+            with self.subTest(linha):
+                texto, origem, fonte = (c.strip() for c in linha.split("|"))
+                self.assertEqual(texto, texto.casefold())
+                self.assertIn(origem, ("lista", "regra"))
+                self.assertTrue(fonte.startswith("eMAG 3.1, Recomendação 3.5"))
+                origens.append(origem)
+        self.assertEqual(origens.count("lista"), 6)
 
 
 if __name__ == "__main__":

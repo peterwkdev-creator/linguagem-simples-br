@@ -10,6 +10,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from linguagem_simples import __version__
 from linguagem_simples.__main__ import main
 from linguagem_simples.relatorio import (
     AVISO, CONFERIDO, DESLIGADO, NAO_CONFERIDO, SEM_DETECTOR,
@@ -158,7 +159,7 @@ class TestLinhaDeComando(unittest.TestCase):
     def test_versao(self):
         with contextlib.redirect_stdout(io.StringIO()) as saida, self.assertRaises(SystemExit) as fim:
             main(["--versao"])
-        self.assertEqual((fim.exception.code, saida.getvalue()), (0, "linguagem_simples 1.0.0\n"))
+        self.assertEqual((fim.exception.code, saida.getvalue()), (0, f"linguagem_simples {__version__}\n"))
 
     def test_erros_de_uso_saem_com_2(self):
         erro = io.StringIO()

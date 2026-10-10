@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from . import limiares
+from .pagina import Pagina
 from .texto import PARAGRAFO, blocos, palavras
 
 
@@ -23,6 +24,7 @@ class Ocorrencia:
     trecho: str
     mensagem: str
     medida: int = 0
+    no_html: tuple = ()  # (início, fim) no HTML, quando o achado é marcação (XVII)
 
 
 def frases_longas(texto, max_palavras=None):
@@ -449,3 +451,51 @@ def redundancias(texto):
         for padrao, forma in _REDUNDANCIAS.items() for m in padrao.finditer(texto)
     ]
     return sorted(achadas, key=lambda o: o.inicio)
+
+
+# Inciso XVII: o que o eMAG 3.1 pede no HTML e se confere sem ver a imagem nem
+# seguir o link: texto de link que diz o destino (Recomendação 3.5), texto
+# alternativo na imagem (3.6) e célula de cabeçalho na tabela (3.10). O eMAG
+# diz que o atributo title não serve de texto do link: não conta.
+_LINKS_VAGOS = frozenset(_ler_lexico("links-vagos.txt"))
+_PONTAS = re.compile(r"^[\W_]+|[\W_]+$")
+_LINK_MARKDOWN = re.compile(r"(?<!!)\[([^\]\n]+)\]\([^)\n]+\)")
+_SEM_PAPEL = frozenset({"presentation", "none"})  # role de enfeite ou de leiaute
+_LINK_VAGO = "link com texto que não diz o destino (eMAG 3.5)"
+
+
+def _vago(texto):
+    return " ".join(_PONTAS.sub("", texto).split()).casefold() in _LINKS_VAGOS
+
+
+def acessibilidade(texto):
+    """Inciso XVII. Numa ``Pagina``: link de texto vago ("clique aqui",
+    eMAG 3.5), imagem sem o atributo alt (3.6) e tabela sem ``th`` (3.10).
+    No texto ou Markdown, só o link de texto vago ("[clique aqui](url)")."""
+    if not isinstance(texto, Pagina):
+        return [
+            Ocorrencia("XVII", m.start(), m.end(), m.group(), _LINK_VAGO)
+            for m in _LINK_MARKDOWN.finditer(texto) if _vago(m.group(1))
+        ]
+    achadas = []
+    for e in texto.elementos:
+        if (e.atributo("role") or "").strip().lower() in _SEM_PAPEL:
+            continue
+        nomeado = e.atributo("aria-labelledby") is not None
+        rotulo = (e.atributo("aria-label") or "").strip()
+        if e.tag == "a" and not nomeado and _vago(rotulo or e.texto):
+            mensagem = _LINK_VAGO
+        elif (e.tag == "img" and e.atributo("alt") is None and not nomeado and not rotulo
+              and e.atributo("aria-hidden") != "true"):
+            mensagem = "imagem sem texto alternativo, o atributo alt (eMAG 3.6)"
+        elif e.tag == "table" and not e.cabecalho:
+            mensagem = "tabela sem célula de cabeçalho, o elemento th (eMAG 3.10)"
+        else:
+            continue
+        inicio, fim = texto.no_texto(e.inicio, e.fim)
+        trecho = texto.texto[inicio:fim]
+        inicio += len(trecho) - len(trecho.lstrip())  # sem a quebra de parágrafo que abre a tabela
+        fim -= len(trecho) - len(trecho.rstrip())
+        trecho = texto.fonte[e.inicio:e.fim] if e.tag == "img" else texto.texto[inicio:fim]
+        achadas.append(Ocorrencia("XVII", inicio, fim, trecho, mensagem, no_html=(e.inicio, e.fim)))
+    return achadas

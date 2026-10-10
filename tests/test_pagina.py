@@ -90,6 +90,48 @@ class TestPosicao(unittest.TestCase):
         self.assertIn("linha 4, coluna 12: RG", como_texto(resultados, p))
 
 
+class TestElementos(unittest.TestCase):
+    HTML = ('<header><a href="/">Início</a></header><main>\r\n<p>Veja <a href="e.pdf" title="Edital">o '
+            '<b>edital</b> <img src="i.png" alt="em PDF"></a>.</p>\r\n<img src="m.png">'
+            "<table><tr><th>A</th></tr></table><a name=\"x\">âncora</a></main>")
+
+    def test_links_imagens_e_tabelas_do_main(self):
+        p = ler_html(self.HTML)
+        self.assertEqual([e.tag for e in p.elementos], ["a", "img", "img", "table"])
+        link, dentro, solta, tabela = p.elementos
+        self.assertEqual(link.texto, "o edital em PDF")
+        self.assertEqual(self.HTML[link.inicio:link.fim], self.HTML[self.HTML.index('<a href="e'):self.HTML.index(".</p>")])
+        self.assertEqual((link.atributo("title"), link.atributo("alt")), ("Edital", None))
+        self.assertEqual(self.HTML[solta.inicio:solta.fim], '<img src="m.png">')
+        self.assertTrue(tabela.cabecalho)
+        self.assertEqual(self.HTML[tabela.fim - 8:tabela.fim], "</table>")
+        self.assertEqual(ler_html('<img src="a" alt>').elementos[0].atributo("alt"), "")
+        # a marca do título e a quebra de linha não entram no texto do link
+        self.assertEqual(ler_html('<a href="x"><h3>Saiba\n  mais</h3></a>').elementos[0].texto, "Saiba mais")
+
+    def test_sem_main_vale_a_pagina_toda(self):
+        self.assertEqual(len(ler_html(self.HTML.replace("main>", "div>")).elementos), 5)
+
+    def test_no_texto(self):
+        p = ler_html(self.HTML)
+        link = p.elementos[0]
+        inicio, fim = p.no_texto(link.inicio, link.fim)
+        self.assertEqual(p.texto[inicio:fim], "o edital ")  # o alt não é texto da página
+        self.assertEqual(p.no_texto(0, 0), (0, 0))
+
+    def test_relatorio_aponta_a_tag_no_html(self):
+        p = ler_html(self.HTML.replace('>o <b>edital</b> <img src="i.png" alt="em PDF">', ">aqui"))
+        xvii = next(i for i in como_dict(conferir(p), p)["incisos"] if i["inciso"] == "XVII")
+        self.assertEqual(xvii["estado"], "conferido")
+        self.assertEqual([(o["trecho"], o["linha"], o["coluna"]) for o in xvii["ocorrencias"]],
+                         [("aqui", 2, 9), ('<img src="m.png">', 3, 1)])
+        o = xvii["ocorrencias"][1]
+        self.assertEqual(p.fonte[o["inicio"]:o["fim"]], '<img src="m.png">')
+        self.assertIn('linha 3, coluna 1: imagem sem texto alternativo', como_texto(conferir(p), p))
+        # o texto sozinho só tem os links em Markdown
+        self.assertEqual(next(r for r in conferir(p.texto) if r.inciso.numero == "XVII").ocorrencias, ())
+
+
 class TestBytes(unittest.TestCase):
     def test_utf8_com_e_sem_bom(self):
         self.assertEqual(decodificar("<p>ação</p>".encode("utf-8")), "<p>ação</p>")
@@ -136,6 +178,21 @@ class TestLinhaDeComando(unittest.TestCase):
 
     def test_texto_continua_texto(self):
         self.assertEqual(self.rodar("nota.txt", self.DIV), (1, [("DIV", 1, 2), ("INSS", 2, 9)]))
+
+    def test_xvii_so_lendo_como_html(self):
+        dados = '<p>Formulário: <a href="f.pdf">clique aqui</a></p><img src="a.png">'.encode()
+        saida = io.StringIO()
+        with tempfile.TemporaryDirectory() as pasta:
+            for nome, esperado in (("p.html", ["link", "imagem"]), ("p.txt", [])):
+                arquivo = Path(pasta) / nome
+                arquivo.write_bytes(dados)
+                with contextlib.redirect_stdout(saida):
+                    main(["--json", str(arquivo)])
+                d = json.loads(saida.getvalue())
+                saida.seek(0), saida.truncate()
+                xvii = next(i for i in d["incisos"] if i["inciso"] == "XVII")
+                with self.subTest(nome):
+                    self.assertEqual([o["mensagem"].split()[0] for o in xvii["ocorrencias"]], esperado)
 
     def test_charset_desconhecido_sai_com_2(self):
         with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as fim:

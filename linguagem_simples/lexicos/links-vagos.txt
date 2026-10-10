@@ -1,0 +1,26 @@
+# Inciso XVII: texto de link que não diz o destino.
+# Uma entrada por linha: texto do link | origem | fonte.
+# Fonte: eMAG 3.1 (abril de 2014), Recomendação 3.5, "Descrever links clara e
+# sucintamente", https://emag.governoeletronico.gov.br/#r3.5, lida em
+# 10/10/2026. A regra: "é preciso que o texto do link faça sentido mesmo
+# quando isolado do contexto da página".
+# Origem "lista": a expressão está na observação da Recomendação 3.5.
+# Origem "regra": a expressão não está na lista, mas é o núcleo de uma que
+# está ("aqui" de "clique aqui") ou troca só o substantivo genérico de
+# "acesse a lista"; isolada, também não diz o destino.
+# O link só conta se o texto inteiro for a expressão (maiúscula, espaço e
+# pontuação nas pontas não contam): "Saiba mais sobre o cadastro" fica de fora.
+clique aqui | lista | eMAG 3.1, Recomendação 3.5, observação: "Não se deve fazer a utilização de links do tipo “clique aqui”, “leia mais”, “mais”, “saiba mais”, “veja mais”, “acesse a lista”"
+leia mais | lista | eMAG 3.1, Recomendação 3.5, observação (a mesma lista)
+mais | lista | eMAG 3.1, Recomendação 3.5, observação (a mesma lista)
+saiba mais | lista | eMAG 3.1, Recomendação 3.5, observação (a mesma lista)
+veja mais | lista | eMAG 3.1, Recomendação 3.5, observação (a mesma lista)
+acesse a lista | lista | eMAG 3.1, Recomendação 3.5, observação (a mesma lista)
+aqui | regra | eMAG 3.1, Recomendação 3.5: núcleo de "clique aqui"
+clicando aqui | regra | eMAG 3.1, Recomendação 3.5: "clique aqui" no gerúndio
+acesse aqui | regra | eMAG 3.1, Recomendação 3.5: "clique aqui" com outro verbo
+link | regra | eMAG 3.1, Recomendação 3.5: o substantivo genérico de "acesse a lista", sem o destino
+este link | regra | eMAG 3.1, Recomendação 3.5: idem
+neste link | regra | eMAG 3.1, Recomendação 3.5: idem
+acesse o link | regra | eMAG 3.1, Recomendação 3.5: "acesse a lista" com outro substantivo genérico
+acesse o site | regra | eMAG 3.1, Recomendação 3.5: idem

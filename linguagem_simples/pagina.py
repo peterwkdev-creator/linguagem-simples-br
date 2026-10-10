@@ -3,10 +3,12 @@
 O texto sai em blocos como no Markdown (linha em branco entre blocos, "- "
 no item de lista, "# " no título), para os detectores lerem do mesmo jeito.
 Cada caractere guarda onde começa e onde acaba no HTML: o relatório dá a
-linha e a coluna no arquivo lido, não no texto extraído.
+linha e a coluna no arquivo lido, não no texto extraído. Links, imagens e
+tabelas vêm à parte, em ``elementos``, para o inciso XVII.
 """
 
 import re
+from bisect import bisect_left
 from dataclasses import dataclass
 from html import unescape
 from html.parser import HTMLParser
@@ -34,11 +36,30 @@ _PARECE_HTML = re.compile(rb"(?:\xef\xbb\xbf)?\s*<(?:!doctype\s+html|html)\b", r
 
 
 @dataclass(frozen=True)
+class Elemento:
+    """Link (``a`` com ``href``), imagem ou tabela da página."""
+    tag: str          # "a", "img" ou "table"
+    inicio: int       # no HTML, do "<" da abertura
+    fim: int          # até o fim do fechamento; na imagem, o fim da própria tag
+    atributos: tuple  # pares (nome, valor) da abertura, como o HTMLParser dá
+    texto: str = ""   # link: o texto dentro dele, com o alt das imagens
+    cabecalho: bool = False  # tabela: tem célula ``th``
+
+    def atributo(self, nome):
+        """Valor do atributo (``""`` se vier sem valor) ou ``None``."""
+        for n, v in self.atributos:
+            if n == nome:
+                return v or ""
+        return None
+
+
+@dataclass(frozen=True)
 class Pagina:
     fonte: str     # o HTML lido
     texto: str     # o texto extraído, em blocos
     inicios: tuple  # posição no HTML onde começa cada caractere do texto
     fins: tuple     # e onde acaba
+    elementos: tuple = ()  # links, imagens e tabelas, na ordem do HTML
 
     def na_fonte(self, inicio, fim):
         """Início e fim no HTML do trecho ``texto[inicio:fim]``."""
@@ -46,6 +67,10 @@ class Pagina:
             a = self.inicios[inicio] if inicio < len(self.inicios) else len(self.fonte)
             return a, a
         return self.inicios[inicio], self.fins[fim - 1]
+
+    def no_texto(self, inicio, fim):
+        """Início e fim no texto do trecho ``fonte[inicio:fim]`` do HTML."""
+        return bisect_left(self.inicios, inicio), bisect_left(self.inicios, fim)
 
 
 def parece_html(dados):
@@ -72,10 +97,12 @@ def ler_html(fonte):
     leitor = _Leitor(fonte)
     leitor.feed(fonte)
     leitor.close()
-    pedacos = leitor.pedacos
+    pedacos, elementos = leitor.pedacos, leitor.elementos
     if leitor.tem_main:
         pedacos = [p for p in pedacos if p[4]]
-    return _montar(fonte, pedacos)
+        elementos = [e for e in elementos if e[1]]
+    elementos = tuple(sorted((e for e, _ in elementos), key=lambda e: e.inicio))
+    return _montar(fonte, pedacos, elementos)
 
 
 class _Leitor(HTMLParser):
@@ -87,6 +114,9 @@ class _Leitor(HTMLParser):
         self.fora = []     # elementos abertos dentro de um trecho que não conta
         self.main = 0
         self.tem_main = False
+        self.elementos = []  # (Elemento, dentro do main)
+        self.links = []      # abertos: [inicio, atributos, partes do texto, dentro do main]
+        self.tabelas = []    # abertas: [inicio, atributos, tem th, dentro do main]
 
     def _pos(self):
         linha, coluna = self.getpos()
@@ -95,6 +125,8 @@ class _Leitor(HTMLParser):
     def _guardar(self, tipo, texto, inicio, fim):
         if not self.fora:
             self.pedacos.append((tipo, texto, inicio, fim, self.main > 0))
+            if self.links and tipo in ("texto", "entidade"):
+                self.links[-1][2].append(texto)
 
     def handle_starttag(self, tag, attrs):
         if self.fora or tag in _FORA or any(nome == "hidden" for nome, _ in attrs):
@@ -110,6 +142,18 @@ class _Leitor(HTMLParser):
             self._guardar("linha", "", inicio, fim)
         elif tag in _BLOCO:
             self._guardar("bloco", _MARCA.get(tag, ""), inicio, fim)
+        dentro = self.main > 0
+        if tag == "a" and any(nome == "href" for nome, _ in attrs):
+            self.links.append([inicio, attrs, [], dentro])
+        elif tag == "img":
+            alt = dict(attrs).get("alt")
+            if self.links and alt:
+                self.links[-1][2].append(alt)
+            self.elementos.append((Elemento("img", inicio, fim, tuple(attrs)), dentro))
+        elif tag == "table":
+            self.tabelas.append([inicio, attrs, False, dentro])
+        elif tag == "th" and self.tabelas:
+            self.tabelas[-1][2] = True
 
     def handle_endtag(self, tag):
         if self.fora:
@@ -119,6 +163,15 @@ class _Leitor(HTMLParser):
         if tag in _BLOCO:
             inicio = self._pos()
             self._guardar("bloco", "", inicio, inicio)
+        if tag == "a" and self.links or tag == "table" and self.tabelas:
+            fim = self.fonte.find(">", self._pos()) + 1 or len(self.fonte)
+            if tag == "a":
+                inicio, attrs, partes, dentro = self.links.pop()
+                texto = " ".join(" ".join(partes).split())
+                self.elementos.append((Elemento("a", inicio, fim, tuple(attrs), texto), dentro))
+            else:
+                inicio, attrs, th, dentro = self.tabelas.pop()
+                self.elementos.append((Elemento("table", inicio, fim, tuple(attrs), cabecalho=th), dentro))
         if tag == "main" and self.main:
             self.main -= 1
 
@@ -140,7 +193,7 @@ class _Leitor(HTMLParser):
         self._entidade("&#", name)
 
 
-def _montar(fonte, pedacos):
+def _montar(fonte, pedacos, elementos=()):
     texto, inicios, fins = [], [], []
 
     def por(caracteres, a, b):
@@ -173,4 +226,4 @@ def _montar(fonte, pedacos):
                 por(" ", *espaco)
             quebra = marca = espaco = None
             por(c, ca, cb)
-    return Pagina(fonte, "".join(texto), tuple(inicios), tuple(fins))
+    return Pagina(fonte, "".join(texto), tuple(inicios), tuple(fins), elementos)

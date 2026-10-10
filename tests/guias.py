@@ -191,3 +191,31 @@ NOMINALIZACAO = (
 # Inciso XV. A CAPES, item 14, "Evite redundâncias e palavras desnecessárias".
 _CAPES_11 = Fonte("CAPES, O uso da Linguagem Simples na CAPES (2026)", 11, CAPES, _CAPES_SHA)
 REDUNDANCIA_CAPES = Par(_CAPES_11, "Compareça pessoalmente ao local.", "Compareça ao local.")
+
+# Inciso XVII. O eMAG 3.1 é uma página, não um PDF: "pagina" 0. O HTML foi
+# baixado em 10/10/2026 (o SHA-256 é o dele); os exemplos são o código que a
+# própria página traz, copiado como está (na tabela, sem o recuo das linhas).
+EMAG = "https://emag.governoeletronico.gov.br/"
+_EMAG = Fonte("eMAG 3.1, Modelo de Acessibilidade em Governo Eletrônico (abril de 2014)", 0, EMAG,
+              "200884cddfa8a769473899f2db6cd34cc819a6573439f9409eec7806ea368d0f")
+# Recomendação 3.5, "Exemplo Incorreto" e "Exemplo Correto".
+LINK_EMAG = Par(
+    _EMAG,
+    '<p><a id="r19_c" href="#r19_c">Clique aqui</a> para saber mais a respeito de acessibilidade.</p>',
+    '<p><a id="r19_i" href="#r19_i">Saiba mais a respeito de acessibilidade</a></p>',
+)
+# Recomendação 3.5 (o texto do link, certo nos dois exemplos), 3.6 (exemplos
+# 1 e 2) e 3.10 (exemplo 1, com caption, thead, tfoot e tbody).
+BONS_EMAG = (
+    '<p> <a href="notici5125.html">Leia mais notícias sobre Educação Superior</a> </p>',
+    '<img src="foto-porto-alegre.jpg" alt="Foto de uma bicicleta de carga verde com caixas '
+    'laranjas encostada numa parede"  />',
+    '<a href="http://www.dominiopublico.gov.br/">      <img src="guia.png" alt="Guia de Serviços – '
+    'Consulte serviços públicos de forma fácil" />      </a>',
+    "<table><caption>Demonstrativo do Patrimônio</caption><thead><tr><th>Tipos</th>"
+    "<th>Valores (R$)</th><th>Percentual</th></tr></thead><tfoot><tr><td>Total</td>"
+    "<td>110.740,22</td><td>100%</td></tr></tfoot><tbody><tr><td>Recursos Financeiro</td>"
+    "<td>56.879,63</td><td>51,36%</td></tr><tr><td>Bens Móveis</td><td>25.691,23</td>"
+    "<td>23,20%</td></tr><tr><td>Bens Imóveis</td><td>28.169,36</td><td>25,44%</td></tr>"
+    "</tbody></table>",
+)

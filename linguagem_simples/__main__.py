@@ -23,14 +23,11 @@ def _positivo(valor):
 
 
 def _ler(arquivo, html):
-    """O texto a conferir e onde contar a posição: o próprio texto ou, no
-    HTML, a ``Pagina``."""
+    """O que conferir: o próprio texto ou, no HTML, a ``Pagina``."""
     dados = sys.stdin.buffer.read() if arquivo == "-" else Path(arquivo).read_bytes()
     if html or Path(arquivo).suffix.lower() in (".html", ".htm") or parece_html(dados):
-        pagina = ler_html(decodificar(dados))
-        return pagina.texto, pagina
-    texto = dados.decode("utf-8-sig")
-    return texto, texto
+        return ler_html(decodificar(dados))
+    return dados.decode("utf-8-sig")
 
 
 def main(argv=None):
@@ -58,7 +55,7 @@ def main(argv=None):
     a = p.parse_args(argv)
 
     try:
-        texto, origem = _ler(a.arquivo, a.html)
+        origem = _ler(a.arquivo, a.html)
     except OSError as erro:
         p.error(f"não consegui ler {a.arquivo}: {erro.strerror or erro}")
     except UnicodeDecodeError:
@@ -66,7 +63,7 @@ def main(argv=None):
     except LookupError as erro:
         p.error(f"{a.arquivo}: codificação desconhecida ({erro})")
     try:
-        resultados = conferir(texto, a.max_palavras, a.max_frases, a.ignorar_sigla, a.ligar, a.desligar)
+        resultados = conferir(origem, a.max_palavras, a.max_frases, a.ignorar_sigla, a.ligar, a.desligar)
     except ValueError as erro:
         p.error(str(erro))
 

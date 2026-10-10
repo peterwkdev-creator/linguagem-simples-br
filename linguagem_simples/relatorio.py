@@ -8,8 +8,8 @@ from dataclasses import dataclass
 
 from . import limiares
 from .detectores import (
-    frases_intercaladas, frases_longas, paragrafos_longos, redundancias, siglas_sem_nome,
-    substantivos_no_lugar_de_verbos, voz_passiva,
+    acessibilidade, frases_intercaladas, frases_longas, paragrafos_longos, redundancias,
+    siglas_sem_nome, substantivos_no_lugar_de_verbos, voz_passiva,
 )
 from .incisos import FONTE_LEI, FORA_DO_ALCANCE, INCISOS, POR_NUMERO, Inciso
 from .pagina import Pagina
@@ -37,9 +37,14 @@ class Resultado:
 
 
 def conferir(texto, max_palavras=None, max_frases=None, ignorar_siglas=(), ligar=(), desligar=()):
-    """Um resultado por inciso, na ordem da lei. ``ligar`` e ``desligar``
-    recebem números de inciso ("XI"); o XI vem desligado por padrão."""
+    """Um resultado por inciso, na ordem da lei. ``texto`` é o texto ou a
+    ``Pagina`` lida de um HTML (o XVII olha links, imagens e tabelas dela).
+    ``ligar`` e ``desligar`` recebem números de inciso ("XI"); o XI vem
+    desligado por padrão."""
     ligar, desligar = _numeros(ligar), _numeros(desligar)
+    pagina = texto if isinstance(texto, Pagina) else None
+    if pagina:
+        texto = pagina.texto
     rodar = {
         "II": lambda: frases_longas(texto, max_palavras),
         "III": lambda: paragrafos_longos(texto, max_frases),
@@ -48,6 +53,7 @@ def conferir(texto, max_palavras=None, max_frases=None, ignorar_siglas=(), ligar
         "XIII": lambda: frases_intercaladas(texto),
         "XIV": lambda: substantivos_no_lugar_de_verbos(texto),
         "XV": lambda: redundancias(texto),
+        "XVII": lambda: acessibilidade(pagina or texto),
     }
     informado = {"II": max_palavras, "III": max_frases}
     resultados = []
@@ -87,7 +93,7 @@ def no_arquivo(o, texto):
     """Início, fim, linha e coluna de uma ocorrência no arquivo lido. Com
     uma ``Pagina`` no lugar do texto, a posição é a do HTML."""
     if isinstance(texto, Pagina):
-        inicio, fim = texto.na_fonte(o.inicio, o.fim)
+        inicio, fim = o.no_html or texto.na_fonte(o.inicio, o.fim)
         return (inicio, fim) + linha_coluna(texto.fonte, inicio)
     return (o.inicio, o.fim) + linha_coluna(texto, o.inicio)
 
