@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "linguagem-simples-br"
+# A versão tem uma fonte só: o __version__ do pacote (lido sem importar).
+dynamic = ["version"]
+description = "Verificador aberto da Lei 15.263/2025 (Política Nacional de Linguagem Simples): confere um texto contra as técnicas do art. 5º. Não é parecer jurídico."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Peter" }]
+requires-python = ">=3.11"
+dependencies = []
+keywords = ["linguagem-simples", "lei-15263", "acessibilidade", "plain-language", "portugues", "setor-publico"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
+
+[project.urls]
+Homepage = "https://github.com/peterwkdev-creator/linguagem-simples-br"
+Issues = "https://github.com/peterwkdev-creator/linguagem-simples-br/issues"
+
+[tool.setuptools]
+packages = ["linguagem_simples"]
+
+# Os léxicos são lidos do disco, ao lado do código.
+[tool.setuptools.package-data]
+linguagem_simples = ["lexicos/*.txt"]
+
+[tool.setuptools.dynamic]
+version = { attr = "linguagem_simples.__version__" }

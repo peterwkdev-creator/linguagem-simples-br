@@ -155,6 +155,11 @@ class TestLinhaDeComando(unittest.TestCase):
         viii = next(i for i in json.loads(saida)["incisos"] if i["inciso"] == "VIII")
         self.assertEqual(viii["ocorrencias"][0]["inicio"], 8)
 
+    def test_versao(self):
+        with contextlib.redirect_stdout(io.StringIO()) as saida, self.assertRaises(SystemExit) as fim:
+            main(["--versao"])
+        self.assertEqual((fim.exception.code, saida.getvalue()), (0, "linguagem_simples 1.0.0\n"))
+
     def test_erros_de_uso_saem_com_2(self):
         erro = io.StringIO()
         with self.subTest("arquivo"), contextlib.redirect_stderr(erro), self.assertRaises(SystemExit) as fim:

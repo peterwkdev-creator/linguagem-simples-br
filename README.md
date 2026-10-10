@@ -21,15 +21,34 @@ trechos para quem lê decidir. Intervalos e método em
 > O resultado aponta trechos para revisão. **Não é parecer jurídico** e não
 > certifica que um texto cumpre a lei.
 
-> **Em construção.** Ainda não há versão publicada (release).
+## Instalar
+
+Python 3.11 ou mais novo; só a biblioteca padrão, sem outra dependência.
+
+```bash
+pip install "git+https://github.com/peterwkdev-creator/linguagem-simples-br@v1.0.0"
+```
+
+Também roda sem instalar, de dentro da pasta do repositório.
 
 ## Como usar
 
-Python 3 (testado no 3.12), só a biblioteca padrão, sem instalar nada. Na
-pasta do repositório:
+Na linha de comando:
 
 ```bash
 python -m linguagem_simples texto.txt
+```
+
+Em Python:
+
+```python
+from linguagem_simples.relatorio import conferir
+
+texto = "Procure o INSS para pedir o benefício."
+for resultado in conferir(texto):
+    for o in resultado.ocorrencias:
+        print(resultado.inciso.numero, o.trecho, o.mensagem)
+# VIII INSS INSS: primeira ocorrência sem o nome completo antes
 ```
 
 O arquivo é texto, Markdown ou HTML; `-` lê da entrada padrão. HTML é
@@ -61,6 +80,7 @@ X. organizar o texto a fim de que as informações mais importantes apareçam pr
 | `--ignorar-sigla SIGLA` | inciso VIII: sigla que o público já conhece (repetível) |
 | `--ligar INCISO` | liga um inciso desligado por padrão, como o XI |
 | `--desligar INCISO` | desliga um inciso |
+| `--versao` | mostra a versão |
 
 Código de saída: 0 sem ocorrências, 1 com ocorrências, 2 erro de uso ou de
 leitura.
@@ -413,6 +433,12 @@ Texto da lei: publicação original no portal da Câmara dos Deputados, DOU de
 Outras fontes: Dicionário Priberam da Língua Portuguesa (um verbete por
 palavra do léxico de cores) e Lei Complementar 95/1998, art. 4º, no portal
 do Planalto (epígrafe de ato normativo em maiúsculas).
+
+## Compatibilidade
+
+Versão semântica desde a 1.0.0: o formato do relatório (texto e JSON) e as
+opções da linha de comando só mudam numa versão 2; detector novo sai numa
+1.x. O que mudou em cada versão está no [CHANGELOG.md](CHANGELOG.md).
 
 ## Licença
 

@@ -10,6 +10,7 @@ import json
 import sys
 from pathlib import Path
 
+from . import __version__
 from .pagina import decodificar, ler_html, parece_html
 from .relatorio import AVISO, como_dict, como_texto, conferir
 
@@ -52,6 +53,8 @@ def main(argv=None):
                    help="liga um inciso desligado por padrão, como o XI (repetível)")
     p.add_argument("--desligar", action="append", default=[], metavar="INCISO",
                    help="desliga um inciso (repetível)")
+    p.add_argument("--versao", "--version", action="version",
+                   version=f"linguagem_simples {__version__}", help="mostra a versão e sai")
     a = p.parse_args(argv)
 
     try:

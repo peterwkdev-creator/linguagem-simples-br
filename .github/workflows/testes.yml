@@ -1,0 +1,35 @@
+# Testes a cada push e pull request, em todas as versões do Python que o
+# pyproject aceita (requires-python), do checkout limpo, sem instalar nada,
+# como diz o README. A lista vai até a versão do Pyodide da vitrine (314 =
+# Python 3.14): é nela que a página roda. Um job no Windows confere a saída
+# da linha de comando fora do UTF-8 (cp1252).
+name: testes
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unittest:
+    runs-on: ${{ matrix.os }}
+    # a suíte leva segundos; sem teto, um processo preso segura o job por 6 h
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python: ["3.11", "3.12", "3.13", "3.14"]
+        include:
+          - os: windows-latest
+            python: "3.14"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m unittest -v

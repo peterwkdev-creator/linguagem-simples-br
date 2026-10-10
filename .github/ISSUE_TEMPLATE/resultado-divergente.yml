@@ -1,0 +1,36 @@
+name: Resultado diferente do esperado
+description: A biblioteca deu um resultado diferente da sua conta ou da fonte, ou falta um caso.
+title: "Resultado diferente: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use dados inventados: nada de nome, documento ou dado real de pessoa ou de empresa.
+        O resultado aponta trechos para revisão: não é parecer jurídico e não certifica que um texto cumpre a lei.
+  - type: input
+    id: versao
+    attributes:
+      label: Versão
+      description: "Saída de `python -m linguagem_simples --version`."
+    validations:
+      required: true
+  - type: textarea
+    id: entrada
+    attributes:
+      label: O que você rodou
+      description: A entrada e o comando ou a chamada em Python.
+    validations:
+      required: true
+  - type: textarea
+    id: obtido
+    attributes:
+      label: O que a biblioteca deu
+    validations:
+      required: true
+  - type: textarea
+    id: esperado
+    attributes:
+      label: O que você esperava, e de onde vem
+      description: A conta à mão, a fonte ou a regra.
+    validations:
+      required: true
