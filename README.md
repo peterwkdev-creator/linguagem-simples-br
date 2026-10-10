@@ -143,11 +143,15 @@ estão em `tests/guias.py`, com a página e o hash do PDF.
   art. 4º, manda grafar em maiúsculas). Fora disso, palavra comum em caixa
   alta ainda é apontada ("SENHA", "BUSCAR").
 - VIII reconhece o nome antes da sigla ligado a ela ("Nome (SIGLA)",
-  "Nome - SIGLA", com uma ou mais letras de cada palavra e até duas
-  palavras puladas) ou, em qualquer ponto antes, como nome próprio inteiro
-  cujas iniciais são a sigla. Fora disso aponta: "Coordenação-Geral de
-  Autorização para Transferência Fusão, Cisão, Incorporação e Retirada -
-  CGTR" pula quatro palavras do nome. Abreviatura de mês ("31 DEZ")
+  "Nome - SIGLA" ou o nome próprio colado, "Nome SIGLA", com uma ou mais
+  letras de cada palavra e até duas palavras puladas) ou, em qualquer
+  ponto antes, como nome próprio cujas iniciais são a sigla: o nome
+  inteiro ou, se a sigla tem três letras ou mais, o fim dele depois de um
+  conectivo ("Secretaria Especial da Receita Federal do Brasil" serve a
+  RFB). Com duas letras, o fim do nome coincide demais ("Cadastro de
+  Pessoa Física" e a PF de Polícia Federal). Fora disso aponta:
+  "Coordenação-Geral de Autorização para Transferência Fusão, Cisão,
+  Incorporação e Retirada - CGTR" pula quatro palavras do nome. Abreviatura de mês ("31 DEZ")
   também é apontada.
 
 ## Precisão medida
@@ -214,6 +218,15 @@ Depois desta amostra, uma 3ª correção (nome de cor e data da epígrafe de
 ato normativo) tira 3 dos 12 erros dela e nenhum acerto: 36 / 45 = 80%
 (66% a 89%), número otimista, porque é a amostra que a motivou. Nas
 amostras 1 e 2 não muda nada.
+
+Uma 4ª correção liga o nome que vinha antes em três formas que o detector
+não via: o fim de um nome maior ("Secretaria Especial da Receita Federal
+do Brasil" antes de "RFB"), o nome colado à sigla ("Divisão de Cooperação
+e Intercâmbio DICIN") e o nome com "no", "na", "nos" ou "nas" ("Saúde e
+Segurança no Trabalho" antes de "SST"). Tira mais 3 erros da 3ª amostra e
+nenhum acerto: 36 / 42 = 86% (72% a 93%), também otimista. Nas amostras 1
+e 2 não muda nada. A 4ª amostra mede as duas correções fora das amostras
+que as motivaram.
 
 **Como se mediu.** 30 páginas sorteadas (semente 20261009) entre as 5.735
 páginas de serviço do sitemap do gov.br de 08/10/2026. Os 621 apontamentos

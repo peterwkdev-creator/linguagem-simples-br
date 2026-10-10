@@ -212,6 +212,35 @@ class TestIncisoVIII(unittest.TestCase):
         self.assertEqual(self.siglas("O prazo de 27 DE MAIO. Leia o DE 4."), ["DE", "MAIO"])
         self.assertEqual(self.siglas("Leia o DE 4 DE SUS."), ["DE", "SUS"])
 
+    # Os três a seguir também vêm dos erros da 3ª amostra: o nome vinha antes.
+    def test_nome_dentro_de_nome_maior(self):
+        texto = "Serviço da Secretaria Especial da Receita Federal do Brasil.\n\nLeia a Instrução RFB nº 1."
+        self.assertEqual(self.siglas(texto), [])
+        self.assertEqual(self.siglas("Serviço da Receita Federal.\n\nLeia a Instrução RFB nº 1."), ["RFB"])
+        # O pedaço começa depois de um conectivo e vai até o fim do nome.
+        self.assertEqual(self.siglas("Serviço da Secretaria Receita Federal Brasil.\n\nLeia a RFB."), ["RFB"])
+        self.assertEqual(self.siglas("Serviço da Receita Federal do Brasil Digital.\n\nLeia a RFB."), ["RFB"])
+        # Com duas letras, só o nome inteiro: na 2ª amostra, a PF (Polícia
+        # Federal) depois do "Cadastro de Pessoa Física".
+        self.assertEqual(self.siglas("Leve o Cadastro de Pessoa Física.\n\nCursos na PF."), ["PF"])
+        self.assertEqual(self.siglas("Leve a Pessoa Física.\n\nCursos na PF."), [])
+
+    def test_nome_colado_a_sigla(self):
+        texto = "No âmbito da Divisão de Cooperação e Intercâmbio DICIN/INPA."
+        self.assertEqual(self.siglas(texto), ["INPA"])
+        self.assertEqual(self.siglas("Fale com a Divisão de Cooperação e Intercâmbio. A DICIN atende."), ["DICIN"])
+        self.assertEqual(self.siglas("Fale com a Divisão de Cooperação e Intercâmbio, DICIN."), ["DICIN"])
+        self.assertEqual(self.siglas("Divisão de Cooperação e Intercâmbio\nDICIN"), ["DICIN"])
+
+    def test_nome_com_contracao_de_em(self):
+        for contracao in ("no", "na", "nos", "nas"):
+            texto = f"Saúde e Segurança {contracao} Trabalho\n\nBaixe o SST Fácil."
+            self.assertEqual(self.siglas(texto), [], contracao)
+        self.assertEqual(self.siglas("Curso de Saúde no Sistema Único de Saúde.\n\nUse o SUS."), [])
+        self.assertEqual(self.siglas("No Instituto Nacional do Seguro Social, procure o INSS."), [])
+        self.assertEqual(self.siglas("Saúde e Segurança pelo Trabalho\n\nBaixe o SST Fácil."), ["SST"])
+        self.assertEqual(self.siglas("Saúde e Segurança no trabalho\n\nBaixe o SST Fácil."), ["SST"])
+
     def test_romano_caixa_alta_acento_e_plural(self):
         self.assertEqual(self.siglas("Leia o inciso XI, o capítulo CC e o século XX."), [])
         self.assertEqual(self.siglas("Dom Pedro II assinou."), [])

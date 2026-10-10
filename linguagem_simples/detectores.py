@@ -202,13 +202,22 @@ def _prefixos_batem(sigla, palavras_nome):
 _LIGA_PARENTESE = re.compile(r"\((?:\s*[a-zà-ÿ]+){0,2}\s*$")
 _LIGA_TRAVESSAO = re.compile(r"\s[-–—]\s*$")
 _CONECTIVOS = frozenset("de da do das dos e em para".split())
+# Dentro do nome próprio, também a contração de "em": "Saúde e Segurança no
+# Trabalho". No nome ligado, contam como palavra pulada ("Colégio Estadual na
+# Rua Nova do Porto - CEP" não serve a CEP).
+_LIGAM_NOME = _CONECTIVOS | frozenset("no na nos nas".split())
 # Palavra que só tem maiúscula por abrir a frase: "A Guia de Recolhimento".
-_ABRE_FRASE = _CONECTIVOS | frozenset("a o as os na no nas nos ao à pela pelo um uma".split())
+_ABRE_FRASE = _LIGAM_NOME | frozenset("a o as os ao à pela pelo um uma".split())
 # Palavras com maiúscula separadas só por espaço, com um conectivo entre elas;
 # o hífen separa palavras ("Procuradoria-Geral", "Coordenação-geral").
 _PALAVRA_MAIUSCULA = r"[A-ZÀ-Ý][a-zà-ÿA-ZÀ-Ý]*(?:-[a-zà-ÿA-ZÀ-Ý]+)*"
 _NOME_PROPRIO = re.compile(
-    r"%s(?:[ \t]+(?:(?:%s)[ \t]+)?%s)*" % (_PALAVRA_MAIUSCULA, "|".join(_CONECTIVOS), _PALAVRA_MAIUSCULA))
+    r"%s(?:[ \t]+(?:(?:%s)[ \t]+)?%s)*" % (_PALAVRA_MAIUSCULA, "|".join(_LIGAM_NOME), _PALAVRA_MAIUSCULA))
+# O fim de um nome maior só serve a sigla de três letras ou mais: com duas, a
+# coincidência é comum ("Cadastro de Pessoa Física" e a PF de Polícia Federal,
+# "Ambulatório de Pediatria Especializada" e o PE de Pernambuco, nas 90
+# páginas das amostras).
+_MINIMO_FIM_DO_NOME = 3
 
 
 def _nome_antes(texto, inicio, fim, sigla):
@@ -228,16 +237,27 @@ def _nome_antes(texto, inicio, fim, sigla):
 
 
 def _nome_proprio_antes(antes, sigla):
-    """Um nome próprio inteiro (palavras com maiúscula ligadas por conectivo,
-    sem pontuação nem quebra de linha no meio) cujas iniciais são as letras da
-    sigla: "Informar Mudança de Endereço de Curso" não serve a MEC."""
+    """Um nome próprio (palavras com maiúscula ligadas por conectivo, sem
+    pontuação nem quebra de linha no meio) cujas iniciais são as letras da
+    sigla. Vale o nome inteiro ou o fim dele depois de um conectivo, se a
+    sigla tem três letras ou mais ("Secretaria Especial da Receita Federal do
+    Brasil" serve a RFB), mas não
+    um pedaço qualquer: "Informar Mudança de Endereço de Curso" não serve a MEC.
+    Colado à sigla, só com espaço entre eles, o nome se lê como o ligado
+    ("Divisão de Cooperação e Intercâmbio DICIN")."""
     letras = "".join(c for c in _sem_acento(sigla).upper() if c.isalpha())
+    colado = len(antes.rstrip(" \t"))
     for m in _NOME_PROPRIO.finditer(antes):
+        if m.end() == colado and _prefixos_batem(sigla, _PALAVRA_SIMPLES.findall(m.group())):
+            return True
         nome = re.split(r"[ \t-]+", m.group())
         if nome[0].lower() in _ABRE_FRASE:
             nome = nome[1:]
-        if "".join(_sem_acento(p)[0].upper() for p in nome if p not in _CONECTIVOS) == letras:
-            return True
+        for k in range(len(nome) if len(letras) >= _MINIMO_FIM_DO_NOME else 1):
+            if k > 0 and nome[k - 1] not in _LIGAM_NOME:
+                continue
+            if "".join(_sem_acento(p)[0].upper() for p in nome[k:] if p not in _LIGAM_NOME) == letras:
+                return True
     return False
 
 
