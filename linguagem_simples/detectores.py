@@ -425,3 +425,27 @@ def substantivos_no_lugar_de_verbos(texto):
                 f"substantivo no lugar de verbo (verbo: {_NOMINALIZACOES[nome]})",
             ))
     return sorted(achadas, key=lambda o: o.inicio)
+
+
+# Inciso XV: expressão do léxico (TRE-AL p. 16 e 17, CJF p. 9, CAPES p. 11).
+# "*" no fim da palavra vale por qualquer terminação. Entre as palavras,
+# espaço ou uma quebra de linha; parágrafo novo, não.
+_ESPACO = r"(?:[^\S\n]+|[^\S\n]*\n[^\S\n]*)"
+
+
+def _padrao_da_expressao(expressao):
+    partes = [re.escape(p[:-1]) + r"\w*" if p.endswith("*") else re.escape(p) for p in expressao.split()]
+    return re.compile(r"(?<!\w)" + _ESPACO.join(partes) + r"(?!\w)", re.IGNORECASE)
+
+
+_REDUNDANCIAS = {_padrao_da_expressao(e): forma for e, forma in _ler_lexico("redundancias.txt").items()}
+
+
+def redundancias(texto):
+    """Inciso XV: expressão redundante ou com palavras sobrando, do léxico
+    ("Compareça pessoalmente ao local": CAPES p. 11)."""
+    achadas = [
+        Ocorrencia("XV", m.start(), m.end(), m.group(), f"palavras sobrando: o guia sugere “{forma}”")
+        for padrao, forma in _REDUNDANCIAS.items() for m in padrao.finditer(texto)
+    ]
+    return sorted(achadas, key=lambda o: o.inicio)

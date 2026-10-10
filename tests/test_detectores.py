@@ -7,7 +7,7 @@ from pathlib import Path
 
 from linguagem_simples import detectores, limiares
 from linguagem_simples.detectores import (
-    frases_intercaladas, frases_longas, paragrafos_longos, siglas_sem_nome,
+    frases_intercaladas, frases_longas, paragrafos_longos, redundancias, siglas_sem_nome,
     substantivos_no_lugar_de_verbos, voz_passiva,
 )
 
@@ -426,6 +426,59 @@ class TestIncisoXIV(unittest.TestCase):
                     palavra, acepcao, fonte = (c.strip() for c in linha.split("|"))
                     self.assertTrue(palavra and acepcao)
                     self.assertRegex(fonte, r'^Dicionário Priberam, verbete "\w+"')
+
+
+class TestIncisoXV(unittest.TestCase):
+    def test_plantado(self):
+        achadas = redundancias("Compareça pessoalmente ao local.")
+        self.assertEqual([(o.inciso, o.trecho) for o in achadas], [("XV", "Compareça pessoalmente")])
+        self.assertEqual((achadas[0].inicio, achadas[0].fim), (0, len("Compareça pessoalmente")))
+        self.assertIn("“comparecer”", achadas[0].mensagem)
+
+    def test_verbo_conjugado_e_plural(self):
+        self.assertEqual(trechos(redundancias, "Ele entrou para dentro e depois saiu para fora."),
+                         ["entrou para dentro", "saiu para fora"])
+        self.assertEqual(trechos(redundancias, "Desça para baixo; ele sobe para cima."),
+                         ["Desça para baixo", "sobe para cima"])
+        self.assertEqual(trechos(redundancias, "As conclusões finais, na data acima citada."),
+                         ["conclusões finais", "acima citada"])
+
+    def test_palavra_inteira(self):
+        self.assertEqual(trechos(redundancias, "A FIM DE votar, um pequeno número de eleitores."),
+                         ["A FIM DE", "um pequeno número"])
+        for texto in ("Ele está de acordo comigo.", "Um termo afim de outro.", "Vou entrar.",
+                      "com vistas", "Subir para a cima.", "Leve a mesa para fora."):
+            with self.subTest(texto):
+                self.assertEqual(redundancias(texto), [])
+
+    def test_quebra_de_linha_sim_paragrafo_nao(self):
+        self.assertEqual(trechos(redundancias, "Pague de acordo \n com a tabela."), ["de acordo \n com"])
+        self.assertEqual(trechos(redundancias, "Pague de  acordo com a tabela."), ["de  acordo com"])
+        self.assertEqual(redundancias("Pague de acordo\n\ncom a tabela."), [])
+
+    def test_crase_e_artigo(self):
+        self.assertEqual(trechos(redundancias, "Com vistas à posse e com vistas aos prazos."),
+                         ["Com vistas à", "com vistas aos"])
+
+    def test_texto_bom_e_par_do_guia(self):
+        par = guias.REDUNDANCIA_CAPES
+        self.assertEqual((len(redundancias(par.antes)), len(redundancias(par.depois))), (1, 0))
+        bons = [guias.TREAL_PARAGRAFOS, guias.ANVISA_SEI_DEPOIS, guias.FRASE_CAPES.depois,
+                guias.FRASE_ANVISA.depois, guias.FRASE_TJGO.depois, guias.INTERCALADA_CAPES.depois]
+        bons += [p.depois for p in guias.PASSIVA + guias.NOMINALIZACAO]
+        for texto in bons:
+            with self.subTest(texto[:30]):
+                self.assertEqual(redundancias(texto), [])
+
+    def test_lexico_de_redundancias_tem_fonte(self):
+        caminho = Path(detectores.__file__).parent / "lexicos" / "redundancias.txt"
+        linhas = [l for l in caminho.read_text(encoding="utf-8").splitlines() if l.strip() and not l.startswith("#")]
+        self.assertEqual(len(linhas), 29)
+        for linha in linhas:
+            with self.subTest(linha):
+                expressao, forma, fonte = (c.strip() for c in linha.split("|"))
+                self.assertTrue(expressao and forma)
+                self.assertRegex(fonte, r"^(?:TRE-AL p\. 1[67] \(1[45]\)|CJF p\. 9|CAPES p\. 11 \(10\))")
 
 
 if __name__ == "__main__":

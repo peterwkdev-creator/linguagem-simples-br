@@ -91,11 +91,12 @@ Os detectores também se chamam um a um, em `linguagem_simples/detectores.py`.
 | XII | redigir frases preferencialmente na voz ativa | verbo "ser" com particípio ("foi entregue pela empresa"), com ou sem quem faz a ação | — |
 | XIII | evitar frases intercaladas | trecho entre vírgulas no meio da frase que começa por pronome relativo (", que deve ser apresentado pelo requerente,") | — |
 | XIV | evitar o uso de substantivos no lugar de verbos | verbo de apoio com substantivo ("faça a identificação") e substantivo do léxico com complemento ("prevenção da Covid-19") | léxico em `linguagem_simples/lexicos/`, com a fonte de cada palavra |
+| XV | evitar redundâncias e palavras desnecessárias | expressão do léxico com palavras sobrando ("compareça pessoalmente", "a fim de", "de acordo com") e a forma que o guia sugere | léxico em `linguagem_simples/lexicos/redundancias.txt`: 29 entradas do TRE-AL, do CJF e da CAPES, com a página |
 
 O XIII é **sinal**, não automático: acerta 31% das vezes (abaixo), então
-aponta trechos para quem lê decidir. Os outros cinco são automáticos.
+aponta trechos para quem lê decidir. Os outros seis são automáticos.
 
-Os outros 12 incisos aparecem no relatório com a classe de cada um:
+Os outros 11 incisos aparecem no relatório com a classe de cada um:
 **automático** (dá para contar; detector ainda não escrito), **sinal** (dá
 para apontar, quem lê decide) ou **fora do alcance** (X e XVIII: só uma
 pessoa confere). O inciso XI vem desligado por padrão.
@@ -133,6 +134,11 @@ estão em `tests/guias.py`, com a página e o hash do PDF.
   da frase quando ela tem vírgula por dentro (31% de precisão, abaixo).
 - XIV conhece só as palavras que os guias trazem (12, com o plural); fora
   delas, só aponta "fazer" ou "promover" com substantivo em -ção ou -mento.
+- XV conhece só as expressões que os guias trazem. Nas páginas do gov.br,
+  quase tudo o que ele aponta é "de acordo com" (TRE-AL p. 17: prefira
+  "segundo, conforme, como"); os pleonasmos da lista ("subir para cima")
+  não apareceram. "No Estado de Pernambuco" (CJF) fica de fora: pede a
+  lista dos estados.
   Não aponta a palavra depois de nome de documento com "de" ("Guia de
   Recolhimento"): o nome do documento não se troca por verbo.
 - XV e XVI ainda sem detector: os guias dão um exemplo de cada, pouco para
@@ -297,6 +303,22 @@ dela ainda pertence à oração ("Ofício de exigência, que será encaminhado
 via SEI, por e-mail, para o interessado"). Use o XIII como lista para
 revisar, não como erro certo. Por isso o relatório passou a dar ao XIII a
 classe **sinal**.
+
+**XV nas 150 páginas (10/10/2026).** O XV aponta 85 vezes nas 150
+páginas; sem os repetidos, 64, dos quais 60 sorteados e anotados com duas
+passagens (60 dos 60 rótulos iguais):
+
+| Inciso | Precisão | Acertos / anotados | Intervalo de 95% (Wilson) | Fora da conta: defeito da leitura do HTML |
+|---|---|---|---|---|
+| XV | 98% | 59 / 60 | 91% a 100% | 0 |
+
+Acerto quer dizer que a forma do guia cabe no lugar sem mudar o sentido.
+47 dos 60 são "de acordo com" (47 acertos); os outros 13 são "a fim de",
+"com o objetivo de", "com vistas à" e "de conformidade com" (12 acertos).
+O erro: "Certificado de conformidade com a norma", em que "conformidade" é
+o nome do certificado. Se "de acordo com" é palavra demais, quem diz é o
+guia, não esta conta. Os pleonasmos da lista e "compareça pessoalmente"
+não apareceram: deles não há número.
 
 **Como se mediu.** 30 páginas sorteadas (semente 20261009) entre as 5.735
 páginas de serviço do sitemap do gov.br de 08/10/2026. Os 621 apontamentos

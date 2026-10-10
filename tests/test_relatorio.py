@@ -47,7 +47,8 @@ class TestRelatorio(unittest.TestCase):
         self.assertEqual(e["XI"], DESLIGADO)
         self.assertEqual(e["I"], SEM_DETECTOR)
         self.assertEqual([e["XII"], e["XIII"], e["XIV"]], [CONFERIDO] * 3)
-        self.assertEqual([e["XV"], e["XVI"]], [SEM_DETECTOR] * 2)
+        self.assertEqual(e["XV"], CONFERIDO)
+        self.assertEqual(e["XVI"], SEM_DETECTOR)
 
     def test_xiii_e_sinal_e_roda(self):
         # 31% de precisão (amostra 6): o XIII aponta para quem lê decidir.

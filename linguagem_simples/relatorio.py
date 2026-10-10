@@ -8,7 +8,7 @@ from dataclasses import dataclass
 
 from . import limiares
 from .detectores import (
-    frases_intercaladas, frases_longas, paragrafos_longos, siglas_sem_nome,
+    frases_intercaladas, frases_longas, paragrafos_longos, redundancias, siglas_sem_nome,
     substantivos_no_lugar_de_verbos, voz_passiva,
 )
 from .incisos import FONTE_LEI, FORA_DO_ALCANCE, INCISOS, POR_NUMERO, Inciso
@@ -47,6 +47,7 @@ def conferir(texto, max_palavras=None, max_frases=None, ignorar_siglas=(), ligar
         "XII": lambda: voz_passiva(texto),
         "XIII": lambda: frases_intercaladas(texto),
         "XIV": lambda: substantivos_no_lugar_de_verbos(texto),
+        "XV": lambda: redundancias(texto),
     }
     informado = {"II": max_palavras, "III": max_frases}
     resultados = []

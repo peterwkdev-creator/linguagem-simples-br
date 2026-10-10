@@ -187,3 +187,7 @@ NOMINALIZACAO = (
     Par(_TREAL_15, "Fazer o encaminhamento do eleitor ao cartório eleitoral.",
         "Encaminhar o eleitor ao cartório eleitoral."),
 )
+
+# Inciso XV. A CAPES, item 14, "Evite redundâncias e palavras desnecessárias".
+_CAPES_11 = Fonte("CAPES, O uso da Linguagem Simples na CAPES (2026)", 11, CAPES, _CAPES_SHA)
+REDUNDANCIA_CAPES = Par(_CAPES_11, "Compareça pessoalmente ao local.", "Compareça ao local.")

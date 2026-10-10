@@ -1,0 +1,39 @@
+# Inciso XV: expressões redundantes ou com palavras sobrando.
+# Uma entrada por linha: expressão | forma que o guia sugere | fonte.
+# Página do arquivo PDF; entre parênteses, a impressa, quando é outra.
+# "*" no fim de uma palavra vale por qualquer terminação: o verbo se
+# conjuga ("entrou para dentro") e o particípio varia ("acima citada").
+# Plural escrito à parte, com a fonte do singular.
+# De fora: "no Estado de Pernambuco" (CJF p. 9; pede a lista dos estados),
+# "O Departamento X e o Departamento Y" (TRE-AL p. 17; é estrutura, não
+# expressão) e "no sentido de" (CAPES p. 8, em "Use palavras comuns": é do
+# inciso IV, não deste).
+hemorragia de sangue | hemorragia | TRE-AL p. 16 (14): "Todas as hemorragias são de sangue; portanto, “sangue” está sobrando na frase."
+hemorragias de sangue | hemorragias | TRE-AL p. 16 (14), plural da entrada acima
+entr* para dentro | entrar | TRE-AL p. 16 (14): "Algumas expressões redundantes (pleonasmos): Entrar para dentro"
+sa* para fora | sair | TRE-AL p. 16 (14): "Sair para fora"
+desc* para baixo | descer | TRE-AL p. 16 (14): "Descer para baixo"
+desç* para baixo | descer | TRE-AL p. 16 (14): "Descer para baixo" (desço, desça)
+sub* para cima | subir | TRE-AL p. 16 (14): "Subir para cima"
+sob* para cima | subir | TRE-AL p. 16 (14): "Subir para cima" (sobe, sobem)
+metades iguais | metades | TRE-AL p. 16 (14): "Metades iguais"
+adi* para depois | adiar | TRE-AL p. 16 (14): "Adiar para depois"
+conclusão final | conclusão | TRE-AL p. 16 (14): "Conclusão final"
+conclusões finais | conclusões | TRE-AL p. 16 (14), plural da entrada acima
+com base no fato de que | porque | TRE-AL p. 17 (15), tabela "Evite / Prefira": "Com base no fato de que / Porque"
+devido ao fato de que | por causa de | CJF p. 9, tabela "Evite / Prefira": "devido ao fato de que / por causa de" (no TRE-AL p. 17 a mesma expressão está na célula de "para", que não é o sentido)
+a fim de | para | TRE-AL p. 17 (15): "a fim de, com o objetivo de, com vistas a / Para"
+com o objetivo de | para | TRE-AL p. 17 (15): "com o objetivo de / Para"
+com vistas a* | para | TRE-AL p. 17 (15): "com vistas a / Para" (a, ao, aos, as)
+com vistas à* | para | TRE-AL p. 17 (15): "com vistas a / Para" (à, às)
+com periodicidade mensal | todos os meses, mensalmente | TRE-AL p. 17 (15): "Com periodicidade mensal / Todos os meses, mensalmente"
+um grande número de | muitos, muitas | TRE-AL p. 17 (15): "Um grande número de; um pequeno número / Muitos(as), Poucos(as)"
+um pequeno número | poucos, poucas | TRE-AL p. 17 (15): "um pequeno número / Poucos(as)"
+de conformidade com | segundo, conforme, como | TRE-AL p. 17 (15): "De conformidade com, de acordo com / Segundo, conforme, como"
+de acordo com | segundo, conforme, como | TRE-AL p. 17 (15): "de acordo com / Segundo, conforme, como"
+acima citad* | citado | CJF p. 9, tabela "Evite / Prefira": "acima citado / citado"
+acusamos o recebimento | recebemos | CJF p. 9: "acusamos o recebimento / recebemos"
+como dissemos acima | como mencionado | CJF p. 9: "como dissemos acima / como mencionado"
+conforme segue relacionad* | relacionado a seguir | CJF p. 9: "conforme segue relacionado / relacionado a seguir"
+no corrente mês | neste mês | CJF p. 9: "ocorrido no corrente mês / ocorrido neste mês"
+compar* pessoalmente | comparecer | CAPES p. 11 (10), "14. Evite redundâncias e palavras desnecessárias": "Antes: Compareça pessoalmente ao local. Depois: Compareça ao local."
