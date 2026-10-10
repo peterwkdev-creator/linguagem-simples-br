@@ -18,9 +18,21 @@ class TestPacote(unittest.TestCase):
         pacote = RAIZ / "linguagem_simples"
         dados = [p for p in pacote.rglob("*") if p.is_file() and p.suffix not in (".py", ".pyc")]
         self.assertTrue(dados)
-        for p in dados:
-            with self.subTest(p.name):
-                self.assertTrue(any(p.relative_to(pacote).match(g) for g in padroes))
+        # glob do Path, como o setuptools: o match da direita deixava
+        # "lexicos/*.txt" valer em "sub/lexicos/x.txt" (Coordenação, 10/10)
+        cobertos = {p for g in padroes for p in pacote.glob(g)}
+        fora = [p.relative_to(pacote).as_posix() for p in dados if p not in cobertos]
+        self.assertEqual(fora, [], "fora do package-data: não vão na instalação")
+
+    def test_subpacotes_no_packages(self):
+        # packages = ["linguagem_simples"] não leva subpasta com .py: o
+        # import quebra só depois do pip install
+        projeto = tomllib.loads((RAIZ / "pyproject.toml").read_text(encoding="utf-8"))
+        pacotes = projeto["tool"]["setuptools"]["packages"]
+        pacote = RAIZ / "linguagem_simples"
+        subs = sorted({".".join(("linguagem_simples",) + p.parent.relative_to(pacote).parts)
+                       for p in pacote.rglob("*.py") if "__pycache__" not in p.parts})
+        self.assertEqual([s for s in subs if s not in pacotes], [])
 
     def test_changelog_abre_com_a_versao(self):
         changelog = (RAIZ / "CHANGELOG.md").read_text(encoding="utf-8")

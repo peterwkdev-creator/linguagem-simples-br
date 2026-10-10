@@ -22,8 +22,11 @@ class TestExemplosDoReadme(unittest.TestCase):
 
     def test_instalar_pela_tag_da_versao_atual(self):
         from linguagem_simples import __version__
-        tags = re.findall(r"linguagem-simples-br@v([\d.]+)", README.read_text(encoding="utf-8"))
-        self.assertEqual(tags, [__version__])
+        # a tag pode aparecer mais de uma vez (pip e uv); o ponto final da
+        # frase não entra (Coordenação, 10/10)
+        tags = re.findall(r"linguagem-simples-br@v(\d+(?:\.\d+)*)", README.read_text(encoding="utf-8"))
+        self.assertTrue(tags, "o README não manda instalar pela tag")
+        self.assertEqual(set(tags), {__version__})
 
 
 if __name__ == "__main__":

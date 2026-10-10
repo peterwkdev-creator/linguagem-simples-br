@@ -11,6 +11,14 @@
       "exemplo": "Outrossim, cumpre salientar que o requerente deverá, impreterivelmente, providenciar a documentação pertinente no prazo de 30 dias, sob pena de indeferimento do pleito, conforme disposto no art. 5º da Lei nº 9.784/1999.\n\nO atendimento é feito de segunda a sexta. Traga o documento com foto."
     }
   ],
+  "exemplos": [
+    {
+      "rotulo": "HTML",
+      "valores": {
+        "texto": "<h1>Segunda via da carteira</h1>\n<p>Para pedir a segunda via, <a href=\"/pedido\">clique aqui</a>. A fim de agilizar o atendimento, leve o documento com foto.</p>\n<p><img src=\"mapa.png\"> O atendimento é feito de segunda a sexta.</p>"
+      }
+    }
+  ],
   "campo_marcado": "texto",
   "botao": "Conferir o texto",
   "repositorio": "https://github.com/peterwkdev-creator/linguagem-simples-br",

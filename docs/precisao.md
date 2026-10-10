@@ -257,6 +257,33 @@ listas que a página já põe em linhas separadas, que a leitura do HTML
 juntou. A série de dois itens ("RG e CPF") não é apontada: os pares da
 DICAS e da SES-DF passam sem marca.
 
+**Cobertura do IX (1.3.0, 10/10/2026).** A precisão diz quanto do que o
+IX aponta é enumeração; a cobertura diz quanto das enumerações ele
+aponta. Nas mesmas 220 páginas, um filtro que não usa o detector separou
+as frases de parágrafo do corpo do serviço com forma de série: ponto e
+vírgula, ou vírgula seguida, em até 8 palavras, de "e" ou "ou" (889
+frases distintas). Foram sorteadas 150 (semente 2026101016), e duas
+passagens às cegas, sem saber o que o detector aponta, disseram se cada
+uma traz 3 itens paralelos ou mais que, um por linha, formariam lista ou
+tabela (149 dos 150 rótulos iguais).
+
+| Enumerações | Apontadas | Cobertura | Intervalo de 95% (Wilson) | Fora da conta: a página já põe em lista |
+|---|---|---|---|---|
+| 59 | 4 | 7% | 3% a 16% | 2 |
+
+52 das 59 não têm dois-pontos ("O pagamento poderá ser realizado via Pix,
+cartão de crédito ou boleto bancário"; "Informe seu CPF, o número de
+registro da CNH e o código de segurança"), e o detector só lê a série
+depois deles. Nas 7 com dois-pontos, aponta 4; escapam um rótulo de 4
+palavras ("Selecionar a modalidade pretendida:"), um "Obs.:" e um
+dois-pontos colado ao item seguinte por defeito da página. Nenhuma das 89
+frases sem enumeração foi apontada. Uma frase de modelo do portal ("Em
+caso de dúvidas, reclamações ou sugestões…") aparece em 8 páginas e conta
+8 vezes; sem as repetições, são 52 enumerações e as mesmas 4 apontadas.
+O filtro não vê a série só com vírgulas, sem "e" nem "ou" no fim, e 11
+apontamentos do IX nessas páginas são dessa forma: a medida vale para a
+série com "e", "ou" ou ponto e vírgula.
+
 **Como se mediu.** 30 páginas sorteadas (semente 20261009) entre as 5.735
 páginas de serviço do sitemap do gov.br de 08/10/2026. Os 621 apontamentos
 viraram 431 sem os repetidos (o modelo do portal se repete em toda página);

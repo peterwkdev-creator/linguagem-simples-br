@@ -141,7 +141,11 @@ expressões na 1.2.0): "Acesse o serviço", "Protocolar" ou as abas "O que
 1ª versão acertou 43% nas 180 páginas das outras amostras, quase sempre
 errando no dois-pontos de rótulo ("Atenção:", "Endereço:"); a 1.3.0 não
 conta esse dois-pontos, e o número acima é dela, em páginas que nenhuma
-versão tinha visto. Cada
+versão tinha visto. A cobertura do IX é baixa por desenho: das 59
+enumerações dentro de parágrafo numa amostra de 150 frases com série
+("Pix, cartão de crédito ou boleto"), ele aponta 4 (**7%**, de 3% a 16%),
+porque 52 delas não têm dois-pontos. Sem marca do IX não quer dizer sem
+enumeração. Cada
 amostra, o método e o que os erros mostram estão em
 [docs/precisao.md](docs/precisao.md).
 
@@ -248,7 +252,9 @@ do Planalto (epígrafe de ato normativo em maiúsculas).
   SES-DF (p. 6), que põem dois itens em tópicos, passam sem marca. Também
   não conta o dois-pontos com menos de 5 palavras antes ("Atenção: leve o
   RG, o CPF e o título"), que nas páginas do gov.br é quase sempre rótulo
-  de campo, nem a série que a página já põe em lista ou tabela.
+  de campo, nem a série que a página já põe em lista ou tabela. A série
+  sem dois-pontos ("pague por Pix, cartão ou boleto") também passa: é a
+  maioria das enumerações dentro de parágrafo (52 de 59 na medida).
 - XII aponta toda voz passiva com "ser", e a lei diz "preferencialmente":
   o texto que os guias dão como bom também tem passiva sem agente ("podem
   ser utilizadas", TRE-AL; "pode ser punido", Anvisa). A mensagem diz se a
