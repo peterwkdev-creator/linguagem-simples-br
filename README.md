@@ -265,6 +265,19 @@ Número otimista: é a amostra que motivou a correção. Nas 120 páginas das
 quatro amostras, ela tira 30 apontamentos, todos nome de documento, e não
 cria nenhum.
 
+**Quinta amostra, depois da correção do XIV (09/10/2026, commit
+`6c945ed`).** Outras 30 páginas (semente 2026100905, sem as 160 sorteadas
+antes), só o XIV, mesmo critério e duas passagens (23 dos 24 rótulos
+iguais). Este é o número do XIV a usar:
+
+| Inciso | Precisão | Acertos / anotados | Intervalo de 95% (Wilson) | Fora da conta: defeito da leitura do HTML |
+|---|---|---|---|---|
+| XIV | 88% | 21 / 24 | 69% a 96% | 0 |
+
+A amostra é pequena: depois da correção, o XIV apontou só 27 vezes nas 30
+páginas. Por isso o intervalo é largo. Nestas páginas, a correção tira 5
+apontamentos, todos nome de documento, e não cria nenhum.
+
 **Como se mediu.** 30 páginas sorteadas (semente 20261009) entre as 5.735
 páginas de serviço do sitemap do gov.br de 08/10/2026. Os 621 apontamentos
 viraram 431 sem os repetidos (o modelo do portal se repete em toda página);
@@ -314,7 +327,11 @@ rótulos iguais (86%), cada divergência resolvida com uma nota. Precisão não
   documento com "de" ("Guia de Recolhimento da União") saiu na correção;
   ficam o nome de serviço ("Solicitar Análise de Fotoluminescência") e o
   documento com outra palavra antes do "de" ("Formulário padronizado de
-  solicitação"). Use o XIV como lista para revisar, não como erro certo.
+  solicitação", "Requerimento de solicitação de Importação"), o nome de
+  sistema ("Solicitação de Divulgação de Informações Aeronáuticas") e a
+  solicitação como pedido enviado ("anuência da solicitação"). Na 5ª
+  amostra, 3 dos 24 apontamentos foram erro. Use o XIV como lista para
+  revisar, não como erro certo.
 - Nas páginas do gov.br, a lista "Serviços recomendados para você" está
   dentro do `<main>` e entra no texto lido: dos 60 apontamentos do VIII
   anotados, 16 vinham dela.
