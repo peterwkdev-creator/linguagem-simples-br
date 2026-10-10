@@ -1,0 +1,2 @@
+# O gancho roda no sh: CRLF quebra o script.
+.githooks/* text eol=lf

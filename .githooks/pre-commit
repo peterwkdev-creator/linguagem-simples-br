@@ -1,0 +1,20 @@
+#!/bin/sh
+# Gancho de commit versionado: barra o commit se um teste falhar ou se o
+# conferidor de segredo achar token ou chave no que o commit levaria.
+# Ligar num clone novo:
+#   git config core.hooksPath .githooks
+# Pular só com motivo dito: git commit --no-verify
+raiz="$(git rev-parse --show-toplevel)"
+if ! (cd "$raiz" && python -m unittest -q); then
+    echo "pre-commit: testes falharam; commit barrado." >&2
+    exit 1
+fi
+# Segredo: conferidor comum do autor, fora deste repositório, chamado pelo
+# caminho e sem cópia. Num clone sem ele, avisa e segue.
+segredo="$raiz/../../../Coordenacao/ferramentas/conferir-segredo.py"
+if [ ! -f "$segredo" ]; then
+    echo "pre-commit: conferidor de segredo não encontrado; segredo não conferido." >&2
+elif ! (cd "$raiz" && python -I "$segredo" .); then
+    echo "pre-commit: possível segredo (acima, mascarado); commit barrado." >&2
+    exit 1
+fi
