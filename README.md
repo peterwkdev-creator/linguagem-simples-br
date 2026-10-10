@@ -126,7 +126,8 @@ estão em `tests/guias.py`, com a página e o hash do PDF.
 - XII não pega a passiva com "-se" ("recomenda-se"). O par da CAPES
   ("é responsabilidade da CAPES") fica de fora: não tem verbo na passiva.
 - XIII só pega o trecho entre vírgulas com pronome relativo; entre
-  travessões, não.
+  travessões, não. Não sabe onde a oração termina: aponta a oração no fim
+  da frase quando ela tem vírgula por dentro (31% de precisão, abaixo).
 - XIV conhece só as palavras que os guias trazem (12, com o plural); fora
   delas, só aponta "fazer" ou "promover" com substantivo em -ção ou -mento.
   Não aponta a palavra depois de nome de documento com "de" ("Guia de
@@ -277,6 +278,21 @@ iguais). Este é o número do XIV a usar:
 A amostra é pequena: depois da correção, o XIV apontou só 27 vezes nas 30
 páginas. Por isso o intervalo é largo. Nestas páginas, a correção tira 5
 apontamentos, todos nome de documento, e não cria nenhum.
+
+**XIII nas 150 páginas (09/10/2026, commit `2fbd34e`).** O XIII aponta
+pouco: 50 vezes nas 150 páginas das cinco amostras. Os 45 que a 1ª amostra
+não tinha anotado foram todos anotados, com o mesmo critério e duas
+passagens (41 dos 45 rótulos iguais; 3 ficaram como dúvida):
+
+| Inciso | Precisão | Acertos / anotados | Intervalo de 95% (Wilson) | Fora da conta: defeito da leitura do HTML |
+|---|---|---|---|---|
+| XIII | 31% | 13 / 42 | 19% a 46% | 0 |
+
+Em 23 dos 29 erros, a oração apontada está no fim da frase. O detector
+toma a vírgula seguinte como o fim da intercalação, mas o que vem depois
+dela ainda pertence à oração ("Ofício de exigência, que será encaminhado
+via SEI, por e-mail, para o interessado"). Use o XIII como lista para
+revisar, não como erro certo.
 
 **Como se mediu.** 30 páginas sorteadas (semente 20261009) entre as 5.735
 páginas de serviço do sitemap do gov.br de 08/10/2026. Os 621 apontamentos
