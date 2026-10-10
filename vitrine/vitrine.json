@@ -1,0 +1,18 @@
+{
+  "titulo": "Linguagem Simples: conferir um texto",
+  "descricao": "Cole um texto de órgão público e veja, trecho por trecho, onde ele foge da Lei nº 15.263/2025 (Política Nacional de Linguagem Simples).",
+  "lang": "pt-BR",
+  "pacote": "linguagem_simples",
+  "campos": [
+    {
+      "nome": "texto",
+      "rotulo": "Texto a conferir",
+      "tipo": "textarea",
+      "exemplo": "Outrossim, cumpre salientar que o requerente deverá, impreterivelmente, providenciar a documentação pertinente no prazo de 30 dias, sob pena de indeferimento do pleito, conforme disposto no art. 5º da Lei nº 9.784/1999.\n\nO atendimento é feito de segunda a sexta. Traga o documento com foto."
+    }
+  ],
+  "campo_marcado": "texto",
+  "botao": "Conferir o texto",
+  "repositorio": "https://github.com/peterwkdev-creator/linguagem-simples-br",
+  "rodape": "Aponta trechos para revisão; não é parecer jurídico."
+}
