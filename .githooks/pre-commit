@@ -18,3 +18,12 @@ elif ! (cd "$raiz" && python -I "$segredo" .); then
     echo "pre-commit: possível segredo (acima, mascarado); commit barrado." >&2
     exit 1
 fi
+# Data de amanhã nas linhas novas: registro datado de cabeça, não pelo
+# relógio. Conferidor comum do autor, chamado pelo caminho; só aviso, não
+# barra. Num clone sem ele, avisa e segue.
+datas="$raiz/../../../Coordenacao/ferramentas/conferir-datas.py"
+if [ ! -f "$datas" ]; then
+    echo "pre-commit: conferidor de datas não encontrado; datas não conferidas." >&2
+else
+    (cd "$raiz" && python -I "$datas" .) || true
+fi
