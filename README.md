@@ -5,12 +5,23 @@ Simples. Confere um texto contra as 18 técnicas do art. 5º e diz, técnica por
 técnica, o que achou, onde achou e o que não confere. Feito para servidor
 público, órgão e quem escreve para o cidadão.
 
+![Um texto de órgão colado na página; um clique marca a frase longa, a voz passiva e a oração intercalada, e lista os 18 incisos](docs/vitrine.gif)
+
+**[Experimente no navegador](https://peterwkdev-creator.github.io/linguagem-simples-br/)**:
+cole o texto e clique. A página roda esta mesma biblioteca no seu
+navegador (Pyodide); o texto não sai do seu computador. Na primeira visita
+ela baixa cerca de 6 MB e fica pronta em 1,7 s (medido em 10/10/2026, numa
+conexão rápida). Depois disso, conferir o texto do exemplo leva uns 5 ms.
+
+**Precisão medida** em páginas de serviço do gov.br, por inciso: XII 100%,
+XV 98%, II 95%, XIV 88%, VIII 78%; o XIII acerta 31% e por isso só aponta
+trechos para quem lê decidir. Intervalos e método em
+[Precisão medida](#precisão-medida).
+
 > O resultado aponta trechos para revisão. **Não é parecer jurídico** e não
 > certifica que um texto cumpre a lei.
 
-> **Em construção.** Ainda não há versão publicada. A precisão medida em
-> duas amostras de 30 páginas de serviço do gov.br está em
-> [Precisão medida](#precisão-medida), com o método.
+> **Em construção.** Ainda não há versão publicada (release).
 
 ## Como usar
 
