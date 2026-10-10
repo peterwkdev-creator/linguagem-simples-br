@@ -65,6 +65,14 @@ class TestRelatorio(unittest.TestCase):
         self.assertEqual([por[n].inciso.classe for n in ("II", "XII", "XIV")], ["automático"] * 3)
         self.assertIn("sinal; ", como_texto(conferir(texto), texto).split("XIII. ")[1].splitlines()[1])
 
+    def test_ix_e_sinal_e_roda_com_o_limiar(self):
+        # A lei diz "quando couber": o IX aponta e quem lê decide.
+        texto = "Leve ao atendimento os documentos: RG, CPF e comprovante de residência."
+        por = {r.inciso.numero: r for r in conferir(texto)}
+        self.assertEqual((por["IX"].inciso.classe, por["IX"].estado), ("sinal", CONFERIDO))
+        self.assertEqual((len(por["IX"].ocorrencias), por["IX"].limiar), (1, 3))
+        self.assertIn("SES-DF p. 6", por["IX"].fonte_do_limiar)
+
     def test_ligar_e_desligar(self):
         e = estados(conferir(LONGA, ligar=["xi"], desligar=["II"]))
         self.assertEqual(e["XI"], SEM_DETECTOR)

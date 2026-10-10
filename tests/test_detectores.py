@@ -7,8 +7,8 @@ from pathlib import Path
 
 from linguagem_simples import detectores, limiares
 from linguagem_simples.detectores import (
-    acessibilidade, frases_intercaladas, frases_longas, paragrafos_longos, redundancias,
-    siglas_sem_nome, substantivos_no_lugar_de_verbos, voz_passiva,
+    acessibilidade, enumeracoes, frases_intercaladas, frases_longas, paragrafos_longos,
+    redundancias, siglas_sem_nome, substantivos_no_lugar_de_verbos, voz_passiva,
 )
 from linguagem_simples.pagina import ler_html
 
@@ -268,6 +268,75 @@ class TestIncisoVIII(unittest.TestCase):
         # "Anvisa") não se distingue de nome próprio sem um léxico com fonte.
         par = guias.SIGLA_ANVISA_LACEN
         self.assertGreater(len(self.siglas(par.antes)), len(self.siglas(par.depois)))
+
+
+class TestIncisoIX(unittest.TestCase):
+    def test_plantado(self):
+        texto = ("Primeiro parágrafo.\n\nLeia antes. "
+                 "Leve ao atendimento os documentos: RG, CPF e comprovante de residência.")
+        achadas = enumeracoes(texto)
+        self.assertEqual([(o.inciso, o.medida) for o in achadas], [("IX", 3)])
+        self.assertEqual(texto[achadas[0].inicio:achadas[0].fim],
+                         "Leve ao atendimento os documentos: RG, CPF e comprovante de residência.")
+        self.assertIn("limiar: 3", achadas[0].mensagem)
+
+    def test_contagem_dos_itens(self):
+        for texto, n in (
+            ("Os prazos do pedido são: 10 dias para o pedido; 30 dias, se urgente; 60 dias.", 3),
+            ("Os prazos do pedido são: 10 dias; 30 dias; 60 dias para recurso e decisão.", 3),
+            ("Leve ao atendimento os documentos: RG, CPF, título, e comprovante.", 4),  # ", e" uma vez
+            ("Leve ao atendimento os documentos: RG, CPF, título ou comprovante.", 4),  # "ou" no último
+            ("As taxas do serviço são: R$ 1,50 a cópia, R$ 2,00 a página e R$ 3,00 a certidão.", 3),
+            ("Leve ao atendimento os documentos: a) RG, b) CPF e c) título.", 3),  # parêntese de fecho
+            ("Leve ao atendimento os documentos:\nRG, CPF e título.", 3),  # linha nova, itens corridos
+            ("Atenção: leve ao atendimento os documentos: RG, CPF e título.", 3),  # rótulo antes
+        ):
+            with self.subTest(texto):
+                self.assertEqual([o.medida for o in enumeracoes(texto)], [n])
+
+    def test_nao_e_enumeracao(self):
+        for texto in (
+            "Leve o RG, o CPF e o comprovante.",                  # sem dois-pontos
+            "Leve ao atendimento os documentos: RG e CPF.",       # dois itens
+            "Veja o que houve com o pedido: o prazo acabou, e o pedido foi negado.",  # ", e" de oração
+            "Veja o que houve com o pedido: o prazo acabou, e o pedido foi negado e arquivado.",
+            "Atenção, cidadão, no dia marcado, leve: RG e CPF.",  # vírgula antes dos dois-pontos
+            "Os prazos do pedido são: \n10 dias; \n30 dias; \n60 dias.",  # um por linha, com espaço
+            "O valor cobrado pelo serviço: R$ 1,50 por página (cópia, autenticada).",
+            "Leve ao atendimento os documentos: RG (ou CNH, ou passaporte) e CPF.",
+            "Leve ao atendimento os documentos: RG (ou CNH, passaporte, carteira de trabalho) e CPF.",
+            "Leve ao atendimento este documento: o RG, se tiver.",  # "se " não é o "e" do último
+            "Veja o resultado no site https://www.gov.br/a, b, c.",  # dois-pontos de endereço
+            "Os prazos do pedido são:\n10 dias, se urgente;\n30 dias;\n60 dias.",  # um por linha
+            "Leve ao atendimento os documentos:\n\n- RG,\n- CPF,\n- comprovante.",  # item de lista
+            "# Leve ao atendimento os documentos: RG, CPF e comprovante",  # título
+            "Endereço: Rua das Flores, 100, Centro, Brasília.",   # rótulo de campo
+            "Leve ao atendimento estes: RG, CPF e título.",       # 4 palavras antes: rótulo
+            "Leve ao atendimento estes : RG, CPF e título.",      # o ":" solto não é palavra
+        ):
+            with self.subTest(texto):
+                self.assertEqual(enumeracoes(texto), [])
+
+    def test_limiar_informado(self):
+        self.assertEqual(len(enumeracoes("Leve ao atendimento os documentos: RG e CPF.", min_itens=2)), 1)
+        self.assertEqual(enumeracoes("Leve ao atendimento os documentos: RG, CPF e título.", min_itens=4), [])
+        self.assertEqual(limiares.LIMIARES["IX"].padrao, 3)
+
+    def test_texto_bom_e_par_do_guia(self):
+        par = guias.ENUMERACAO_CAPES
+        self.assertEqual((len(enumeracoes(par.antes)), len(enumeracoes(par.depois))), (1, 0))
+        for texto in (guias.TREAL_PARAGRAFOS, guias.ANVISA_SEI_DEPOIS, guias.FRASE_CAPES.depois,
+                      guias.FRASE_ANVISA.depois, guias.FRASE_TJGO.depois,
+                      *(p.depois for p in guias.ENUMERACAO_DOIS_ITENS)):
+            with self.subTest(texto[:30]):
+                self.assertEqual(enumeracoes(texto), [])
+
+    @unittest.expectedFailure
+    def test_dois_itens_ligados_por_e(self):
+        # Limite conhecido: com dois itens o "e" não separa a enumeração de
+        # uma frase comum; os pares da DICAS p. 2 e da SES-DF p. 6 dão 0 × 0.
+        for par in guias.ENUMERACAO_DOIS_ITENS:
+            self.assertGreater(len(enumeracoes(par.antes)), len(enumeracoes(par.depois)))
 
 
 def trechos(detector, texto):

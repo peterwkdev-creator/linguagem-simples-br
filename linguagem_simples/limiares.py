@@ -29,6 +29,16 @@ LIMIARES = {
     # "Linguagem Simples – Cartilha" (2024), p. 14: "não tenha mais que 150
     # palavras e, no máximo, oito frases". Consulta: 09/10/2026.
     "III": Limiar(8, "TRE-AL p. 14: no máximo oito frases por parágrafo"),
+    # Enumeração com 3 itens ou mais. Nenhum guia dá número; os pares da
+    # DICAS, p. 2, e da SES-DF (2024), p. 6, já põem em tópicos uma de dois
+    # itens ("documento de identificação e comprovante de residência"). Com
+    # dois itens o "e" não separa a lista de uma frase comum: o detector vê
+    # a série de 3 em diante, a que a vírgula marca. Consulta: 10/10/2026.
+    "IX": Limiar(
+        3,
+        "DICAS p. 2 e SES-DF p. 6 põem em tópicos até dois itens; o detector "
+        "vê a série de 3 itens em diante, a que a vírgula marca",
+    ),
 }
 
 

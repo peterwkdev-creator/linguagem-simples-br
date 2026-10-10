@@ -8,8 +8,8 @@ from dataclasses import dataclass
 
 from . import limiares
 from .detectores import (
-    acessibilidade, frases_intercaladas, frases_longas, paragrafos_longos, redundancias,
-    siglas_sem_nome, substantivos_no_lugar_de_verbos, voz_passiva,
+    acessibilidade, enumeracoes, frases_intercaladas, frases_longas, paragrafos_longos,
+    redundancias, siglas_sem_nome, substantivos_no_lugar_de_verbos, voz_passiva,
 )
 from .incisos import FONTE_LEI, FORA_DO_ALCANCE, INCISOS, POR_NUMERO, Inciso
 from .pagina import Pagina
@@ -49,13 +49,14 @@ def conferir(texto, max_palavras=None, max_frases=None, ignorar_siglas=(), ligar
         "II": lambda: frases_longas(texto, max_palavras),
         "III": lambda: paragrafos_longos(texto, max_frases),
         "VIII": lambda: siglas_sem_nome(texto, ignorar_siglas),
+        "IX": lambda: enumeracoes(texto),
         "XII": lambda: voz_passiva(texto),
         "XIII": lambda: frases_intercaladas(texto),
         "XIV": lambda: substantivos_no_lugar_de_verbos(texto),
         "XV": lambda: redundancias(texto),
         "XVII": lambda: acessibilidade(pagina or texto),
     }
-    informado = {"II": max_palavras, "III": max_frases}
+    informado = {"II": max_palavras, "III": max_frases, "IX": None}
     resultados = []
     for inciso in INCISOS:
         n = inciso.numero

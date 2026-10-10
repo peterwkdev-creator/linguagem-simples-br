@@ -229,6 +229,34 @@ devagar contra a variedade dos nomes. Passaram "Acesse o serviço",
 modelo do gov.br (120 dos 166 links vagos; sem elas, depois de ver o
 resultado, 5 de 14 nomes, 36%).
 
+**IX, em duas rodadas (1.3.0, 10/10/2026).** O IX aponta a frase de
+parágrafo que anuncia uma série depois dos dois-pontos, com 3 itens ou
+mais na mesma linha. O detector foi escrito só com os pares dos guias
+(CAPES p. 7, DICAS p. 2, SES-DF p. 6), antes de rodar em qualquer página.
+Nas 180 páginas das amostras anteriores (sem baixar nada), ele apontou 61
+frases distintas; 60 sorteadas foram anotadas com duas passagens (60 dos
+60 rótulos iguais). Acerto quer dizer que os itens são paralelos e, um
+por linha, formariam lista ou tabela.
+
+| Versão | Precisão | Acertos / anotados | Intervalo de 95% (Wilson) | Fora da conta: defeito da leitura do HTML | Amostra |
+|---|---|---|---|---|---|
+| 1ª (não publicada) | 43% | 21 / 49 | 30% a 57% | 11 | 180 páginas já usadas |
+| 1.3.0 | 73% | 22 / 30 | 56% a 86% | 4 | 220 páginas novas |
+
+Na 1ª, 18 dos 28 erros eram dois-pontos de rótulo de campo ("Atenção:",
+"Obs.:", "Endereço:", "Horário:"), com até 4 palavras antes, e nenhum
+acerto tinha menos de 5. A 1.3.0 só conta o dois-pontos com 5 palavras ou
+mais antes. Naquelas 180 páginas a regra daria 68%, número otimista,
+porque foram elas que a sugeriram. Por isso a 1.3.0 foi medida em 220
+páginas que nenhuma amostra tinha usado, sorteadas antes de baixar (120,
+ampliadas para 220 só pela contagem de apontamentos, antes de anotar).
+Os 34 apontamentos distintos foram todos anotados (33 dos 34 rótulos
+iguais). Os 8 erros: exemplo entre parênteses, dois itens com "dentre
+outras", citações legais, aposto. Os 4 de fora são contato, endereço e
+listas que a página já põe em linhas separadas, que a leitura do HTML
+juntou. A série de dois itens ("RG e CPF") não é apontada: os pares da
+DICAS e da SES-DF passam sem marca.
+
 **Como se mediu.** 30 páginas sorteadas (semente 20261009) entre as 5.735
 páginas de serviço do sitemap do gov.br de 08/10/2026. Os 621 apontamentos
 viraram 431 sem os repetidos (o modelo do portal se repete em toda página);

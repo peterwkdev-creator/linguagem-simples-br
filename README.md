@@ -30,7 +30,7 @@ só aponta trechos para quem lê decidir. Intervalos em
 Python 3.11 ou mais novo; só a biblioteca padrão, sem outra dependência.
 
 ```bash
-pip install "git+https://github.com/peterwkdev-creator/linguagem-simples-br@v1.2.0"
+pip install "git+https://github.com/peterwkdev-creator/linguagem-simples-br@v1.3.0"
 ```
 
 Também roda sem instalar, de dentro da pasta do repositório.
@@ -79,18 +79,19 @@ a página.
 | II | redigir frases curtas | frase longa | mais de 20 palavras |
 | III | desenvolver uma ideia por parágrafo | parágrafo longo, sinal de mais de uma ideia | mais de 8 frases |
 | VIII | redigir o nome completo antes das siglas | primeira vez que a sigla aparece sem o nome antes | léxico de cores em `linguagem_simples/lexicos/`, com a fonte de cada palavra |
+| IX | organizar o texto de forma esquemática, quando couber, com o uso de listas, tabelas e recursos gráficos | frase de parágrafo que anuncia uma série depois dos dois-pontos, com os itens separados por vírgula ou ponto e vírgula ("leve ao atendimento os documentos: RG, CPF e comprovante") | 3 itens ou mais |
 | XII | redigir frases preferencialmente na voz ativa | verbo "ser" com particípio ("foi entregue pela empresa"), com ou sem quem faz a ação | — |
 | XIII | evitar frases intercaladas | trecho entre vírgulas no meio da frase que começa por pronome relativo (", que deve ser apresentado pelo requerente,") | — |
 | XIV | evitar o uso de substantivos no lugar de verbos | verbo de apoio com substantivo ("faça a identificação") e substantivo do léxico com complemento ("prevenção da Covid-19") | léxico em `linguagem_simples/lexicos/`, com a fonte de cada palavra |
 | XV | evitar redundâncias e palavras desnecessárias | expressão do léxico com palavras sobrando ("compareça pessoalmente", "a fim de", "de acordo com") e a forma que o guia sugere | léxico em `linguagem_simples/lexicos/redundancias.txt`: 29 entradas do TRE-AL, do CJF e da CAPES, com a página |
 | XVII | usar linguagem acessível à pessoa com deficiência (Lei 13.146/2015) | no HTML, link de texto vago ("clique aqui", "saiba mais"), imagem sem `alt` e tabela sem célula de cabeçalho (`th`); no texto e no Markdown, só o link vago | eMAG 3.1, recomendações 3.5, 3.6 e 3.10; léxico em `linguagem_simples/lexicos/links-vagos.txt`: 46 entradas |
 
-O XIII e o XVII são **sinal**, não automáticos: o XIII acerta 31% das
-vezes, e o XVII confere só três pontos do que a Lei 13.146/2015 pede;
-os dois apontam trechos para quem lê decidir. Os outros seis são
-automáticos.
+O IX, o XIII e o XVII são **sinal**, não automáticos: o IX acerta 73% das
+vezes, e a lei diz "quando couber"; o XIII acerta 31%; o XVII confere só
+três pontos do que a Lei 13.146/2015 pede. Os três apontam trechos para
+quem lê decidir. Os outros seis são automáticos.
 
-Os outros 10 incisos aparecem no relatório com a classe de cada um:
+Os outros 9 incisos aparecem no relatório com a classe de cada um:
 **automático** (dá para contar; detector ainda não escrito), **sinal** (dá
 para apontar, quem lê decide) ou **fora do alcance** (X e XVIII: só uma
 pessoa confere). O inciso XI vem desligado por padrão.
@@ -127,6 +128,7 @@ cegas:
 | II | 95% | 57 / 60 | 86% a 98% | 30 páginas, 09/10/2026 |
 | XIV | 88% | 21 / 24 | 69% a 96% | 30 páginas, 09/10/2026 |
 | VIII | 78% | 38 / 49 | 64% a 87% | 30 páginas, 09/10/2026 |
+| IX | 73% | 22 / 30 | 56% a 86% | 220 páginas novas, 10/10/2026 |
 | XIII | 31% | 13 / 42 | 19% a 46% | 150 páginas, 09/10/2026 |
 
 III não apontou nada nas 30 páginas da primeira amostra: sem número.
@@ -135,7 +137,11 @@ conta. Do XVII, a cobertura também foi medida: em 30 páginas novas, dos
 18 nomes de link vagos, ele aponta 5 (**28%**, de 12% a 51%), sem apontar
 nenhum nome que diz o destino. O léxico dele é uma lista fechada (46
 expressões na 1.2.0): "Acesse o serviço", "Protocolar" ou as abas "O que
-é?" do modelo do gov.br passam sem marca. Cada
+é?" do modelo do gov.br passam sem marca. O IX foi medido duas vezes: a
+1ª versão acertou 43% nas 180 páginas das outras amostras, quase sempre
+errando no dois-pontos de rótulo ("Atenção:", "Endereço:"); a 1.3.0 não
+conta esse dois-pontos, e o número acima é dela, em páginas que nenhuma
+versão tinha visto. Cada
 amostra, o método e o que os erros mostram estão em
 [docs/precisao.md](docs/precisao.md).
 
@@ -237,6 +243,12 @@ do Planalto (epígrafe de ato normativo em maiúsculas).
 - Com o padrão de 20 palavras, o "depois" da CAPES e o da Anvisa ainda
   têm uma frase acima de 20 (de 21 a 23 palavras); os dois guias aceitam até
   25. Com `--max-palavras 25`, nada aparece.
+- IX não aponta série de dois itens ("RG e CPF"): com dois, o "e" não
+  separa a enumeração de uma frase comum. Os pares da DICAS (p. 2) e da
+  SES-DF (p. 6), que põem dois itens em tópicos, passam sem marca. Também
+  não conta o dois-pontos com menos de 5 palavras antes ("Atenção: leve o
+  RG, o CPF e o título"), que nas páginas do gov.br é quase sempre rótulo
+  de campo, nem a série que a página já põe em lista ou tabela.
 - XII aponta toda voz passiva com "ser", e a lei diz "preferencialmente":
   o texto que os guias dão como bom também tem passiva sem agente ("podem
   ser utilizadas", TRE-AL; "pode ser punido", Anvisa). A mensagem diz se a
@@ -273,7 +285,12 @@ do Planalto (epígrafe de ato normativo em maiúsculas).
   `role="presentation"` também. Tabela de leiaute sem esse `role` é
   apontada: quem lê decide.
 - XVII nas páginas do gov.br: o "Saiba mais" do quadro "Login Integrado"
-  do portal fica dentro do `<main>` e aparece em quase toda página.
+  do portal fica dentro do `<main>` e aparece em quase toda página. Já as
+  abas do modelo de página de serviço ("O que é?", "Quem pode utilizar
+  este serviço?", "Etapas para a realização deste serviço", "Outras
+  Informações") também são vagas pelo eMAG 3.5, mas o XVII não as aponta:
+  vêm do portal, não do texto do órgão. Sem marca nelas não quer dizer
+  que estão certas.
 - HTML: se a página tem `<main>`, só o que está dentro dele conta; sem
   `<main>`, a página inteira, menos menu (`<nav>`), código, formulário e o
   que tem o atributo `hidden`. O CSS não é aplicado: texto escondido por

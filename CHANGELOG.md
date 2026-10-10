@@ -4,6 +4,22 @@ A versão segue `linguagem_simples.__version__`; cada uma tem uma tag
 `vX.Y.Z` no commit que a publicou. O formato do relatório e as opções da
 linha de comando só mudam numa versão 2; detector novo sai numa 1.x.
 
+## 1.3.0 — 10/10/2026
+
+- Detector do inciso IX (texto esquemático, classe **sinal**): frase de
+  parágrafo que anuncia uma série depois dos dois-pontos, com 3 itens ou
+  mais separados por vírgula ou ponto e vírgula. Fonte: CAPES p. 7 e os
+  guias que mandam pôr em tópicos a informação de dentro do parágrafo
+  (DICAS, SES-DF, TJGO, TRE-AL, Anvisa). Não conta o dois-pontos de rótulo
+  ("Atenção:", menos de 5 palavras antes), a série que já está em linhas
+  separadas, nem a de dois itens.
+- Precisão do IX: 73% (56–86) em 220 páginas novas do gov.br. A 1ª
+  versão, sem a regra do rótulo, tinha dado 43% nas 180 páginas das
+  amostras anteriores. Método e números em `docs/precisao.md`.
+- README: nos limites, as abas do modelo do gov.br ("O que é?") passam
+  sem marca no XVII.
+- Lei reconferida em 10/10/2026 (ficha do Senado): sem alteração.
+
 ## 1.2.0 — 10/10/2026
 
 - XVII: o léxico de links vagos passa de 14 para 46 entradas, todas com

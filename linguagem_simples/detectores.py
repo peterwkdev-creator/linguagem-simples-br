@@ -308,6 +308,70 @@ def siglas_sem_nome(texto, ignorar=()):
     return achadas
 
 
+# Inciso IX: enumeração dentro do parágrafo. Os guias mandam pôr em tópicos
+# a informação que vem dentro de um parágrafo (DICAS p. 2, TJGO p. 7, TRE-AL
+# p. 9, Anvisa p. 15; SES-DF p. 6: "Substitua o texto corrido por tópicos").
+# O detector vê a forma do par da CAPES p. 7: dois-pontos e itens separados
+# por vírgula ou ponto e vírgula na mesma frase. Dois-pontos com menos de 5
+# palavras antes é rótulo de campo ("Atenção:", "Endereço:", "Horário:"),
+# não frase que anuncia a série: na 11ª rodada (corpus/amostra-11.md), 18
+# dos 28 erros e nenhum acerto.
+_DOIS_PONTOS = re.compile(r":(?=\s)")
+_PALAVRAS_ANTES = 5
+_ULTIMO_ITEM = re.compile(r"\s(?:e|ou)\s")
+_ABRE_ULTIMO = re.compile(r"(?:e|ou)\s")
+_ITEM_NA_LINHA = re.compile(r"[ \t]*\r?\n")
+
+
+def _itens(serie):
+    """Número de itens da série depois dos dois-pontos e onde começa cada
+    um. Com ponto e vírgula, só ele separa: a vírgula fica dentro do item.
+    Vírgula entre parênteses ou entre algarismos ("R$ 1,50") não separa
+    item; na série de vírgulas, o "e" ou o "ou" antes do último item conta
+    mais um."""
+    separadores, nivel = {",": [], ";": []}, 0
+    for i, c in enumerate(serie):
+        if c == "(":
+            nivel += 1
+        elif c == ")":
+            nivel = max(nivel - 1, 0)
+        elif c in ",;" and nivel == 0 and serie[i + 1:i + 2].isspace():
+            separadores[c].append(i + 1)
+    comecos = [0] + (separadores[";"] or separadores[","])
+    n = len(comecos)
+    ultimo = serie[comecos[-1]:].lstrip()
+    if not separadores[";"] and not _ABRE_ULTIMO.match(ultimo) and _ULTIMO_ITEM.search(ultimo):
+        n += 1
+    return n, comecos
+
+
+def enumeracoes(texto, min_itens=None):
+    """Inciso IX: frase de parágrafo com dois-pontos e uma série de itens na
+    mesma linha. É um sinal: a lei diz "quando couber", e quem lê decide se
+    vira lista ou tabela. Série com um item por linha, item de lista,
+    título e rótulo de campo não contam."""
+    limite = limiares.valor("IX", min_itens)
+    achadas = []
+    for bloco in blocos(texto):
+        if bloco.tipo != PARAGRAFO:
+            continue
+        for frase in bloco.frases:
+            trecho = frase.em(texto)
+            m = next((m for m in _DOIS_PONTOS.finditer(trecho)
+                      if len(trecho[:m.start()].split()) >= _PALAVRAS_ANTES), None)
+            if not m:
+                continue
+            serie = trecho[m.end():]
+            n, comecos = _itens(serie)
+            if n >= limite and not all(_ITEM_NA_LINHA.match(serie, c) for c in comecos):
+                achadas.append(Ocorrencia(
+                    "IX", frase.inicio, frase.fim, trecho,
+                    f"enumeração dentro do parágrafo, {n} itens pela pontuação (limiar: "
+                    f"{limite}); o inciso pede lista ou tabela, quando couber", n,
+                ))
+    return achadas
+
+
 # Voz passiva analítica: verbo "ser" seguido de particípio. Particípio
 # regular (-ado, -ido, -ído) em minúscula, sem acento antes da terminação
 # ("válido", "sábado" são adjetivo e substantivo), e os irregulares dos

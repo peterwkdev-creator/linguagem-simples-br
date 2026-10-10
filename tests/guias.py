@@ -192,6 +192,44 @@ NOMINALIZACAO = (
 _CAPES_11 = Fonte("CAPES, O uso da Linguagem Simples na CAPES (2026)", 11, CAPES, _CAPES_SHA)
 REDUNDANCIA_CAPES = Par(_CAPES_11, "Compareça pessoalmente ao local.", "Compareça ao local.")
 
+# Inciso IX. A CAPES, item 2, "Organize o texto de forma esquemática (listas,
+# tabelas, gráficos)". No "depois", cada linha de ação é um item com
+# marcador (um quadrado desenhado no PDF, escrito aqui "- "; conferido em
+# 10/10/2026).
+_CAPES_7 = Fonte("CAPES, O uso da Linguagem Simples na CAPES (2026)", 7, CAPES, _CAPES_SHA)
+ENUMERACAO_CAPES = Par(
+    _CAPES_7,
+    "As atividades da CAPES são agrupadas nas seguintes linhas de ação, cada qual "
+    "desenvolvida por um conjunto estruturado de programas: avaliação da pós-graduação "
+    "stricto sensu, acesso e divulgação da produção científica, investimentos na formação "
+    "de pessoal de alto nível, no País e exterior, promoção da cooperação científica "
+    "internacional, indução e fomento da formação inicial e continuada de professores "
+    "para a educação básica nos formatos presencial e a distância.",
+    "As atividades da CAPES são agrupadas nas seguintes linhas de ação, cada qual "
+    "desenvolvida por um conjunto estruturado de programas:\n"
+    "- avaliação da pós-graduação stricto sensu;\n"
+    "- acesso e divulgação da produção científica;\n"
+    "- investimentos na formação de pessoal de alto nível, no País e exterior;\n"
+    "- promoção da cooperação científica internacional;\n"
+    "- indução e fomento da formação inicial e continuada de professores para a "
+    "educação básica nos formatos presencial e a distância.",
+)
+# Dois itens ligados por "e", que o guia põe em tópicos: DICAS p. 2 (marcador
+# "●", como no PDF) e SES-DF p. 6 (marcador "•", sem ponto final, como no PDF).
+# O detector não os vê: o limiar é 3 (``limiares.py``).
+DICAS = "https://repositorio.enap.gov.br/bitstream/1/5259/1/10-dicas-de-linguagem-simples.pdf"
+SESDF = "https://info.saude.df.gov.br/wp-content/uploads/2024/12/guia_LS.pdf"
+ENUMERACAO_DOIS_ITENS = (
+    Par(Fonte("10 dicas para escrever um documento em Linguagem Simples", 2, DICAS,
+              "c1a4bce76a2dfc1b3ca5dd9996213659d6f89acd8a5c5138e6270f75aa612f2d"),
+        "Você vai precisar do seu documento de identificação e comprovante de residência.",
+        "Você vai precisar:\n● documento de identificação\n● comprovante de residência."),
+    Par(Fonte("SES-DF, Guia para simplificar documentos (2024)", 6, SESDF,
+              "1d604fed297a90de6c06a3b546ff009a640699409249ddd51825f5be2a126bd9"),
+        "Apresente documento de identificação e comprovante de renda",
+        "Apresente:\n• Documento de identificação\n• Comprovante de renda"),
+)
+
 # Inciso XVII. O eMAG 3.1 é uma página, não um PDF: "pagina" 0. O HTML foi
 # baixado em 10/10/2026 (o SHA-256 é o dele); os exemplos são o código que a
 # própria página traz, copiado como está (na tabela, sem o recuo das linhas).
