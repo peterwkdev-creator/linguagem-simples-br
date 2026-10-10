@@ -152,8 +152,13 @@ estão em `tests/guias.py`, com a página e o hash do PDF.
   lista dos estados.
   Não aponta a palavra depois de nome de documento com "de" ("Guia de
   Recolhimento"): o nome do documento não se troca por verbo.
-- XV e XVI ainda sem detector: os guias dão um exemplo de cada, pouco para
-  um léxico com fonte.
+- XVI sem detector, e com a classe **sinal** desde 10/10/2026: nenhum guia
+  oficial dá lista de palavras imprecisas. O Manual de Redação da
+  Presidência (2018, p. 17) e o TJMG (p. 6) só dão a regra; a CAPES
+  (p. 11), um exemplo ("por descumprimento da norma"); o TJRS (p. 58),
+  comandos de despacho ("cumpra-se", "intime-se"). E o mesmo Manual usa
+  "oportunamente" num exemplo certo (p. 62), que o TJGO (p. 15) reescreve.
+  Se a palavra é imprecisa depende do contexto: quem lê decide.
 - HTML: se a página tem `<main>`, só o que está dentro dele conta; sem
   `<main>`, a página inteira, menos menu (`<nav>`), código, formulário e o
   que tem o atributo `hidden`. O CSS não é aplicado: texto escondido por

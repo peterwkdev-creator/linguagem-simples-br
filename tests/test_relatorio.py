@@ -50,6 +50,11 @@ class TestRelatorio(unittest.TestCase):
         self.assertEqual(e["XV"], CONFERIDO)
         self.assertEqual(e["XVI"], SEM_DETECTOR)
 
+    def test_xvi_e_sinal_sem_detector(self):
+        # Nenhum guia oficial dá lista de palavras imprecisas (10/10/2026).
+        por = {r.inciso.numero: r for r in conferir("Será feito em breve.")}
+        self.assertEqual((por["XVI"].inciso.classe, por["XVI"].estado), ("sinal", SEM_DETECTOR))
+
     def test_xiii_e_sinal_e_roda(self):
         # 31% de precisão (amostra 6): o XIII aponta para quem lê decidir.
         texto = "O documento, que deve ser apresentado pelo requerente, fica no protocolo."
