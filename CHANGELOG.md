@@ -5,6 +5,24 @@ A versão segue `linguagem_simples.__version__`; cada uma tem uma tag
 tem, os campos do JSON e as opções da linha de comando só mudam numa
 versão 2; detector novo, linha nova, campo novo e opção nova saem numa 1.x.
 
+## 1.12.0 — 11/10/2026
+
+A reescrita por IA (`--reescrever`) confere mais duas coisas antes de
+aceitar:
+
+- O texto de cada link do original continua igual. Na página HTML, conta
+  a 1ª linha de cada link; no texto puro, o `[texto](endereço)`.
+- A frase de crime ou punição (crime, pena, multa, sanção, infração…) não
+  perde nenhuma das alternativas ligadas por "ou". Se a frase reescrita
+  não traz nenhuma delas, vale junto com a frase anterior.
+- Campo novo `recusas` no JSON e linhas "Tentativa N recusada" na tela,
+  com o motivo de cada tentativa que não passou.
+- Medido antes de publicar, com a regra de decisão escrita antes: nas 10
+  páginas longas, 10 de 10 aceitas. As recusas foram relidas; a única
+  falsa corrigiu a conferência. O crime e os links ficaram inteiros, e o
+  mesmo sentido ficou em 4 de 10, como na 1.11.0. Números em
+  `docs/precisao.md`.
+
 ## 1.11.0 — 11/10/2026
 
 A reescrita por IA (`--reescrever`) muda menos o sentido:

@@ -477,6 +477,40 @@ apontamento sobrando: a voz passiva (inciso XII) fica em 77 de 121 (18
 na 1.10.1) e a sigla (VIII) em 37 de 55 (18). 109.010 tokens de entrada
 e 47.780 de saída nas longas; mediana de 16 segundos por página.
 
+**Duas conferências novas (1.12.0, 11/10/2026).** Dois dos erros da
+1.11.0 dá para pegar sem ler o sentido: o texto de link mudado e a
+alternativa que sai da frase de crime ("campos em branco ou informação
+falsa … pode configurar crime" virou "Informação falsa também pode
+configurar crime"). A reescrita agora volta à IA nos dois casos. Provas
+antes de medir, sem chave: as duas pegam a página 08 e a 05 das medidas
+anteriores; o original contra ele mesmo dá zero acusação em 55 textos;
+nos 56 curtos, nada. Regra escrita antes: as conferências ficam se toda
+recusa, relida, for perda real e as aceitas nas longas não caírem abaixo
+de 8 / 10. Mesmas 10 páginas, mesmo pedido e mesmo critério de sentido,
+com 2 passagens, a 2ª às cegas (semente 20261015).
+
+| Medida | 1.11.0 | 1.12.0 |
+|---|---|---|
+| Longas: aceitas | 10 / 10 | 10 / 10 (4 na 2ª tentativa) |
+| Longas: apontamentos | 378 → 163 | 378 → 176 |
+| Longas: mesmo sentido | 40% (17% a 69%) | **40% (17% a 69%)** |
+| Longas com quem faz a ação acrescentado | 4 / 10 | 4 / 10 |
+| Longas com outra mudança | 2 / 10 | 4 / 10 |
+| Longas com nome de link trocado | 2 / 10 | 1 / 10 (um título, não um link) |
+
+As conferências ficaram. Das três tentativas recusadas por elas, duas
+eram link mudado de fato ("Requerer…" virou "Pedir…"). A terceira
+dividia a frase do crime e deixava o sujeito na frase anterior. Era
+recusa falsa, e por isso a frase de punição que não traz nenhuma
+alternativa passou a valer junto com a anterior (provado de novo antes
+de publicar). Na medida, a frase do crime e os links ficaram inteiros. O
+sentido não subiu porque mudaram outras coisas, que nenhuma conferência
+pega: "PDF" ganhou explicação em 2 páginas, "sujeita o candidato à perda
+de direito" virou "perde o direito", e o título "Login Integrado" virou
+"Acesso Integrado" (está em 5 páginas, e a IA o troca numa delas a cada
+rodada). As duas passagens deram a mesma classe nas 10 páginas. 118.616
+tokens de entrada e 51.533 de saída, 252 s.
+
 Para refazer, com a sua chave: `python docs/medir_reescrita.py
 medida.jsonl`, da pasta do repositório. O script grava o resultado de
 cada trecho numa linha, na hora, num arquivo novo; o sentido se anota à parte, com o critério acima. Desde a

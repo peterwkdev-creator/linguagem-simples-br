@@ -4,7 +4,9 @@ A IA (Claude, pela API da Anthropic, com a chave de quem usa) recebe o
 texto e os apontamentos do relatório. A reescrita só é aceita se o
 verificador medir nela menos apontamentos, nenhum inciso pior, e se todo
 número, data, sigla, link e e-mail do original continuar no texto novo,
-sem número que o original não tinha. Senão, a IA tenta de novo sabendo o
+sem número que o original não tinha. O texto de cada link também fica
+igual, e a frase de crime ou punição não perde nenhuma das alternativas
+ligadas por "ou". Senão, a IA tenta de novo sabendo o
 que falhou; esgotadas as tentativas, a reescrita é recusada e o motivo
 vem junto.
 
@@ -21,11 +23,13 @@ Só a biblioteca padrão: a chamada à API vai pelo ``urllib``.
 import json
 import os
 import re
+import unicodedata
 from dataclasses import dataclass
 
 from .incisos import FONTE_LEI
 from .pagina import Pagina
 from .relatorio import AVISO, CONFERIDO, conferir, linha_coluna
+from .texto import blocos, frases
 
 URL = "https://api.anthropic.com/v1/messages"
 VERSAO_DA_API = "2023-06-01"
@@ -55,6 +59,21 @@ _TAMANHO_DA_SIGLA = 6  # mais que isso em caixa alta é título ou ênfase, não
 _MARCA_DE_ITEM = re.compile(r"^[ \t]*\d{1,3}[.)][ \t]", re.M)  # o "1." da lista numerada
 _TEXTO = re.compile(r"<texto>\s*(.*?)\s*</texto>", re.S)
 _CHAVE_VALIDA = re.compile(r"[!-~]+")  # ASCII visível, sem espaço: o que cabe num cabeçalho HTTP
+_LINK_MARKDOWN = re.compile(r"\[([^\]\n]+)\]\(")
+_MARCA_DE_BLOCO = re.compile(r"^(?:# |- )")  # as de título e de item que a Pagina põe no texto
+# Frase de punição: a que fala de crime, pena ou sanção ("vale a pena" não
+# conta). Nela, as condutas ligadas por "ou" são as que se punem ("omitir
+# ou inserir", art. 299 do Código Penal): tirar uma muda quem responde.
+_PUNICAO = re.compile(
+    r"(?<!\w)(?<!vale a )(?<!valer a )(?<!valeu a )(?:crimes?|criminal|penal|penas?|multas?|"
+    r"sanç(?:ão|ões)|puniç(?:ão|ões)|punid[oa]s?|infraç(?:ão|ões)|reclusão|detenção|penalidades?)(?!\w)",
+    re.I,
+)
+_PALAVRA = re.compile(r"[^\W\d_]+")
+_VAZIAS = frozenset(
+    "a o as os um uma uns umas de do da dos das em no na nos nas ao aos à às por para com sem "
+    "e ou que se seu sua seus suas".split()
+)
 
 
 class ErroDeReescrita(Exception):
@@ -76,6 +95,7 @@ class Reescrita:
     modelo: str
     do_html: bool = False  # veio de uma Pagina: só o texto foi reescrito, sem a marcação
     tokens: tuple = (0, 0)  # (entrada, saída) somados em todas as tentativas
+    recusas: tuple = ()  # o motivo de cada tentativa recusada, em ordem
 
     @property
     def total_antes(self):
@@ -104,6 +124,7 @@ def reescrever(texto, *, chave=None, modelo=MODELO_PADRAO, chamar=None, tentativ
     if tentativas < 1:
         raise ValueError("tentativas: o mínimo é 1")
     do_html = isinstance(texto, Pagina)
+    links = _textos_de_link(texto)
     if do_html:
         texto = texto.texto
     antes = conferir(texto, **opcoes)
@@ -113,12 +134,12 @@ def reescrever(texto, *, chave=None, modelo=MODELO_PADRAO, chamar=None, tentativ
                          contagem_antes, contagem_antes, modelo, do_html)
     chamar = chamar or _Claude(modelo, chave)
     mensagens = [{"role": "user", "content": _pedido(texto, antes)}]
-    contagem_depois, motivo = contagem_antes, ""
+    contagem_depois, motivo, recusas = contagem_antes, "", []
 
     def resultado(novo, aceita, tentativa):
         tokens = getattr(chamar, "tokens", (0, 0))
         return Reescrita(texto, novo, aceita, tentativa, motivo, contagem_antes, contagem_depois,
-                         modelo, do_html, tokens)
+                         modelo, do_html, tokens, tuple(recusas))
 
     for tentativa in range(1, tentativas + 1):
         try:
@@ -133,11 +154,12 @@ def reescrever(texto, *, chave=None, modelo=MODELO_PADRAO, chamar=None, tentativ
         else:
             depois = conferir(novo, **opcoes)
             contagem_depois = _contagem(depois)
-            problemas = _problemas(texto, novo, contagem_antes, contagem_depois)
+            problemas = _problemas(texto, novo, contagem_antes, contagem_depois, links)
             if not problemas:
                 motivo = ""
                 return resultado(novo, True, tentativa)
             motivo = "; ".join(problemas)
+        recusas.append(motivo)
         mensagens += [
             {"role": "assistant", "content": resposta},
             {"role": "user", "content": _de_novo(motivo, depois, novo)},
@@ -149,8 +171,10 @@ def _contagem(resultados):
     return tuple((r.inciso.numero, len(r.ocorrencias)) for r in resultados if r.estado == CONFERIDO)
 
 
-def _problemas(original, novo, antes, depois):
-    """O que impede aceitar a reescrita; lista vazia quando passa."""
+def _problemas(original, novo, antes, depois, links=None):
+    """O que impede aceitar a reescrita; lista vazia quando passa. ``links``
+    são os textos de link que não podem mudar; sem eles, valem os do
+    Markdown do original."""
     problemas = []
     total_antes, total_depois = sum(n for _, n in antes), sum(n for _, n in depois)
     if total_depois >= total_antes:
@@ -166,7 +190,85 @@ def _problemas(original, novo, antes, depois):
     novos = [t for t in _numeros(novo) if t not in do_original]
     if novos:
         problemas.append("número que o original não tem: " + ", ".join(novos))
+    perdidas = _alternativas_perdidas(original, novo)
+    if perdidas:
+        problemas.append("a frase de crime ou punição perdeu alternativa ligada por “ou”: " + ", ".join(perdidas))
+    igual = _igual(novo)
+    mudaram = [t for t in (_textos_de_link(original) if links is None else links) if _igual(t) not in igual]
+    if mudaram:
+        problemas.append("mudou o texto de link: " + ", ".join(f"“{t}”" for t in mudaram))
     return problemas
+
+
+def _igual(texto):
+    """Sem diferença de espaço, de caixa nem de caractere invisível (o
+    espaço de largura zero que algumas páginas põem no texto)."""
+    return " ".join("".join(c for c in texto if unicodedata.category(c) != "Cf").split()).casefold()
+
+
+def _textos_de_link(fonte):
+    """Texto de cada link (o ``a`` da página ou o ``[texto](endereço)`` do
+    Markdown) que está no texto lido: quem procura o link na tela procura
+    esse texto, e a reescrita não pode mudá-lo. No cartão (link com título
+    e descrição em linhas separadas), conta só a primeira linha."""
+    if isinstance(fonte, Pagina):
+        textos = [fonte.texto[slice(*fonte.no_texto(e.inicio, e.fim))] for e in fonte.elementos if e.tag == "a"]
+        onde = fonte.texto
+    else:
+        textos, onde = _LINK_MARKDOWN.findall(fonte), fonte
+    onde = _igual(onde)
+    # A primeira linha, sem a marca de título ou de item que a página põe.
+    textos = (_MARCA_DE_BLOCO.sub("", " ".join(next((l for l in t.splitlines() if l.strip()), "").split()))
+              for t in textos)
+    return list(dict.fromkeys(t for t in textos if _igual(t) and _igual(t) in onde))
+
+
+def _frases_de_punicao(texto):
+    """Cada frase de punição, com a frase anterior do mesmo bloco ("" na
+    primeira): o sujeito pode estar nela ("Campos em branco ou informação
+    falsa atrasam o passaporte. Também podem configurar crime.")."""
+    for b in blocos(texto):
+        lista = frases(texto, b.inicio, b.fim)
+        for i, f in enumerate(lista):
+            if _PUNICAO.search(f.em(texto)):
+                yield f.em(texto), lista[i - 1].em(texto) if i else ""
+
+
+def _alternativas(frase):
+    """Para cada "ou", a palavra antes e a depois, sem artigo nem preposição."""
+    palavras = _PALAVRA.findall(frase)
+    grupos = []
+    for i, p in enumerate(palavras):
+        if p.lower() == "ou":
+            antes = next((q for q in reversed(palavras[:i]) if q.lower() not in _VAZIAS), None)
+            depois = next((q for q in palavras[i + 1:] if q.lower() not in _VAZIAS), None)
+            grupos.append([q for q in (antes, depois) if q])
+    return grupos
+
+
+def _tem(texto, palavra):
+    # Pelo começo da palavra (sem as duas últimas letras, no mínimo 4):
+    # "falsa" casa com "falso", "branco" com "brancos".
+    return re.search(r"(?<!\w)" + re.escape(palavra[:max(4, len(palavra) - 2)]), texto, re.I) is not None
+
+
+def _alternativas_perdidas(original, novo):
+    """Alternativas de uma frase de punição do original que nenhuma frase de
+    punição do texto novo traz juntas. A frase que não traz nenhuma delas
+    (sujeito subentendido) vale com a anterior; a que traz só uma restringe
+    a punição ("Informação falsa também pode configurar crime")."""
+    do_novo = list(_frases_de_punicao(novo))
+    perdidas = []
+    for frase, _ in _frases_de_punicao(original):
+        for grupo in _alternativas(frase):
+            faltas = []
+            for f, anterior in do_novo:
+                if not any(_tem(f, p) for p in grupo):
+                    f = anterior + " " + f
+                faltas.append([p for p in grupo if not _tem(f, p)])
+            if all(faltas):  # nenhuma frase traz o grupo inteiro
+                perdidas += min(faltas, key=len, default=grupo)
+    return list(dict.fromkeys(perdidas))
 
 
 def fatos(texto):
@@ -258,7 +360,8 @@ def _pedido(texto, resultados):
 
 
 def _de_novo(motivo, resultados, novo):
-    pedido = f"A reescrita não foi aceita: {motivo}."
+    # O motivo pode trazer texto de link da página: também vai neutro.
+    pedido = f"A reescrita não foi aceita: {_neutro(motivo)}."
     if resultados is not None and any(r.ocorrencias for r in resultados):
         pedido += "\nNela o verificador ainda aponta:\n" + _neutro(_apontamentos(resultados, novo))
     return pedido + "\nReescreva de novo a partir do original, entre <texto> e </texto>."
@@ -403,7 +506,7 @@ def como_dict(r):
     return {
         "lei": FONTE_LEI, "aviso": AVISO, "aviso_da_reescrita": AVISO_SENTIDO,
         "modelo": r.modelo, "aceita": r.aceita, "tentativas": r.tentativas, "motivo": r.motivo,
-        "do_html": r.do_html,
+        "recusas": list(r.recusas), "do_html": r.do_html,
         "tokens": {"entrada": r.tokens[0], "saida": r.tokens[1]},
         "apontamentos": {"antes": r.total_antes, "depois": r.total_depois if r.aceita else None},
         "por_inciso": [{"inciso": n, "antes": antes[n], "depois": depois[n] if r.aceita else None}
@@ -428,6 +531,7 @@ def como_texto(r, destino=None):
                       "relatório (o mesmo comando sem --reescrever).")
     else:
         linhas.append(f"Aceita na tentativa {r.tentativas}. Apontamentos: {r.total_antes} → {r.total_depois}.")
+        linhas += [f"Tentativa {i} recusada: {m}." for i, m in enumerate(r.recusas, 1)]
         depois = dict(r.depois)
         mudou = [(n, a, depois[n]) for n, a in r.antes if a or depois[n]]
         if mudou:

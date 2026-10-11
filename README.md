@@ -38,7 +38,7 @@ python -m pip install linguagem-simples-br
 Ou direto da tag no GitHub:
 
 ```bash
-python -m pip install "git+https://github.com/peterwkdev-creator/linguagem-simples-br@v1.11.0"
+python -m pip install "git+https://github.com/peterwkdev-creator/linguagem-simples-br@v1.12.0"
 ```
 
 Sem instalar nada, cole o texto na
@@ -168,16 +168,20 @@ se a API estiver fora do ar, a mensagem diz o que fazer.
 - O total de apontamentos cai, e nenhum inciso piora.
 - Todo número, data, sigla, link e e-mail do original continua no texto,
   e não aparece número novo.
+- O texto de cada link fica igual, e a frase de crime ou punição não perde
+  nenhuma das alternativas ligadas por "ou" ("campos em branco ou
+  informação falsa").
 
 Senão, a IA tenta mais duas vezes, sabendo o que falhou. Se ainda não
-passar, a saída diz por que recusou e não mostra o texto.
+passar, a saída diz por que recusou e não mostra o texto. Aceita depois
+de uma recusa, a saída diz o motivo de cada tentativa recusada.
 
 O texto aceito vai para a tela ou para o arquivo de `--saida`, que tem de
 ser novo: a reescrita nunca grava por cima de um arquivo. Se a gravação
 falhar, o texto vai para a tela, para não se perder. Num HTML, só o
 texto é reescrito, sem a marcação. `--modelo` troca o modelo (padrão
-`claude-sonnet-5-5`). Com `--json`, sai o antes e o depois por inciso, e
-os tokens. Código de saída: 0 aceita (ou nada a reescrever), 1 recusada,
+`claude-sonnet-5-5`). Com `--json`, sai o antes e o depois por inciso, os
+tokens e o motivo de cada tentativa recusada (`recusas`). Código de saída: 0 aceita (ou nada a reescrever), 1 recusada,
 2 erro (sem chave, sem rede ou erro da API). Recusada, a saída diz o que
 fazer: rodar de novo, que é outra cobrança, ou revisar à mão os trechos
 do relatório. Em Python,
@@ -213,6 +217,15 @@ numa página que cita o art. 299 do Código Penal; dois nomes de link
 mudaram. Nenhum nome de sigla foi inventado, e nenhuma página perdeu
 link, e-mail, telefone, prazo ou valor. Sobram mais apontamentos de voz
 passiva e de sigla: a reescrita agora os deixa, e quem escreve decide.
+
+A 1.12.0 recusa a reescrita que muda o texto de um link ou que tira uma
+alternativa ligada por "ou" de uma frase de crime ou punição. Nas mesmas
+10 páginas, as 10 foram aceitas, 4 depois de uma recusa (378 → 176
+apontamentos). O crime e os links ficaram inteiros, e o sentido ficou em
+**4 de 10 (17% a 69%)** de novo, porque mudaram outras coisas: "PDF"
+ganhou uma explicação, "sujeita à perda do direito" virou "perde o
+direito", e "Login Integrado", que é título e não link, virou "Acesso
+Integrado".
 Em página longa, use a reescrita como rascunho e leia frase por frase.
 
 Método em [docs/precisao.md](https://github.com/peterwkdev-creator/linguagem-simples-br/blob/main/docs/precisao.md); para medir de novo
@@ -466,8 +479,10 @@ do Planalto (epígrafe de ato normativo em maiúsculas).
 - A reescrita por IA foi medida em 28 trechos curtos (de 4 a 68
   palavras), tirados de guias públicos que o modelo pode ter lido, e em
   10 páginas longas do gov.br; nas longas, o sentido mudou em 6 de 10
-  (ver "O que se mediu"). O aceite confere números, siglas e
-  links, não nomes, condições nem quem faz a ação. Um texto com ordens
+  nas duas últimas medidas (ver "O que se mediu"). O aceite confere
+  números, siglas, links, o texto de cada link e as alternativas da frase
+  de crime ou punição; não confere nomes, as outras condições nem quem
+  faz a ação. Um texto com ordens
   dirigidas à IA pode desviar a reescrita, ainda que o pedido mande não
   obedecer: o aceite e a sua leitura são a proteção.
 

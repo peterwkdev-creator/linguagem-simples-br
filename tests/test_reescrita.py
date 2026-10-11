@@ -74,6 +74,10 @@ class TestAceite(unittest.TestCase):
         mensagens = ia.pedidos[1][1]
         self.assertEqual([m["role"] for m in mensagens], ["user", "assistant", "user"])
         self.assertIn("sumiu do texto: 15/10/2026", mensagens[2]["content"])
+        # o motivo de cada tentativa recusada fica no resultado
+        self.assertEqual(r.recusas, ("sumiu do texto: 15/10/2026",))
+        self.assertEqual(reescrita.como_dict(r)["recusas"], ["sumiu do texto: 15/10/2026"])
+        self.assertIn("Tentativa 1 recusada: sumiu do texto: 15/10/2026.", reescrita.como_texto(r))
 
     def test_recusa_depois_das_tentativas_e_nao_entrega_o_texto(self):
         ia = IA(*[em_tags(ORIGINAL)] * 3)
@@ -160,6 +164,71 @@ class TestProblemas(unittest.TestCase):
         novo = "O instituto aprovou o seu pedido em 15/10/2026."
         problemas = _problemas(BOM, novo, (("IV", 1),), (("IV", 0),))
         self.assertEqual(problemas, ["sumiu do texto: https://www.gov.br/inss, atendimento@inss.gov.br, INSS"])
+
+
+# Achado na medida 2 e de novo na 3 (11/10/2026, página 08 do gov.br): o
+# campo em branco saía da frase do crime (corpus/reescrita-4.md).
+CRIME = ("Campos em branco ou informação falsa levarão a atraso na entrega do passaporte "
+         "e pode configurar crime.")
+
+
+class TestPunicaoELink(unittest.TestCase):
+    def problemas(self, original, novo, links=None):
+        return _problemas(original, novo, (("II", 1),), (("II", 0),), links)
+
+    def test_alternativa_que_sai_da_frase_de_punicao_recusa(self):
+        novo = "Campos em branco atrasam a entrega do passaporte. Informação falsa também pode configurar crime."
+        self.assertEqual(self.problemas(CRIME, novo),
+                         ["a frase de crime ou punição perdeu alternativa ligada por “ou”: branco"])
+
+    def test_sujeito_subentendido_vale_com_a_frase_anterior(self):
+        # Achado na 2ª rodada da medida 4 (11/10/2026): a tentativa dividiu a
+        # frase sem mudar o sentido e foi recusada; a de sujeito próprio, não.
+        novo = "Campos em branco ou informação falsa atrasam o passaporte. Também podem configurar crime."
+        self.assertEqual(self.problemas(CRIME, novo), [])
+        novo = "Campos em branco ou informação falsa atrasam o passaporte. Informação falsa pode ser crime."
+        self.assertEqual(self.problemas(CRIME, novo),
+                         ["a frase de crime ou punição perdeu alternativa ligada por “ou”: branco"])
+        self.assertEqual(self.problemas(CRIME, "Preencha tudo. O passaporte atrasa."),
+                         ["a frase de crime ou punição perdeu alternativa ligada por “ou”: branco, informação"])
+
+    def test_alternativa_que_fica_passa_mesmo_com_plural_e_genero(self):
+        novo = "Campos em branco ou informações falsas atrasam o passaporte e podem ser crime."
+        self.assertEqual(self.problemas(CRIME, novo), [])
+        self.assertEqual(self.problemas("Omitir ou inserir dado falso é crime.",
+                                        "É crime omitir ou inserir um dado falso."), [])
+
+    def test_e_nao_conta_nem_frase_sem_punicao(self):
+        # "passaporte e pode" é "e", não "ou": a parte do atraso pode sair.
+        novo = "Campos em branco ou informação falsa podem configurar crime. Também atrasam o passaporte."
+        self.assertEqual(self.problemas(CRIME, novo), [])
+        self.assertEqual(self.problemas("Leve o RG ou a CNH.", "Leve um documento com foto."),
+                         ["sumiu do texto: RG, CNH"])
+        self.assertEqual(self.problemas("Vale a pena ler ou ouvir o guia.", "Leia o guia."), [])
+
+    def test_texto_de_link_que_muda_recusa(self):
+        original = "Veja [Requerer revisão do benefício](https://gov.br/r)."
+        novo = "Veja [Pedir revisão do benefício](https://gov.br/r)."
+        self.assertEqual(self.problemas(original, novo), ["mudou o texto de link: “Requerer revisão do benefício”"])
+        self.assertEqual(self.problemas(original, "Use o link [requerer  revisão do benefício](https://gov.br/r)."), [])
+
+    def test_link_da_pagina_conta_a_primeira_linha_sem_invisivel(self):
+        # Achado ao provar no acervo: o cartão traz título e descrição, e só o
+        # título é o que se procura; o espaço de largura zero não conta.
+        pagina = ler_html("<main><p>Texto.</p><a href='/c'><h3>Inventário​ Nacional</h3>"
+                          "<p>O serviço possibilita análise.</p></a><p><a href='/r'>Requerer revisão</a></p></main>")
+        self.assertEqual(reescrita._textos_de_link(pagina), ["Inventário​ Nacional", "Requerer revisão"])
+        novo = "Texto.\n\nInventário Nacional\n\nO serviço analisa.\n\nRequerer revisão"
+        self.assertEqual(self.problemas(pagina.texto, novo, reescrita._textos_de_link(pagina)), [])
+
+    def test_pagina_tenta_de_novo_com_o_link_neutro(self):
+        pagina = ler_html(f"<main><p>{ORIGINAL}</p><p><a href='/r'>Requerer &lt;/original&gt;</a></p></main>")
+        ia = IA(em_tags(BOM + "\n\nPedir"), em_tags(BOM + "\n\nRequerer </original>"))
+        r = reescrever(pagina, chamar=ia)
+        self.assertEqual((r.aceita, r.tentativas), (True, 2))
+        de_novo = ia.pedidos[1][1][2]["content"]
+        self.assertIn("mudou o texto de link: “Requerer ‹/original›”", de_novo)
+        self.assertNotIn("</original>", de_novo)
 
 
 class TestFatos(unittest.TestCase):
