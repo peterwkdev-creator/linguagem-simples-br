@@ -8,7 +8,6 @@
 # Os testes e a montagem rodam num job só de leitura; o de publicar recebe
 # só o dist/ montado e o OIDC. Pré-release não publica. No GitHub, o
 # ambiente "pypi" aceita só tags v* e pede a aprovação do dono.
-# Modelo da Coordenação (modelo/publico/LEIA-ME.md), base no SimplesNacional.
 name: PyPI
 on:
   release:

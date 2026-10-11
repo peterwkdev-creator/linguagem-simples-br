@@ -1,10 +1,9 @@
-# Vitrine no GitHub Pages (modelo da Coordenação, modelo/vitrine/LEIA-ME.md).
-# Mora em .github/workflows/pages.yml do repositório público da biblioteca.
-# Trocar PACOTE pelo nome da pasta do pacote. Antes do 1º push: Settings →
-# Pages → Source: "GitHub Actions" (é do usuário). Versões conferidas em
-# 10/10/2026 (último release de cada action). Os testes e a montagem rodam só
-# com leitura; a escrita no Pages e o OIDC ficam no job que publica, como no
-# modelo do próprio GitHub Pages (SN, 10/10).
+# Vitrine no GitHub Pages. Mora em .github/workflows/pages.yml do
+# repositório público da biblioteca. Antes do 1º push: Settings →
+# Pages → Source: "GitHub Actions" (é do dono). Toda action fixada pelo
+# commit do release (a versão no comentário ao lado). Os testes e a montagem
+# rodam só com leitura; a escrita no Pages e o OIDC ficam no job que publica,
+# como no modelo do próprio GitHub Pages.
 name: Vitrine
 on:
   push:

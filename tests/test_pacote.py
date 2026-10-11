@@ -19,7 +19,7 @@ class TestPacote(unittest.TestCase):
         dados = [p for p in pacote.rglob("*") if p.is_file() and p.suffix not in (".py", ".pyc")]
         self.assertTrue(dados)
         # glob do Path, como o setuptools: o match da direita deixava
-        # "lexicos/*.txt" valer em "sub/lexicos/x.txt" (Coordenação, 10/10)
+        # "lexicos/*.txt" valer em "sub/lexicos/x.txt"
         cobertos = {p for g in padroes for p in pacote.glob(g)}
         fora = [p.relative_to(pacote).as_posix() for p in dados if p not in cobertos]
         self.assertEqual(fora, [], "fora do package-data: não vão na instalação")

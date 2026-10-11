@@ -1,4 +1,4 @@
-"""Adaptador da vitrine: liga a biblioteca à página (modelo da Coordenação).
+"""Adaptador da vitrine: liga a biblioteca à página.
 
 Contrato: executar(entradas) recebe {nome do campo: texto} e devolve um dict
 com "resumo" (obrigatório; é o que o leitor de tela anuncia), e, se houver,

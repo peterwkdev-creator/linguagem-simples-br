@@ -2,7 +2,6 @@
 # Monta o sdist e o wheel em dist/ e roda o que o pip instala, num venv e
 # fora do checkout (de dentro dele, o import pegaria a cópia local). Roda no
 # testes.yml a cada push (job "pacote") e no pypi.yml antes de publicar.
-# Modelo da Coordenação (modelo/publico/LEIA-ME.md), base no SimplesNacional.
 set -euo pipefail
 python -m pip install --quiet "build==1.6.1"
 python -m build
