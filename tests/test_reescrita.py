@@ -269,13 +269,17 @@ class TestChamada(unittest.TestCase):
 
         class Servidor(BaseHTTPRequestHandler):
             def do_POST(self):
+                # Lê o corpo antes de responder: no Windows, fechar com dado por ler derruba a conexão.
+                self.rfile.read(int(self.headers["Content-Length"]))
                 self.send_response(302)
                 self.send_header("Location", "/outro")
+                self.send_header("Content-Length", "0")
                 self.end_headers()
 
             def do_GET(self):
                 chegou.append(self.headers.get("x-api-key"))
                 self.send_response(200)
+                self.send_header("Content-Length", "0")
                 self.end_headers()
 
             def log_message(self, *args):
