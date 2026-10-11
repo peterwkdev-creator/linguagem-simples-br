@@ -6,9 +6,10 @@
 [![licença: MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-blue)](https://github.com/peterwkdev-creator/linguagem-simples-br/blob/main/LICENSE)
 
 Verificador aberto da **Lei 15.263/2025**, a Política Nacional de Linguagem
-Simples. Confere um texto contra as 18 técnicas do art. 5º e diz, técnica por
-técnica, o que achou, onde achou e o que não confere. Feito para servidor
-público, órgão e quem escreve para o cidadão.
+Simples. Confere um texto contra os 18 incisos do art. 5º, as técnicas de
+escrita que a lei manda usar. Diz, inciso por inciso, o que achou, onde
+achou e o que não confere. Feito para servidor público, órgão e quem
+escreve para o cidadão.
 
 ![Um texto de órgão colado na página; um clique marca a frase longa, a voz passiva e a oração intercalada, e lista os 18 incisos](https://raw.githubusercontent.com/peterwkdev-creator/linguagem-simples-br/main/docs/vitrine.gif)
 
@@ -19,8 +20,8 @@ ela baixa cerca de 6 MB e fica pronta em 1,7 s (medido em 10/10/2026, numa
 conexão rápida). Depois disso, conferir o texto do exemplo leva uns 5 ms.
 
 **Precisão medida** em páginas de serviço do gov.br, por inciso: XII 100%,
-XV 98%, XVII 98%, VI 96%, II 95%, XIV 88%, VIII 78%; o XIII acerta 31% e por isso
-só aponta trechos para quem lê decidir. Intervalos em
+XV 98%, XVII 98%, IV 98%, VI 96%, II 95%, XIV 88%, VIII 78%, IX 73%; o XIII
+acerta 31% e por isso só aponta trechos para quem lê decidir. Intervalos em
 [Precisão medida](https://github.com/peterwkdev-creator/linguagem-simples-br#precisão-medida).
 
 > O resultado aponta trechos para revisão. **Não é parecer jurídico** e não
@@ -31,27 +32,68 @@ só aponta trechos para quem lê decidir. Intervalos em
 Python 3.11 ou mais novo; só a biblioteca padrão, sem outra dependência.
 
 ```bash
-pip install linguagem-simples-br
+python -m pip install linguagem-simples-br
 ```
 
 Ou direto da tag no GitHub:
 
 ```bash
-pip install "git+https://github.com/peterwkdev-creator/linguagem-simples-br@v1.9.0"
+python -m pip install "git+https://github.com/peterwkdev-creator/linguagem-simples-br@v1.10.0"
 ```
 
-Também roda sem instalar, de dentro da pasta do repositório.
+Sem instalar nada, cole o texto na
+[vitrine](https://peterwkdev-creator.github.io/linguagem-simples-br/). Com
+o repositório baixado, o comando também roda de dentro da pasta dele, sem
+`pip`.
+
+### Primeira vez? (Windows)
+
+1. Instale o Python pelo [python.org](https://www.python.org/downloads/).
+   Na primeira tela do instalador, marque **Add python.exe to PATH**.
+2. Abra o PowerShell: no menu Iniciar, digite "PowerShell".
+3. Instale o verificador: `python -m pip install linguagem-simples-br`.
+4. No Bloco de Notas, cole o texto e salve como `carta.txt`, na pasta
+   Documentos. Texto no Word ou em PDF: copie e cole no Bloco de Notas.
+5. No PowerShell, rode `cd ~\Documents` e depois
+   `python -m linguagem_simples carta.txt`.
 
 ## Uso
 
 Na linha de comando:
 
 ```bash
-python -m linguagem_simples texto.txt
+python -m linguagem_simples carta.txt
 ```
 
-Instalado pelo `pip`, o mesmo vale como `linguagem-simples texto.txt`,
-com as mesmas opções (`linguagem-simples --help` lista todas).
+Com `carta.txt` contendo o texto “Os documentos devem ser entregues no INSS
+até sexta-feira.”, o relatório começa assim:
+
+```text
+Lei nº 15.263, de 14/11/2025, art. 5º (publicação original, DOU de 17/11/2025, Seção 1, p. 1): relatório dos 18 incisos
+O resultado aponta trechos para revisão. Não é parecer jurídico e não certifica que o texto cumpre a lei.
+
+Conferidos nesta versão: II, III, IV, V, VI, VIII, IX, XII, XIII, XIV, XV, XVII. Ocorrências: 2.
+Trechos a revisar: 2 (VIII: 1, XII: 1), listados abaixo com linha e coluna.
+Classes: automático, regra que o verificador confere; sinal, indício para quem lê decidir; fora do alcance, só uma pessoa confere. Num sinal, nenhuma ocorrência não garante que o inciso foi cumprido.
+```
+
+E segue com os 18 incisos, na ordem da lei. Os dois trechos aparecem assim:
+
+```text
+VIII. redigir o nome completo antes das siglas
+   automático; 1 ocorrência
+   - linha 1, coluna 38: INSS: primeira ocorrência sem o nome completo antes: “INSS”
+```
+
+```text
+XII. redigir frases preferencialmente na voz ativa
+   automático; 1 ocorrência
+   - linha 1, coluna 21: voz passiva sem agente: a frase não diz quem faz a ação: “ser entregues”
+```
+
+Instalado pelo `pip`, o mesmo vale como `linguagem-simples carta.txt`,
+com as mesmas opções (`linguagem-simples -h` lista todas, com exemplos).
+Para guardar o relatório num arquivo, use `--saida relatorio.txt`.
 
 Em Python:
 
@@ -65,9 +107,11 @@ for resultado in conferir(texto):
 # VIII INSS INSS: primeira ocorrência sem o nome completo antes
 ```
 
-O arquivo é texto, Markdown ou HTML; `-` lê da entrada padrão. O relatório
-lista os 18 incisos, na ordem da lei, cada um com a classe e o que
-aconteceu. Mais exemplos [abaixo](https://github.com/peterwkdev-creator/linguagem-simples-br#mais-exemplos).
+O arquivo é texto, Markdown ou HTML; `-` lê da entrada padrão. Word, PDF
+e RTF não são lidos: a mensagem pede para copiar o texto para o Bloco de
+Notas. Arquivo salvo no padrão antigo do Bloco de Notas (ANSI) é lido com
+um aviso. O relatório lista os 18 incisos, na ordem da lei, cada um com a
+classe e o que aconteceu. Mais exemplos [abaixo](https://github.com/peterwkdev-creator/linguagem-simples-br#mais-exemplos).
 
 ### Reescrita sugerida por IA
 
@@ -84,18 +128,18 @@ python -m linguagem_simples texto.txt --reescrever --saida texto-simples.txt
 1. **O que é.** A reescrita usa a API da Anthropic, que cobra por uso. A
    chave da API funciona como a senha da sua conta nela, e a biblioteca
    não traz chave nenhuma. Crie a sua em
-   [console.anthropic.com](https://console.anthropic.com), em **API Keys**;
-   o crédito se compra lá mesmo, em **Billing**.
-2. **O jeito mais simples.** Rode o comando acima num terminal. Sem chave
-   configurada, ele pergunta: cole a chave e tecle Enter (se o Ctrl+V não
-   colar, use o botão direito do mouse). Ela não aparece na tela e vale
-   só para essa execução. Com o texto pela entrada padrão (`-`), não há
-   pergunta: use o passo 3.
+   [platform.claude.com/settings/keys](https://platform.claude.com/settings/keys);
+   o crédito se compra em
+   [platform.claude.com/settings/billing](https://platform.claude.com/settings/billing).
+2. **O jeito mais simples.** Rode o comando acima no PowerShell (no Linux
+   e no macOS, no terminal). Sem chave configurada, ele pergunta: cole a
+   chave e tecle Enter (se o Ctrl+V não colar, use o botão direito do
+   mouse). Ela não aparece na tela e vale só para essa execução. Com o
+   texto pela entrada padrão (`-`), não há pergunta: use o passo 3.
 3. **Para não colar toda vez, ou num script**, ponha a chave na variável
    `ANTHROPIC_API_KEY` antes de rodar. A variável vale até fechar o
-   terminal, mas o comando com a chave fica gravado no histórico do
-   terminal, em disco, mesmo depois de fechar: por isso o passo 2 é o mais
-   seguro.
+   PowerShell. Mas o comando com a chave fica gravado no histórico dele,
+   em disco, mesmo depois de fechar: por isso o passo 2 é o mais seguro.
    - Windows, PowerShell: `$env:ANTHROPIC_API_KEY = "sua-chave"`
    - Windows, Prompt de Comando: `set ANTHROPIC_API_KEY=sua-chave` (sem aspas)
    - Linux e macOS: `export ANTHROPIC_API_KEY="sua-chave"`
@@ -110,7 +154,8 @@ python -m linguagem_simples texto.txt --reescrever --saida texto-simples.txt
    também quando para num erro depois de uma chamada já paga; o preço por
    token está na página de preços da Anthropic.
 6. **Para onde vai o texto.** O texto vai para a Anthropic. Antes de
-   mandar dado pessoal ou sigiloso (LGPD), leia os termos e a política de
+   mandar dado pessoal (Lei Geral de Proteção de Dados, a LGPD) ou
+   sigiloso, leia os termos e a política de
    privacidade dela. A [vitrine](https://peterwkdev-creator.github.io/linguagem-simples-br/)
    não faz reescrita: a página no navegador não leva chave, e o texto
    colado nela não sai do seu computador.
@@ -133,7 +178,9 @@ falhar, o texto vai para a tela, para não se perder. Num HTML, só o
 texto é reescrito, sem a marcação. `--modelo` troca o modelo (padrão
 `claude-sonnet-5-5`). Com `--json`, sai o antes e o depois por inciso, e
 os tokens. Código de saída: 0 aceita (ou nada a reescrever), 1 recusada,
-2 erro (sem chave, sem rede ou erro da API). Em Python,
+2 erro (sem chave, sem rede ou erro da API). Recusada, a saída diz o que
+fazer: rodar de novo, que é outra cobrança, ou revisar à mão os trechos
+do relatório. Em Python,
 `reescrita.reescrever(texto, chave=...)` faz o mesmo; sem `chave`, vale a
 variável.
 
@@ -155,7 +202,7 @@ com a sua chave, `python docs/medir_reescrita.py medida.jsonl`.
 
 A Lei 15.263/2025 vale desde 17/11/2025 para a administração direta e
 indireta de todos os Poderes e entes (art. 1º), inclusive os municípios. O
-art. 5º lista 18 técnicas de escrita. Algumas se contam no texto (frase
+art. 5º lista, em 18 incisos, as técnicas de escrita. Algumas se contam no texto (frase
 longa, sigla sem o nome antes, voz passiva, link "clique aqui"); outras só
 uma pessoa confere (o mais importante primeiro, o teste com o público).
 
@@ -173,7 +220,7 @@ a página.
 | IV | usar palavras comuns, de fácil compreensão | palavra que um guia oficial manda trocar por outra mais conhecida ("o pedido foi deferido", "dez dias ininterruptos") e a forma que o guia sugere | léxico em `linguagem_simples/lexicos/palavras-complexas.txt`: 86 linhas do TJRS, da CAPES, da Anvisa e da SES-DF, com as formas do verbo |
 | V | usar sinônimos de termos técnicos e de jargões ou explicá-los no próprio texto | termo técnico ou jargão que um guia manda trocar ou explicar ("exordial acusatória", "transitou em julgado"), quando o texto não o explica logo depois (entre parênteses, com "ou seja" ou "isto é") | léxico em `linguagem_simples/lexicos/jargoes.txt`: 32 entradas do TJRS, da SES-DF e da Anvisa |
 | VI | evitar palavras estrangeiras que não sejam de uso corrente | palavra estrangeira que um guia oficial manda trocar ("faça o login", "um checklist") e a forma que o guia sugere | léxico em `linguagem_simples/lexicos/estrangeirismos.txt`: 36 entradas da CAPES, da Anvisa, do TJGO, do TJRS e do Manual de Comunicação do Senado |
-| VIII | redigir o nome completo antes das siglas | primeira vez que a sigla aparece sem o nome antes | léxico de cores em `linguagem_simples/lexicos/`, com a fonte de cada palavra |
+| VIII | redigir o nome completo antes das siglas | primeira vez que a sigla aparece sem o nome antes | — (nome de cor em caixa alta, como "VERMELHO", não conta como sigla: lista em `linguagem_simples/lexicos/cores.txt`, com a fonte de cada palavra) |
 | IX | organizar o texto de forma esquemática, quando couber, com o uso de listas, tabelas e recursos gráficos | frase de parágrafo que anuncia uma série depois dos dois-pontos, com os itens separados por vírgula ou ponto e vírgula ("leve ao atendimento os documentos: RG, CPF e comprovante") | 3 itens ou mais |
 | XII | redigir frases preferencialmente na voz ativa | verbo "ser" com particípio ("foi entregue pela empresa"), com ou sem quem faz a ação | — |
 | XIII | evitar frases intercaladas | trecho entre vírgulas no meio da frase que começa por pronome relativo (", que deve ser apresentado pelo requerente,") | — |
@@ -181,18 +228,24 @@ a página.
 | XV | evitar redundâncias e palavras desnecessárias | expressão do léxico com palavras sobrando ("compareça pessoalmente", "a fim de", "de acordo com") e a forma que o guia sugere | léxico em `linguagem_simples/lexicos/redundancias.txt`: 29 entradas do TRE-AL, do CJF e da CAPES, com a página |
 | XVII | usar linguagem acessível à pessoa com deficiência (Lei 13.146/2015) | no HTML, link de texto vago ("clique aqui", "saiba mais"), imagem sem `alt` e tabela sem célula de cabeçalho (`th`); no texto e no Markdown, só o link vago | eMAG 3.1, recomendações 3.5, 3.6 e 3.10; léxico em `linguagem_simples/lexicos/links-vagos.txt`: 46 entradas |
 
-O IV, o V, o VI, o IX, o XIII e o XVII são **sinal**, não automáticos: o
-IV, o V e o VI só conhecem as palavras que um guia manda trocar; a palavra
-difícil depende de quem lê (TJRS, p. 31), a lei aceita o termo técnico
-explicado e a palavra estrangeira de uso corrente; o IX acerta 73% das
-vezes, e a lei diz "quando couber"; o XIII acerta 31%; o XVII confere só
-três pontos do que a Lei 13.146/2015 pede. Os seis apontam trechos para
-quem lê decidir. Os outros seis são automáticos.
+As siglas dos guias (TJRS, CAPES e outras) estão por extenso em
+[Guias usados](https://github.com/peterwkdev-creator/linguagem-simples-br#guias-usados).
 
-Os outros 6 incisos aparecem no relatório com a classe de cada um:
-**automático** (dá para contar; detector ainda não escrito), **sinal** (dá
-para apontar, quem lê decide) ou **fora do alcance** (X e XVIII: só uma
-pessoa confere). O inciso XI vem desligado por padrão.
+Cada inciso tem uma classe, que o relatório mostra:
+
+- **Automático** (II, III, VIII, XII, XIV e XV): regra que se confere no
+  texto. O XI também é automático, mas vem desligado por padrão e ainda
+  não tem detector.
+- **Sinal** (IV, V, VI, IX, XIII e XVII): o detector aponta trechos para
+  quem lê decidir. O IV, o V e o VI só conhecem as palavras que um guia
+  manda trocar, e a palavra difícil depende de quem lê (TJRS, p. 31); a
+  lei aceita o termo técnico explicado e a palavra estrangeira de uso
+  corrente. O IX acerta 73%, e a lei diz "quando couber"; o XIII acerta
+  31%; o XVII confere só três pontos do que a Lei 13.146/2015 pede. O I,
+  o VII e o XVI também são sinal, ainda sem detector.
+- **Fora do alcance** (X e XVIII): só uma pessoa confere.
+
+Num sinal, "nenhuma ocorrência" não garante que o texto cumpre o inciso.
 
 A lei não fixa número. Cada limiar vem de um guia oficial, com a página, em
 `linguagem_simples/limiares.py`, e quem usa pode trocar.
@@ -251,14 +304,14 @@ passagens às cegas mandariam trocar em 30 páginas novas ("courier",
 "upload", "in loco", "vide"), ele aponta 2 (**10%**, de 3% a 30%), porque
 só conhece as que um guia lista. E quase tudo o que ele aponta é "login"
 (96 de 103 nas 120 páginas), que a CAPES manda trocar por "acesso", mas
-que as mesmas passagens deram como de uso corrente: quem lê decide. Cada
-O IV é a palavra que um guia manda trocar ("protocolar",
+que as mesmas passagens deram como de uso corrente: quem lê decide.
+O IV aponta a palavra que um guia manda trocar ("protocolar",
 "requerer", "deferimento"): o único erro foi o nome de uma opção da tela
 entre aspas; em 5 dos 40 acertos, a forma do guia não cabe ("a licença
 será expedida": cabe "emitida", não "enviada"), e a mensagem diz o que o
 guia sugere, não o que serve no trecho. O V acerta onde aponta (8 de 8
 em páginas de serviço, **amostra pequena**), mas a lista dos guias é
-estreita: em 120 notícias do CNJ ele apontou uma vez, e dos 77 termos
+estreita: em 120 notícias do Conselho Nacional de Justiça (CNJ) ele apontou uma vez, e dos 77 termos
 técnicos que duas passagens às cegas listaram em 30 delas ("autos",
 "liminar", "mérito", "precatórios"), não apontou nenhum (**0%**, de 0% a
 5%). Sem marca do V não quer dizer sem jargão. Cada
@@ -292,13 +345,27 @@ UTF-8; HTML em UTF-8 ou no charset que a página declara.
 | `--html` | lê como HTML um arquivo que não tem extensão `.html` |
 | `--max-palavras N` | inciso II: palavras por frase (padrão 20) |
 | `--max-frases N` | inciso III: frases por parágrafo (padrão 8) |
-| `--ignorar-sigla SIGLA` | inciso VIII: sigla que o público já conhece (repetível) |
-| `--ligar INCISO` | liga um inciso desligado por padrão, como o XI |
-| `--desligar INCISO` | desliga um inciso |
+| `--ignorar-sigla SIGLA` | inciso VIII: sigla que o público já conhece, como CPF (repetível) |
+| `--ligar INCISO` | liga um inciso desligado por padrão: hoje só o XI, que ainda não tem detector |
+| `--desligar INCISO` | desliga um inciso, como `--desligar XII` |
+| `--saida ARQUIVO` | grava o relatório (ou, com `--reescrever`, o texto aceito) num arquivo novo, nunca por cima de um que já existe |
+| `--reescrever` | pede uma reescrita à IA, com a sua chave da API ([acima](https://github.com/peterwkdev-creator/linguagem-simples-br#reescrita-sugerida-por-ia)) |
 | `--versao` | mostra a versão |
+| `-h` | mostra a ajuda, com exemplos |
 
-Código de saída: 0 sem ocorrências, 1 com ocorrências, 2 erro de uso ou de
-leitura.
+### Para quem automatiza
+
+- Código de saída: 0 nada a revisar, 1 há trechos a revisar, 2 erro de
+  uso ou de leitura. Com `--reescrever`: 0 aceita (ou nada a reescrever),
+  1 recusada, 2 erro. Um defeito do próprio verificador também sai com 2,
+  nunca com 1.
+- `--json` dá início, fim, linha e coluna de cada trecho no arquivo lido;
+  com `--saida`, o JSON vai para o arquivo, e a tela mostra uma linha com
+  o resumo.
+- `-` lê o texto da entrada padrão. No Windows PowerShell 5.1, passe o
+  arquivo em vez do pipe (`|`): ele troca os acentos por "?" no caminho.
+- O que muda entre versões está em
+  [Compatibilidade](https://github.com/peterwkdev-creator/linguagem-simples-br#compatibilidade).
 
 Também dá para usar como biblioteca, com a posição de cada trecho:
 
@@ -337,25 +404,35 @@ Os detectores também se chamam um a um, em `linguagem_simples/detectores.py`.
 
 Consultados em 09/10/2026:
 
-- TJGO, Guia de Linguagem Simples do TJGO
-- CAPES, O uso da Linguagem Simples na CAPES (2026)
-- Anvisa, Guia de Linguagem Simples, 1ª edição
-- TRE-AL, Linguagem Simples – Cartilha (2024)
-- CJF, Guia de Linguagem Simples (2024)
-- SES-DF, Guia para simplificar documentos (2024)
-- 10 dicas para escrever um documento em Linguagem Simples (repositório da
-  Enap)
+- Tribunal de Justiça do Estado de Goiás (TJGO), Guia de Linguagem
+  Simples do TJGO
+- Coordenação de Aperfeiçoamento de Pessoal de Nível Superior (CAPES), O
+  uso da Linguagem Simples na CAPES (2026)
+- Agência Nacional de Vigilância Sanitária (Anvisa), Guia de Linguagem
+  Simples, 1ª edição
+- Tribunal Regional Eleitoral de Alagoas (TRE-AL), Linguagem Simples –
+  Cartilha (2024)
+- Conselho da Justiça Federal (CJF), Guia de Linguagem Simples (2024)
+- Secretaria de Estado de Saúde do Distrito Federal (SES-DF), Guia para
+  simplificar documentos (2024)
+- 10 dicas para escrever um documento em Linguagem Simples (DICAS, no
+  repositório da Escola Nacional de Administração Pública, a Enap)
 
-Consultado em 10/10/2026: eMAG, Modelo de Acessibilidade em Governo
-Eletrônico, versão 3.1 (obrigatório no governo federal pela Portaria SLTI
-nº 3, de 07/05/2007), recomendações 3.5, 3.6 e 3.10. Também em 10/10/2026:
-Senado Federal, Manual de Comunicação, verbete "Estrangeirismo" (pares do
-VI e a lista de palavras de uso amplo, que o VI não aponta) e a lista
-"Estrangeirismos grafados sem itálico ou aspas"; TJRS, Guia de Linguagem
-Simples (2022), quadro de palavras complexas (p. 31 e 32, IV), exemplos de
-jargões e termos técnicos (p. 34) e quadro "Expressões que devem ser
-evitadas" (p. 107, V), quadro de expressões estrangeiras (p. 36); TRF3, Escola de
-Magistrados, "Expressões latinas em textos jurídicos" (2021).
+Consultados em 10/10/2026:
+
+- eMAG, Modelo de Acessibilidade em Governo Eletrônico, versão 3.1
+  (obrigatório no governo federal pela Portaria nº 3, de 07/05/2007, da
+  Secretaria de Logística e Tecnologia da Informação), recomendações 3.5,
+  3.6 e 3.10
+- Senado Federal, Manual de Comunicação: verbete "Estrangeirismo" (pares
+  do VI e a lista de palavras de uso amplo, que o VI não aponta) e a lista
+  "Estrangeirismos grafados sem itálico ou aspas"
+- Tribunal de Justiça do Rio Grande do Sul (TJRS), Guia de Linguagem
+  Simples (2022): quadro de palavras complexas (p. 31 e 32, IV), exemplos
+  de jargões e termos técnicos (p. 34), quadro "Expressões que devem ser
+  evitadas" (p. 107, V) e quadro de expressões estrangeiras (p. 36)
+- Tribunal Regional Federal da 3ª Região (TRF3), Escola de Magistrados,
+  "Expressões latinas em textos jurídicos" (2021)
 
 Texto da lei: publicação original no portal da Câmara dos Deputados, DOU de
 17/11/2025.
@@ -420,7 +497,7 @@ do Planalto (epígrafe de ato normativo em maiúsculas).
   Recolhimento"): o nome do documento não se troca por verbo.
 - XVI sem detector, e com a classe **sinal**: nenhum guia
   oficial dá lista de palavras imprecisas. O Manual de Redação da
-  Presidência (2018, p. 17) e o TJMG (p. 6) só dão a regra; a CAPES
+  Presidência (2018, p. 17) e o Tribunal de Justiça de Minas Gerais (TJMG, p. 6) só dão a regra; a CAPES
   (p. 11), um exemplo ("por descumprimento da norma"); o TJRS (p. 58),
   comandos de despacho ("cumpra-se", "intime-se"). E o mesmo Manual usa
   "oportunamente" num exemplo certo (p. 62), que o TJGO (p. 15) reescreve.
@@ -428,7 +505,7 @@ do Planalto (epígrafe de ato normativo em maiúsculas).
 - XVII lê só a marcação: não vê a imagem, não segue o link e não aplica o
   CSS. Confere três recomendações do eMAG; as outras exigências da Lei
   13.146/2015 que o inciso cita ficam com quem lê. No texto e no Markdown,
-  só aponta o link vago ("[clique aqui](url)").
+  só aponta o link vago (`[clique aqui](url)`).
 - XVII conta como nome do link o texto, o `alt` da imagem dentro dele, o
   `aria-label` e o `aria-labelledby`; o `title` não conta (eMAG 3.5). Link
   sem nome nenhum fica de fora. Imagem com `alt=""`, `aria-hidden="true"`
@@ -489,8 +566,11 @@ do Planalto (epígrafe de ato normativo em maiúsculas).
 
 ## Compatibilidade
 
-Versão semântica: o formato do relatório (texto e JSON) e as opções da
-linha de comando só mudam numa versão 2; detector novo sai numa 1.x. O que
+Versão semântica. Só mudam numa versão 2: as linhas que o relatório em
+texto já tem, os campos do JSON e as opções da linha de comando. Numa 1.x
+podem entrar detector novo, linha nova no relatório em texto (como o
+resumo e a legenda do topo, na 1.10.0), campo novo no JSON e opção nova.
+As mensagens de erro podem mudar a qualquer versão. O que
 mudou em cada versão está no [CHANGELOG.md](https://github.com/peterwkdev-creator/linguagem-simples-br/blob/main/CHANGELOG.md).
 
 ## Contribuir

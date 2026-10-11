@@ -32,13 +32,18 @@ def pares():
 
 
 def main(destino):
+    # o arquivo antes da chave: quem digitou a chave não descobre só depois
+    # que o nome já existe
     try:
-        chave = _perguntar_chave()
         arquivo = open(destino, "x", encoding="utf-8")
-    except reescrita.ErroDeReescrita as erro:
-        return f"medir_reescrita: {erro}"
     except FileExistsError:
         return f"medir_reescrita: {destino} já existe; escolha outro nome (a medida nunca grava por cima)"
+    try:
+        chave = _perguntar_chave()
+    except reescrita.ErroDeReescrita as erro:
+        arquivo.close()
+        Path(destino).unlink()
+        return f"medir_reescrita: {erro}"
     textos = aceitas = antes = depois = entrada = saida = 0
     with arquivo:
         for nome, par in pares():
@@ -64,8 +69,9 @@ def main(destino):
                 entrada, saida = entrada + r.tokens[0], saida + r.tokens[1]
                 if r.aceita:
                     aceitas, antes, depois = aceitas + 1, antes + r.total_antes, depois + r.total_depois
-                print(nome, "aceita" if r.aceita else "recusada", r.tentativas,
-                      f"{r.total_antes} → {r.total_depois}", flush=True)
+                # na recusada, o "depois" é o de uma tentativa que não se entrega
+                print(nome, f"aceita, {r.total_antes} → {r.total_depois}" if r.aceita else "recusada",
+                      f"({r.tentativas} tentativas)", flush=True)
             textos += 1
             arquivo.write(json.dumps(item, ensure_ascii=False) + "\n")
             arquivo.flush()

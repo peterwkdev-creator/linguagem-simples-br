@@ -11,7 +11,7 @@ imagens e tabelas, e cada marca cai no HTML colado, que é o que o campo
 mostra.
 """
 from linguagem_simples.pagina import ler_html
-from linguagem_simples.relatorio import CONFERIDO, como_dict, conferir
+from linguagem_simples.relatorio import CONFERIDO, LEGENDA, como_dict, conferir
 
 
 def executar(entradas):
@@ -28,11 +28,13 @@ def executar(entradas):
                        len(ocorrencias) if i["estado"] == CONFERIDO else "—"])
     conferidos = sum(1 for i in d["incisos"] if i["estado"] == CONFERIDO)
     n = len(marcas)
-    resumo = (f"{n} {'trecho marcado' if n == 1 else 'trechos marcados'}; "
+    por_inciso = ", ".join(f"{i['inciso']}: {len(i['ocorrencias'])}" for i in d["incisos"] if i.get("ocorrencias"))
+    resumo = (f"{n} {'trecho marcado' if n == 1 else 'trechos marcados'}"
+              f"{f' ({por_inciso})' if n else ''}; "
               f"{conferidos} dos {len(d['incisos'])} incisos conferidos nesta versão.")
     return {
         "resumo": resumo,
-        "aviso": f"{d['aviso']} Fonte: {d['lei']}.",
+        "aviso": f"{d['aviso']} {LEGENDA} Fonte: {d['lei']}.",
         "marcas": marcas,
         "tabela": {"titulo": "Os incisos do art. 5º, um por um",
                    "colunas": ["Inciso", "O que a lei pede", "Situação", "Trechos"],

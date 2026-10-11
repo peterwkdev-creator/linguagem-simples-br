@@ -30,7 +30,8 @@ from .relatorio import AVISO, CONFERIDO, conferir, linha_coluna
 URL = "https://api.anthropic.com/v1/messages"
 VERSAO_DA_API = "2023-06-01"
 VARIAVEL_DA_CHAVE = "ANTHROPIC_API_KEY"
-ONDE_CRIAR_A_CHAVE = "https://console.anthropic.com, em API Keys"
+ONDE_CRIAR_A_CHAVE = "https://platform.claude.com/settings/keys"
+ONDE_COMPRAR_CREDITO = "https://platform.claude.com/settings/billing"
 MODELO_PADRAO = "claude-sonnet-5-5"
 TENTATIVAS = 3  # a primeira e mais duas, sabendo o que falhou
 MAX_TOKENS = 16000
@@ -44,7 +45,7 @@ AVISO_SENTIDO = (
 
 _ENDERECO = re.compile(r"(?:https?://|www\.)[^\s<>\"'()\[\]]+|[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
 _NUMERO = re.compile(r"\d+(?:[.,/:-]\d+)*")
-_SIGLA = re.compile(r"(?<!\w)[A-ZÀ-Ý][A-ZÀ-Ý0-9]*[A-ZÀ-Ý][A-ZÀ-Ý0-9]*(?!\w)")
+_SIGLA = re.compile(r"(?<!\w)[A-ZÀ-ÖØ-Ý][A-ZÀ-ÖØ-Ý0-9]*[A-ZÀ-ÖØ-Ý][A-ZÀ-ÖØ-Ý0-9]*(?!\w)")
 _TAMANHO_DA_SIGLA = 6  # mais que isso em caixa alta é título ou ênfase, não sigla
 _MARCA_DE_ITEM = re.compile(r"^[ \t]*\d{1,3}[.)][ \t]", re.M)  # o "1." da lista numerada
 _TEXTO = re.compile(r"<texto>\s*(.*?)\s*</texto>", re.S)
@@ -95,6 +96,8 @@ def reescrever(texto, *, chave=None, modelo=MODELO_PADRAO, chamar=None, tentativ
     dela. ``chamar`` substitui a chamada à API: recebe o prompt de sistema e
     a lista de mensagens e devolve a resposta (os testes usam uma IA
     simulada)."""
+    if tentativas < 1:
+        raise ValueError("tentativas: o mínimo é 1")
     do_html = isinstance(texto, Pagina)
     if do_html:
         texto = texto.texto
@@ -154,7 +157,8 @@ def _problemas(original, novo, antes, depois):
     sumiram = [t for t in fatos(original) if not _contem(novo, t)]
     if sumiram:
         problemas.append("sumiu do texto: " + ", ".join(sumiram))
-    novos = [t for t in _numeros(novo) if t not in _numeros(original)]
+    do_original = set(_numeros(original))
+    novos = [t for t in _numeros(novo) if t not in do_original]
     if novos:
         problemas.append("número que o original não tem: " + ", ".join(novos))
     return problemas
@@ -213,18 +217,27 @@ _SISTEMA = (
 )
 
 
+_MARCA_DO_PEDIDO = re.compile(r"<(/?\s*(?:original|texto)\s*)>", re.I)
+
+
+def _neutro(texto):
+    """O texto de quem usa (ou de uma página de terceiro) não fecha o
+    bloco ``<original>`` nem imita a resposta: as marcas viram ‹...›."""
+    return _MARCA_DO_PEDIDO.sub(r"‹\1›", texto)
+
+
 def _pedido(texto, resultados):
     return (
         "O verificador apontou estes trechos, pelo inciso do art. 5º que "
-        "cada um descumpre:\n" + _apontamentos(resultados, texto)
-        + "\n\nReescreva o texto abaixo.\n<original>\n" + texto + "\n</original>"
+        "cada um descumpre:\n" + _neutro(_apontamentos(resultados, texto))
+        + "\n\nReescreva o texto abaixo.\n<original>\n" + _neutro(texto) + "\n</original>"
     )
 
 
 def _de_novo(motivo, resultados, novo):
     pedido = f"A reescrita não foi aceita: {motivo}."
     if resultados is not None and any(r.ocorrencias for r in resultados):
-        pedido += "\nNela o verificador ainda aponta:\n" + _apontamentos(resultados, novo)
+        pedido += "\nNela o verificador ainda aponta:\n" + _neutro(_apontamentos(resultados, novo))
     return pedido + "\nReescreva de novo a partir do original, entre <texto> e </texto>."
 
 
@@ -251,8 +264,9 @@ class _Claude:
         self.tokens = (0, 0)
         if not self._chave:
             raise ErroDeReescrita(
-                f"falta a chave da API da Anthropic: ponha-a na variável de ambiente {VARIAVEL_DA_CHAVE} "
-                f"ou rode a linha de comando num terminal, que ela pergunta. Crie a chave em {ONDE_CRIAR_A_CHAVE}.")
+                "falta a chave da API da Anthropic. Na linha de comando, rode de novo no PowerShell (ou "
+                "no terminal), sem '<' nem '|', e cole a chave quando ela for pedida; ou ponha a chave "
+                f"na variável de ambiente {VARIAVEL_DA_CHAVE}. Crie a chave em {ONDE_CRIAR_A_CHAVE}")
         if not _CHAVE_VALIDA.fullmatch(self._chave):
             # Sem o valor na mensagem: ela vai para a tela.
             raise ErroDeReescrita(
@@ -283,11 +297,20 @@ class _Claude:
             raise ErroDeReescrita(
                 "a resposta da API veio incompleta ou não é da API (rede instável ou proxy no caminho?): "
                 "tente de novo") from None
-        uso = dados.get("usage") or {}
-        self.tokens = (self.tokens[0] + uso.get("input_tokens", 0), self.tokens[1] + uso.get("output_tokens", 0))
-        if dados.get("stop_reason") == "max_tokens":
+        try:
+            uso = dados.get("usage") or {}
+            self.tokens = (self.tokens[0] + int(uso.get("input_tokens") or 0),
+                           self.tokens[1] + int(uso.get("output_tokens") or 0))
+            parar = dados.get("stop_reason")
+            texto = "".join(str(b.get("text") or "") for b in dados.get("content") or []
+                            if b.get("type") == "text")
+        except (AttributeError, TypeError, ValueError):
+            raise ErroDeReescrita(
+                "a resposta da API veio incompleta ou não é da API (rede instável ou proxy no caminho?): "
+                "tente de novo") from None
+        if parar == "max_tokens":
             raise ErroDeReescrita("o texto é longo demais para uma resposta só: divida em partes e reescreva cada uma")
-        return "".join(b.get("text", "") for b in dados.get("content", []) if b.get("type") == "text")
+        return texto
 
 
 def _abrir(pedido):
@@ -320,9 +343,9 @@ def _explicar(codigo, tipo, mensagem, modelo):
     elif codigo == 401:
         o_que = f"a chave não foi aceita: confira se copiou inteira ou crie outra em {ONDE_CRIAR_A_CHAVE}"
     elif codigo == 403:
-        o_que = "a chave não tem permissão para isso: confira a conta em https://console.anthropic.com"
+        o_que = f"a chave não tem permissão para isso: confira a conta em {ONDE_CRIAR_A_CHAVE}"
     elif codigo == 400 and "credit balance" in mensagem.lower():
-        o_que = "a conta da API está sem crédito: adicione em https://console.anthropic.com, em Billing"
+        o_que = f"a conta da API está sem crédito: compre em {ONDE_COMPRAR_CREDITO}"
     elif codigo == 404 or tipo == "not_found_error" or codigo == 400 and mensagem.lower().startswith("model:"):
         o_que = f"o modelo {modelo} não está disponível para esta chave: escolha outro com --modelo"
     elif codigo == 429:
@@ -361,6 +384,8 @@ def como_texto(r, destino=None):
         vezes = "tentativa" if r.tentativas == 1 else "tentativas"
         linhas.append(f"Recusada depois de {r.tentativas} {vezes}. Na última: {r.motivo}.")
         linhas.append(f"Apontamentos no original: {r.total_antes}. O texto recusado não é mostrado.")
+        linhas.append("O que fazer: rodar de novo (é outra cobrança) ou revisar à mão os trechos do "
+                      "relatório (o mesmo comando sem --reescrever).")
     else:
         linhas.append(f"Aceita na tentativa {r.tentativas}. Apontamentos: {r.total_antes} → {r.total_depois}.")
         depois = dict(r.depois)

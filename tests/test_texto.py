@@ -16,6 +16,8 @@ class TestFrases(unittest.TestCase):
 
     def test_ponto_antes_de_minuscula_nao_corta(self):
         self.assertEqual(len(self.frases("Veja o site gov.br e depois. ligue")), 1)
+        # "×" (U+00D7) cai no meio da faixa À-Ý e não é maiúscula
+        self.assertEqual(len(self.frases("Custa 2. ×3 custa 6.")), 1)
 
     def test_frase_sem_ponto_final_conta(self):
         self.assertEqual(self.frases("Primeira. Segunda sem ponto"), ["Primeira.", "Segunda sem ponto"])

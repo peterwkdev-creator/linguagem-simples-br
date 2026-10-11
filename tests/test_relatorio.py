@@ -4,6 +4,7 @@ import contextlib
 import io
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -12,9 +13,9 @@ from pathlib import Path
 from unittest import mock
 
 from linguagem_simples import __version__
-from linguagem_simples.__main__ import main
+from linguagem_simples.__main__ import VITRINE, main
 from linguagem_simples.relatorio import (
-    AVISO, CONFERIDO, DESLIGADO, NAO_CONFERIDO, SEM_DETECTOR,
+    AVISO, CONFERIDO, DESLIGADO, LEGENDA, NAO_CONFERIDO, SEM_DETECTOR,
     como_dict, como_texto, conferir, linha_coluna,
 )
 
@@ -102,6 +103,12 @@ class TestRelatorio(unittest.TestCase):
         with self.assertRaises(ValueError):
             conferir("Texto.", ligar=["XIX"])
 
+    def test_limiar_menor_que_1(self):
+        # a linha de comando já recusava; a biblioteca apontava toda frase
+        for opcao in ({"max_palavras": 0}, {"max_frases": -1}):
+            with self.subTest(opcao), self.assertRaises(ValueError):
+                conferir(LONGA, **opcao)
+
     def test_ocorrencias_e_limiar(self):
         por = {r.inciso.numero: r for r in conferir("Procure o INSS.\n\n" + LONGA)}
         self.assertEqual([o.trecho for o in por["VIII"].ocorrencias], ["INSS"])
@@ -125,6 +132,26 @@ class TestRelatorio(unittest.TestCase):
         self.assertIn("linha 3, coluna 9: INSS: primeira ocorrência", saida)
         self.assertIn("desligado por padrão", saida)
         self.assertIn("não conferido", saida)
+
+    def test_resumo_e_legenda_no_topo(self):
+        texto = "Leve ao INSS. Fale com o SUS."
+        topo = como_texto(conferir(texto), texto).split("\n\nI. ")[0]
+        self.assertIn("\nTrechos a revisar: 2 (VIII: 2), listados abaixo com linha e coluna.\n", topo)
+        self.assertTrue(topo.endswith("\n" + LEGENDA), topo)
+        self.assertIn("nenhuma ocorrência não garante", LEGENDA)
+        limpo = "Texto curto."
+        self.assertIn("\nNada a revisar nos incisos conferidos.\n", como_texto(conferir(limpo), limpo))
+
+    def test_exemplo_do_readme_e_a_saida_real(self):
+        readme = (RAIZ / "README.md").read_text(encoding="utf-8")
+        uso = readme.split("\n## Uso\n")[1].split("\n### ")[0]
+        texto = " ".join(re.search(r"o texto “(.+?)”, o relatório", uso, re.S).group(1).split())
+        blocos = re.findall(r"```text\n(.*?)```", uso, re.S)
+        saida = como_texto(conferir(texto), texto) + "\n"
+        self.assertEqual(len(blocos), 3)
+        self.assertTrue(saida.startswith(blocos[0]), blocos[0])
+        for bloco in blocos[1:]:
+            self.assertIn("\n\n" + bloco, saida)
 
     def test_trecho_longo_e_cortado(self):
         texto = " ".join(["palavra"] * 40) + "."
@@ -196,7 +223,130 @@ class TestLinhaDeComando(unittest.TestCase):
             with self.subTest(argv0), mock.patch.object(sys, "argv", [argv0]), \
                     contextlib.redirect_stderr(io.StringIO()) as erro, self.assertRaises(SystemExit):
                 main([])
-            self.assertTrue(erro.getvalue().startswith(f"usage: {nome} "), erro.getvalue())
+            self.assertTrue(erro.getvalue().startswith(f"uso: {nome} arquivo [opções]\n"), erro.getvalue())
+            self.assertIn(f"{nome}: erro: falta o arquivo a conferir. Exemplo: {nome} carta.txt", erro.getvalue())
+            self.assertIn(VITRINE, erro.getvalue())
+
+    def rodar_bytes(self, dados, *args, nome="texto.txt"):
+        """A CLI num arquivo com estes bytes: código, saída e erro."""
+        saida, erro = io.StringIO(), io.StringIO()
+        with tempfile.TemporaryDirectory() as pasta, \
+                contextlib.redirect_stdout(saida), contextlib.redirect_stderr(erro):
+            arquivo = Path(pasta) / nome
+            arquivo.write_bytes(dados)
+            try:
+                codigo = main([str(arquivo), *args])
+            except SystemExit as fim:
+                codigo = fim.code
+        return codigo, saida.getvalue(), erro.getvalue()
+
+    def test_entrada_padrao_no_terminal_explica_como_terminar(self):
+        import linguagem_simples.__main__ as cli
+        for terminal in (True, False):
+            entrada = mock.Mock(buffer=io.BytesIO("Texto curto.".encode()))
+            with self.subTest(terminal=terminal), mock.patch.object(sys, "stdin", entrada), \
+                    mock.patch.object(cli, "_e_terminal", return_value=terminal), \
+                    contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()) as erro:
+                self.assertEqual(main(["-"]), 0)
+            self.assertEqual("Ctrl+Z e Enter" in erro.getvalue(), terminal)
+
+    def test_ajuda_em_portugues(self):
+        with contextlib.redirect_stdout(io.StringIO()) as saida, self.assertRaises(SystemExit) as fim:
+            main(["-h"])
+        ajuda = saida.getvalue()
+        self.assertEqual(fim.exception.code, 0)
+        for trecho in ("uso: ", "\narquivo:\n", "\nopções:\n", "mostra esta ajuda e sai", "\nexemplos:\n",
+                       "carta.txt --saida relatorio.txt\n", "código de saída: 0 nada a revisar", VITRINE):
+            self.assertIn(trecho, ajuda)
+        self.assertIn("hoje só o XI, que ainda não tem detector", " ".join(ajuda.split()))
+        sem_link = ajuda.replace(VITRINE, "")
+        self.assertLessEqual(max(len(linha) for linha in sem_link.splitlines()), 79)
+        for ingles in ("usage:", "options:", "show this help", "positional arguments"):
+            self.assertNotIn(ingles, ajuda)
+
+    def test_erros_do_argparse_em_portugues(self):
+        for args, esperado in ((["--max-palavras"], "--max-palavras precisa de um valor logo depois"),
+                               (["--max-palavras", "abc"], "--max-palavras: use um número inteiro maior que zero"),
+                               (["--max-frases", "0"], "--max-frases: use um número inteiro maior que zero"),
+                               (["outro.txt"], "não entendi: outro.txt (um arquivo por vez"),
+                               (["--json=sim"], "--json não leva valor"),
+                               (["--max"], "--max é ambíguo: pode ser")):
+            codigo, _, erro = self.rodar_bytes(b"Texto.", *args)
+            with self.subTest(args):
+                self.assertEqual(codigo, 2)
+                self.assertIn(f": erro: {esperado}", erro)
+                self.assertNotIn("error", erro)
+
+    def test_documento_que_nao_e_texto(self):
+        for dados, tipo in ((b"PK\x03\x04resto", "Word (.docx)"), (b"%PDF-1.7\n", "um PDF"),
+                            (b"\xd0\xcf\x11\xe0\xa1\xb1", "Word antigo (.doc)"), (b"{\\rtf1\\ansi", "RTF")):
+            codigo, saida, erro = self.rodar_bytes(dados, nome="documento.txt")
+            with self.subTest(tipo):
+                self.assertEqual((codigo, saida), (2, ""))
+                self.assertIn(tipo, erro)
+                self.assertIn("cole no Bloco de Notas e salve como .txt", erro)
+
+    def test_arquivo_ansi_e_lido_com_aviso(self):
+        codigo, saida, erro = self.rodar_bytes("Ação do INSS.".encode("cp1252"), "--max-palavras", "2")
+        self.assertEqual(codigo, 1)
+        self.assertIn("“Ação do INSS.”", saida)
+        self.assertIn("aviso: ", erro)
+        self.assertIn("lido como Windows-1252", erro)
+        self.assertIn("Codificação: UTF-8", erro)
+        # em UTF-8, nenhum aviso
+        self.assertEqual(self.rodar_bytes("Ação do INSS.".encode("utf-8"))[2], "")
+
+    def test_byte_que_nem_o_ansi_tem(self):
+        codigo, _, erro = self.rodar_bytes(b"A\x81B \xe7")
+        self.assertEqual(codigo, 2)
+        self.assertIn("não está em UTF-8", erro)
+        self.assertIn("Salvar como > Codificação: UTF-8", erro)
+
+    def test_unicode_do_bloco_de_notas(self):
+        for codificacao in ("utf-16", "utf-16-be"):
+            dados = "﻿Leve ao INSS.".encode(codificacao)
+            codigo, saida, erro = self.rodar_bytes(dados, "--json")
+            with self.subTest(codificacao):
+                viii = next(i for i in json.loads(saida)["incisos"] if i["inciso"] == "VIII")
+                self.assertEqual((codigo, erro, [o["inicio"] for o in viii["ocorrencias"]]), (1, "", [8]))
+
+    def test_arquivo_ou_pasta_que_nao_servem(self):
+        with tempfile.TemporaryDirectory() as pasta, contextlib.redirect_stderr(io.StringIO()) as erro:
+            for args in ([str(Path(pasta) / "nao-existe.txt")], [pasta]):
+                with self.assertRaises(SystemExit) as fim:
+                    main(args)
+                self.assertEqual(fim.exception.code, 2)
+        self.assertIn("não achei ", erro.getvalue())
+        self.assertIn("'dir' lista os arquivos", erro.getvalue())
+        self.assertIn("é uma pasta: indique um arquivo dentro dela", erro.getvalue())
+
+    def test_saida_grava_o_relatorio(self):
+        with tempfile.TemporaryDirectory() as pasta:
+            destino = Path(pasta) / "relatorio.txt"
+            codigo, saida, _ = self.rodar_bytes("Leve ao INSS.".encode(), "--saida", str(destino))
+            self.assertEqual(codigo, 1)
+            self.assertEqual(saida, f"Relatório gravado em {destino}. Trechos a revisar: 1 (VIII: 1), "
+                             "listados abaixo com linha e coluna.\n")
+            self.assertIn("INSS: primeira ocorrência", destino.read_text(encoding="utf-8"))
+            # nunca por cima
+            codigo, _, erro = self.rodar_bytes(b"Outro texto.", "--saida", str(destino))
+            self.assertEqual(codigo, 2)
+            self.assertIn("já existe", erro)
+            self.assertIn("INSS", destino.read_text(encoding="utf-8"))
+            em_json = Path(pasta) / "relatorio.json"
+            self.assertEqual(self.rodar_bytes(b"Texto curto.", "--json", "--saida", str(em_json))[0], 0)
+            self.assertEqual(len(json.loads(em_json.read_text(encoding="utf-8"))["incisos"]), 18)
+
+    def test_defeito_do_verificador_sai_com_2_e_nao_com_1(self):
+        # 1 quer dizer "achou ocorrências": um traceback não pode passar por isso
+        import linguagem_simples.__main__ as cli
+        saida, erro = (io.TextIOWrapper(io.BytesIO()) for _ in range(2))
+        with mock.patch.object(cli, "main", side_effect=StopIteration), \
+                mock.patch.object(sys, "stdout", saida), mock.patch.object(sys, "stderr", erro):
+            codigo = cli.comando()
+        erro.seek(0)
+        self.assertEqual(codigo, 2)
+        self.assertIn("erro inesperado (StopIteration); avise em https://github.com/", erro.read())
 
     def test_erros_de_uso_saem_com_2(self):
         erro = io.StringIO()

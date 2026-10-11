@@ -226,6 +226,47 @@ class TestIncisoVIII(unittest.TestCase):
         self.assertEqual(self.siglas("Leve o Cadastro de Pessoa Física.\n\nCursos na PF."), ["PF"])
         self.assertEqual(self.siglas("Leve a Pessoa Física.\n\nCursos na PF."), [])
 
+    def test_sinal_de_vezes_nao_derruba(self):
+        # "×" (U+00D7) cai no meio da faixa À-Ý e não é letra: até a 1.9.0,
+        # "×A" virava sigla e o verificador parava com StopIteration
+        self.assertEqual(self.siglas("Tamanho 10 ×A."), [])
+        self.assertEqual(self.siglas("Placa (×XL) nova, 2 ÷ 3."), ["XL"])
+        # em qualquer ponto da sigla: no meio, antes da última letra e no fim
+        self.assertEqual(self.siglas("Peça A×B e AB×C."), ["AB"])
+        # nem dentro do nome por extenso: com "×" ou "÷" no meio, o nome
+        # acaba ali e não serve à sigla
+        for meio in (" × ", "× ", "÷ ", "-× ", "-÷ "):
+            with self.subTest(meio=meio):
+                self.assertEqual(self.siglas(f"Divisão de Cooperação e Intercâmbio{meio}DICIN."), ["DICIN"])
+        self.assertEqual(self.siglas("Divisão de Cooperação e Intercâmbio (÷ DICIN)."), ["DICIN"])
+
+    def test_mesma_sigla_antes_em_outra_caixa(self):
+        # em minúscula, colada ao nome: "coin" não entra no nome próprio (com
+        # quatro letras, não é palavra comum; o nome serve pelos prefixos)
+        self.assertEqual(self.siglas("Coordenação de Intercâmbio coin.\n\nFale com a COIN."), [])
+        # "İ" (I com ponto) e "I" são a mesma letra para o re.I
+        self.assertEqual(self.siglas("Coordenação de Intercâmbio (Coİn).\n\nFale com a COIN."), [])
+        self.assertEqual(self.siglas("Coordenação de Intercâmbio.\n\nFale com a COIN."), ["COIN"])
+
+    def test_janela_em_volta_da_sigla(self):
+        # título em caixa alta mais longo que 30 caracteres antes da sigla
+        self.assertEqual(self.siglas("ORIENTAÇÕES ADMINISTRATIVAS COMPLEMENTARES INSS\n\nTexto."), [])
+        # a janela de 300 caracteres corta "xy_ZW" no meio: "ZW" não é palavra
+        # em caixa alta, e a sigla não está numa sequência de três
+        texto = "xy_ZW " + "A" * 296 + " INSS foi."
+        self.assertIn("INSS", self.siglas(texto))
+
+    def test_texto_longo_com_muitas_siglas_em_tempo_linear(self):
+        # até a 1.9.0, cada sigla relia o texto antes dela: 2 mil siglas em
+        # 104 KB levavam 21 s; agora, menos de meio segundo
+        import time
+        frases = [f"A sigla {chr(65 + i % 26)}{chr(65 + i // 26 % 26)}{chr(65 + i // 676)} aparece. "
+                  "A Secretaria de Estado da Fazenda cuida disso." for i in range(2000)]
+        texto = " ".join(frases)
+        comeco = time.perf_counter()
+        self.assertEqual(len(self.siglas(texto)), 2000)
+        self.assertLess(time.perf_counter() - comeco, 5)
+
     def test_nome_colado_a_sigla(self):
         texto = "No âmbito da Divisão de Cooperação e Intercâmbio DICIN/INPA."
         self.assertEqual(self.siglas(texto), ["INPA"])

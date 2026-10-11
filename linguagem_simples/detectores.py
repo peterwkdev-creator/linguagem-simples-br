@@ -6,6 +6,7 @@ pode trocar. O resultado aponta trechos para revisão: não certifica que um
 texto cumpre a lei.
 """
 
+import bisect
 import re
 import unicodedata
 from dataclasses import dataclass
@@ -74,7 +75,7 @@ def _ler_lexico(nome):
 
 # Sigla: duas ou mais maiúsculas (dígito no meio vale), plural em "s"
 # minúsculo. Sigla com minúscula no meio ("CNPq", "UnB") fica de fora.
-_SIGLA = re.compile(r"(?<!\w)([A-ZÀ-Ý][A-ZÀ-Ý0-9]*[A-ZÀ-Ý][A-ZÀ-Ý0-9]*)(s?)(?!\w)")
+_SIGLA = re.compile(r"(?<!\w)([A-ZÀ-ÖØ-Ý][A-ZÀ-ÖØ-Ý0-9]*[A-ZÀ-ÖØ-Ý][A-ZÀ-ÖØ-Ý0-9]*)(s?)(?!\w)")
 _ROMANO = re.compile(r"M{0,3}(?:CM|CD|D?C{0,3})(?:XC|XL|L?X{0,3})(?:IX|IV|V?I{0,3})")
 _ANTES_DE_ROMANO = frozenset(
     "inciso incisos capítulo capítulos título títulos anexo anexos seção "
@@ -83,7 +84,7 @@ _ANTES_DE_ROMANO = frozenset(
 _PALAVRA_SIMPLES = re.compile(r"\w+")
 _SEQUENCIA_MAIUSCULA = 3  # palavras em caixa alta seguidas: é texto gritado, não sigla
 # Endereço: URL ("https://...%C2%BA") ou e-mail; o domínio se vê pelo ponto.
-_ENDERECO = re.compile(r"://|@")
+_SINAL_DE_ENDERECO = re.compile(r"://|@")
 # Palavra comum em caixa alta ("SISTEMA SIMEC") se reconhece por aparecer em
 # minúscula no mesmo texto. Com quatro letras ou menos, sigla e palavra se
 # confundem (MAPA, o ministério, e "mapa"): a regra só vale de cinco em diante.
@@ -118,14 +119,31 @@ def _caixa_alta(palavra):
     return bool(letras) and all(c.isupper() for c in letras)
 
 
+# Quanto se olha em volta da sigla. Ler a linha ou o texto inteiro a cada
+# sigla crescia com o quadrado do tamanho: 2 mil siglas em 104 KB, 21 s.
+_JANELA = 300
+
+
+def _letra(c):
+    return c.isalnum() or c == "_"  # o \w das regex
+
+
 def _em_texto_gritado(texto, inicio, fim):
     """A sigla faz parte de uma sequência de palavras em caixa alta (título
     ou aviso escrito todo em maiúsculas)?"""
-    linha_ini = texto.rfind("\n", 0, inicio) + 1
-    linha_fim = texto.find("\n", fim)
-    linha_fim = len(texto) if linha_fim == -1 else linha_fim
+    janela = max(0, inicio - _JANELA)
+    linha_ini = texto.rfind("\n", janela, inicio) + 1 or janela
+    linha_fim = texto.find("\n", fim, fim + _JANELA)
+    linha_fim = min(len(texto), fim + _JANELA) if linha_fim == -1 else linha_fim
+    # A janela corta palavra no meio: o pedaço fica de fora.
+    while linha_ini > 0 and _letra(texto[linha_ini - 1]) and _letra(texto[linha_ini]):
+        linha_ini += 1
+    while linha_fim < len(texto) and _letra(texto[linha_fim - 1]) and _letra(texto[linha_fim]):
+        linha_fim -= 1
     linha = [m for m in _PALAVRA_SIMPLES.finditer(texto, linha_ini, linha_fim)]
-    k = next(i for i, m in enumerate(linha) if m.start() == inicio)
+    k = next((i for i, m in enumerate(linha) if m.start() == inicio), None)
+    if k is None:
+        return False
     a = k
     while a > 0 and _caixa_alta(linha[a - 1].group()):
         a -= 1
@@ -143,22 +161,42 @@ def _em_endereco(texto, inicio, fim):
     b = fim
     while b < len(texto) and not texto[b].isspace():
         b += 1
-    if _ENDERECO.search(texto, a, b):
+    if _SINAL_DE_ENDERECO.search(texto, a, b):
         return True
     ponto_antes = inicio >= 2 and texto[inicio - 1] == "." and texto[inicio - 2].isalnum()
     ponto_depois = fim + 1 < len(texto) and texto[fim] == "." and texto[fim + 1].isalnum()
     return ponto_antes or ponto_depois
 
 
-def _palavra_comum(texto, sigla):
+# As letras que o re.I iguala a uma letra ASCII sem ser ela: "İ", "ı", "ſ"
+# e o sinal de Kelvin.
+_CAIXA_ASCII = str.maketrans({"İ": "I", "ı": "I", "ſ": "S", "K": "K"})
+
+
+class _Palavras:
+    """Onde está cada palavra do texto, lido uma vez só: tal como escrita e
+    em caixa alta. Procurar a sigla no texto inteiro a cada sigla nova
+    crescia com o quadrado do tamanho."""
+
+    def __init__(self, texto):
+        self.exata, self.caixa = {}, {}
+        for m in _PALAVRA_SIMPLES.finditer(texto):
+            w, onde = m.group(), m.span()
+            self.exata.setdefault(w, []).append(onde)
+            self.caixa.setdefault(w.translate(_CAIXA_ASCII).upper(), []).append(onde)
+
+
+def _palavra_comum(texto, sigla, palavras):
     """A "sigla" aparece em minúscula no texto, solta e fora de endereço: é
     palavra comum escrita em caixa alta ("SISTEMA SIMEC" e "o sistema").
     Colada a hífen ou barra é nome de sistema ou caminho
     ("inspecao/e-sisbi"), e não conta."""
     if len(sigla) < _MINIMO_PALAVRA_COMUM:
         return False
-    for m in re.finditer(r"(?<![\w/-])%s(?![\w/-])" % re.escape(sigla.lower()), texto):
-        if not _em_endereco(texto, m.start(), m.end()):
+    for a, b in palavras.exata.get(sigla.lower(), ()):
+        if texto[a - 1:a] in ("/", "-") or texto[b:b + 1] in ("/", "-"):
+            continue
+        if not _em_endereco(texto, a, b):
             return True
     return False
 
@@ -201,7 +239,7 @@ def _prefixos_batem(sigla, palavras_nome):
 
 # Sigla ligada ao nome que vem antes: "Nome (SIGLA)", "Nome (curva SIGLA)"
 # ou "Nome - SIGLA" (o hífen de "e-MEC" não liga).
-_LIGA_PARENTESE = re.compile(r"\((?:\s*[a-zà-ÿ]+){0,2}\s*$")
+_LIGA_PARENTESE = re.compile(r"\((?:\s*[a-zà-öø-ÿ]+){0,2}\s*$")
 _LIGA_TRAVESSAO = re.compile(r"\s[-–—]\s*$")
 _CONECTIVOS = frozenset("de da do das dos e em para".split())
 # Dentro do nome próprio, também a contração de "em": "Saúde e Segurança no
@@ -212,7 +250,7 @@ _LIGAM_NOME = _CONECTIVOS | frozenset("no na nos nas".split())
 _ABRE_FRASE = _LIGAM_NOME | frozenset("a o as os ao à pela pelo um uma".split())
 # Palavras com maiúscula separadas só por espaço, com um conectivo entre elas;
 # o hífen separa palavras ("Procuradoria-Geral", "Coordenação-geral").
-_PALAVRA_MAIUSCULA = r"[A-ZÀ-Ý][a-zà-ÿA-ZÀ-Ý]*(?:-[a-zà-ÿA-ZÀ-Ý]+)*"
+_PALAVRA_MAIUSCULA = r"[A-ZÀ-ÖØ-Ý][a-zà-öø-ÿA-ZÀ-ÖØ-Ý]*(?:-[a-zà-öø-ÿA-ZÀ-ÖØ-Ý]+)*"
 _NOME_PROPRIO = re.compile(
     r"%s(?:[ \t]+(?:(?:%s)[ \t]+)?%s)*" % (_PALAVRA_MAIUSCULA, "|".join(_LIGAM_NOME), _PALAVRA_MAIUSCULA))
 # O fim de um nome maior só serve a sigla de três letras ou mais: com duas, a
@@ -222,57 +260,116 @@ _NOME_PROPRIO = re.compile(
 _MINIMO_FIM_DO_NOME = 3
 
 
-def _nome_antes(texto, inicio, fim, sigla):
+_FECHA_PARENTESE = re.compile(r"\s*\)")
+
+
+def _nome_antes(texto, inicio, fim, sigla, nomes):
     """O nome por extenso vem antes: ligado à sigla (entre parênteses ou com
     travessão) ou, em qualquer ponto antes, como nome próprio cujas
-    iniciais são as letras da sigla ("Guia de Recolhimento da União")."""
-    antes = texto[:inicio]
-    m = _LIGA_TRAVESSAO.search(antes)
-    if not m and texto[fim:].lstrip().startswith(")"):
-        m = _LIGA_PARENTESE.search(antes)
+    iniciais são as letras da sigla ("Guia de Recolhimento da União").
+    ``nomes`` são os nomes próprios do texto (``_Nomes``)."""
+    janela = max(0, inicio - _JANELA)
+    m = _LIGA_TRAVESSAO.search(texto, janela, inicio)
+    if not m and _FECHA_PARENTESE.match(texto, fim):
+        m = _LIGA_PARENTESE.search(texto, janela, inicio)
     if m:
-        cabeca = antes[:m.start()]
-        comeco_frase = max(cabeca.rfind("."), cabeca.rfind("\n"))
-        if _prefixos_batem(sigla, _PALAVRA_SIMPLES.findall(cabeca[comeco_frase + 1:])):
+        comeco_frase = max(texto.rfind(".", 0, m.start()), texto.rfind("\n", 0, m.start()))
+        if _prefixos_batem(sigla, _PALAVRA_SIMPLES.findall(texto, comeco_frase + 1, m.start())):
             return True
-    return _nome_proprio_antes(antes, sigla)
+    return nomes.antes(inicio, sigla)
 
 
-def _nome_proprio_antes(antes, sigla):
+def _letras_da_sigla(sigla):
+    return "".join(c for c in _sem_acento(sigla).upper() if c.isalpha())
+
+
+def _colado(texto, inicio):
+    """Onde acaba o texto antes da sigla, sem os espaços que os separam."""
+    while inicio > 0 and texto[inicio - 1] in " \t":
+        inicio -= 1
+    return inicio
+
+
+def _iniciais_do_nome(nome):
+    """As iniciais do nome inteiro (k = 0) e as de cada fim dele que vem
+    depois de um conectivo (k > 0), sem os conectivos."""
+    nome = re.split(r"[ \t-]+", nome)
+    if nome[0].lower() in _ABRE_FRASE:
+        nome = nome[1:]
+    for k in range(len(nome)):
+        if k > 0 and nome[k - 1] not in _LIGAM_NOME:
+            continue
+        yield k, "".join(_sem_acento(p)[0].upper() for p in nome[k:] if p not in _LIGAM_NOME)
+
+
+def _nome_proprio_antes(texto, comeco, inicio, sigla):
     """Um nome próprio (palavras com maiúscula ligadas por conectivo, sem
-    pontuação nem quebra de linha no meio) cujas iniciais são as letras da
-    sigla. Vale o nome inteiro ou o fim dele depois de um conectivo, se a
-    sigla tem três letras ou mais ("Secretaria Especial da Receita Federal do
-    Brasil" serve a RFB), mas não
-    um pedaço qualquer: "Informar Mudança de Endereço de Curso" não serve a MEC.
+    pontuação nem quebra de linha no meio), entre ``comeco`` e ``inicio``,
+    cujas iniciais são as letras da sigla. Vale o nome inteiro ou o fim dele
+    depois de um conectivo, se a sigla tem três letras ou mais ("Secretaria
+    Especial da Receita Federal do Brasil" serve a RFB), mas não um pedaço
+    qualquer: "Informar Mudança de Endereço de Curso" não serve a MEC.
     Colado à sigla, só com espaço entre eles, o nome se lê como o ligado
     ("Divisão de Cooperação e Intercâmbio DICIN")."""
-    letras = "".join(c for c in _sem_acento(sigla).upper() if c.isalpha())
-    colado = len(antes.rstrip(" \t"))
-    for m in _NOME_PROPRIO.finditer(antes):
+    letras = _letras_da_sigla(sigla)
+    colado = _colado(texto, inicio)
+    for m in _NOME_PROPRIO.finditer(texto, comeco, inicio):
         if m.end() == colado and _prefixos_batem(sigla, _PALAVRA_SIMPLES.findall(m.group())):
             return True
-        nome = re.split(r"[ \t-]+", m.group())
-        if nome[0].lower() in _ABRE_FRASE:
-            nome = nome[1:]
-        for k in range(len(nome) if len(letras) >= _MINIMO_FIM_DO_NOME else 1):
-            if k > 0 and nome[k - 1] not in _LIGAM_NOME:
-                continue
-            if "".join(_sem_acento(p)[0].upper() for p in nome[k:] if p not in _LIGAM_NOME) == letras:
+        for k, iniciais in _iniciais_do_nome(m.group()):
+            if iniciais == letras and (k == 0 or len(letras) >= _MINIMO_FIM_DO_NOME):
                 return True
     return False
 
 
+class _Nomes:
+    """Os nomes próprios do texto, lidos uma vez só, com as iniciais de cada
+    um: procurar de novo antes de cada sigla crescia com o quadrado do
+    tamanho do texto. Responde o mesmo que ``_nome_proprio_antes`` desde o
+    começo do texto."""
+
+    def __init__(self, texto):
+        self.texto = texto
+        self.achados = list(_NOME_PROPRIO.finditer(texto))
+        self.fins = [m.end() for m in self.achados]
+        self.inteiro, self.fim = {}, {}  # iniciais: fim do primeiro nome que as tem
+        for m in self.achados:
+            for k, iniciais in _iniciais_do_nome(m.group()):
+                (self.inteiro if k == 0 else self.fim).setdefault(iniciais, m.end())
+
+    def antes(self, inicio, sigla):
+        letras = _letras_da_sigla(sigla)
+        if self.inteiro.get(letras, inicio + 1) <= inicio:
+            return True
+        if len(letras) >= _MINIMO_FIM_DO_NOME and self.fim.get(letras, inicio + 1) <= inicio:
+            return True
+        i = bisect.bisect_right(self.fins, inicio)  # os nomes antes de i acabam antes da sigla
+        if i and self.fins[i - 1] == _colado(self.texto, inicio):
+            if _prefixos_batem(sigla, _PALAVRA_SIMPLES.findall(self.achados[i - 1].group())):
+                return True
+        # o nome que entra na sigla ("Intercâmbio DICIN") se lê só até ela
+        if i < len(self.achados) and self.achados[i].start() < inicio:
+            return _nome_proprio_antes(self.texto, self.achados[i].start(), inicio, sigla)
+        return False
+
+
+_NOME_DEPOIS = re.compile(r"\s*\(([^()]{3,200})\)")
+
+
 def _nome_depois(texto, fim, sigla):
     """A sigla vem antes e o nome por extenso depois, entre parênteses?"""
-    m = re.match(r"\s*\(([^()]{3,200})\)", texto[fim:])
+    m = _NOME_DEPOIS.match(texto, fim)
     return bool(m) and _iniciais_batem(sigla, _PALAVRA_SIMPLES.findall(m.group(1)))
 
 
-def _outra_caixa_antes(texto, inicio, sigla):
+def _outra_caixa_antes(texto, inicio, sigla, palavras):
     """A mesma sigla escrita antes em outra caixa: "Secretaria Nacional de
     Trânsito — Senatran" serve ao SENATRAN que vem depois."""
-    return re.compile(r"(?<!\w)%s(?!\w)" % re.escape(sigla), re.I).finditer(texto, 0, inicio)
+    for a, b in palavras.caixa.get(sigla, ()):
+        if b > inicio:
+            break
+        if re.fullmatch(re.escape(sigla), texto[a:b], re.I):
+            yield a, b
 
 
 def siglas_sem_nome(texto, ignorar=()):
@@ -283,6 +380,7 @@ def siglas_sem_nome(texto, ignorar=()):
     datas = [(d.start(), d.end()) for d in _DATA_DE_EPIGRAFE.finditer(texto)]
     vistas = set()
     achadas = []
+    nomes, palavras = _Nomes(texto), _Palavras(texto)
     for m in _SIGLA.finditer(texto):
         sigla = m.group(1)
         if sigla in vistas or sigla in ignorar:
@@ -291,14 +389,14 @@ def siglas_sem_nome(texto, ignorar=()):
             continue  # palavra em caixa alta ("NÃO", "ATENÇÃO"), não sigla
         if _eh_romano(sigla, texto, m.start()) or _em_texto_gritado(texto, m.start(), m.end()):
             continue
-        if _em_endereco(texto, m.start(), m.end()) or _palavra_comum(texto, sigla):
+        if _em_endereco(texto, m.start(), m.end()) or _palavra_comum(texto, sigla, palavras):
             continue
         if sigla.lower() in _CORES or any(a <= m.start() and m.end() <= b for a, b in datas):
             continue
         vistas.add(sigla)
-        if _nome_antes(texto, m.start(), m.end(), sigla):
+        if _nome_antes(texto, m.start(), m.end(), sigla, nomes):
             continue
-        if any(_nome_antes(texto, a.start(), a.end(), sigla) for a in _outra_caixa_antes(texto, m.start(), sigla)):
+        if any(_nome_antes(texto, a, b, sigla, nomes) for a, b in _outra_caixa_antes(texto, m.start(), sigla, palavras)):
             continue
         if _nome_depois(texto, m.end(), sigla):
             mensagem = f"{sigla}: o nome completo vem depois da sigla; a lei pede antes"
@@ -380,7 +478,7 @@ _PASSIVA = re.compile(
     r"\b(?i:é|são|foi|foram|era|eram|será|serão|seria|seriam|seja|sejam|"
     r"fosse|fossem|for|forem|ser|sido|sendo)"
     r"\s+(?:\w+mente\s+)?"
-    r"(?=[a-zà-ÿ])(\w+(?:ad|id|íd)[oa]s?|entregues?|feit[oa]s?)\b"
+    r"(?=[a-zà-öø-ÿ])(\w+(?:ad|id|íd)[oa]s?|entregues?|feit[oa]s?)\b"
 )
 _AGENTE = re.compile(r"\b(?:por|pel[oa]s?)\b(?!\s+meio\b)", re.IGNORECASE)
 _FIM_DA_ORACAO = re.compile(r"[,.;:!?]")
@@ -454,7 +552,6 @@ _APOIO = re.compile(
 )
 _NOMINAL = re.compile(r"\w+(?:ção|ções|mento|mentos)")
 _COMPLEMENTO = re.compile(r"\s+(?i:de|do|da|dos|das)\b")
-_PALAVRA_LEXICO = re.compile(r"\w+")
 # Nome de documento logo antes, com "de" sem artigo ("Guia de Recolhimento da
 # União", "Documento de identificação"): o substantivo diz que documento é, não
 # uma ação. "Pedido de ampliação da indicação" segue apontado (Anvisa, p. 13):
@@ -480,7 +577,7 @@ def substantivos_no_lugar_de_verbos(texto):
                 f"verbo de apoio com substantivo: um verbo só diz o mesmo{dica}",
             ))
             cobertos.add(m.start(1))
-    for m in _PALAVRA_LEXICO.finditer(texto):
+    for m in _PALAVRA_SIMPLES.finditer(texto):
         nome = m.group().lower()
         if nome in _NOMINALIZACOES and m.start() not in cobertos and _COMPLEMENTO.match(texto, m.end()):
             antes = _DOCUMENTO_ANTES.search(texto, max(0, m.start() - _JANELA_DOCUMENTO), m.start())

@@ -23,7 +23,7 @@ _MARCA_ITEM = re.compile(r"[ \t]*(?:[-*•·–]|\d{1,3}[.)]|[a-z][)])[ \t]+")
 _MARCA_TITULO = re.compile(r"[ \t]*#{1,6}[ \t]+")
 # Fim de frase: pontuação final (com aspas ou parêntese de fecho) seguida de
 # espaço e de início de frase, ou do fim do bloco.
-_FIM = re.compile(r"[.!?…]+[\"'”’»)\]]*(?=\s+[\"'“‘«(\[]?[A-ZÀ-Ý0-9]|\s*$)")
+_FIM = re.compile(r"[.!?…]+[\"'”’»)\]]*(?=\s+[\"'“‘«(\[]?[A-ZÀ-ÖØ-Ý0-9]|\s*$)")
 _PALAVRA = re.compile(r"\w+(?:[-'’.,/:@]\w+)*")
 _ANTES_DO_PONTO = re.compile(r"(\w+)\W*$")
 

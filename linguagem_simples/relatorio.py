@@ -24,6 +24,12 @@ SEM_DETECTOR = "sem detector nesta versão"
 NAO_CONFERIDO = "não conferido"
 DESLIGADO = "desligado"
 
+LEGENDA = (
+    "Classes: automático, regra que o verificador confere; sinal, indício para quem lê decidir; "
+    "fora do alcance, só uma pessoa confere. Num sinal, nenhuma ocorrência não garante que o "
+    "inciso foi cumprido."
+)
+
 _TRECHO_MAXIMO = 70  # caracteres do trecho no relatório em texto
 
 
@@ -139,6 +145,8 @@ def como_texto(resultados, texto):
         "",
         f"Conferidos nesta versão: {', '.join(r.inciso.numero for r in conferidos)}. "
         f"Ocorrências: {total}.",
+        resumo(resultados),
+        LEGENDA,
     ]
     for r in resultados:
         linhas += ["", f"{r.inciso.numero}. {r.inciso.texto}", "   " + _situacao(r)]
@@ -146,6 +154,17 @@ def como_texto(resultados, texto):
             _, _, linha, coluna = no_arquivo(o, texto)
             linhas.append(f"   - linha {linha}, coluna {coluna}: {o.mensagem}: “{_curto(o.trecho)}”")
     return "\n".join(linhas)
+
+
+def resumo(resultados):
+    """Uma linha: quantos trechos revisar e em que incisos, ou que não há
+    nenhum."""
+    achados = [r for r in resultados if r.ocorrencias]
+    if not achados:
+        return "Nada a revisar nos incisos conferidos."
+    total = sum(len(r.ocorrencias) for r in achados)
+    por_inciso = ", ".join(f"{r.inciso.numero}: {len(r.ocorrencias)}" for r in achados)
+    return f"Trechos a revisar: {total} ({por_inciso}), listados abaixo com linha e coluna."
 
 
 def _situacao(r):

@@ -45,6 +45,8 @@ LIMIARES = {
 def valor(inciso, informado=None):
     """O valor informado por quem usa ou, se não houver, o padrão com fonte."""
     if informado is not None:
+        if informado < 1:
+            raise ValueError(f"inciso {inciso}: o limiar mínimo é 1 (veio {informado})")
         return informado
     padrao = LIMIARES[inciso].padrao
     if padrao is None:

@@ -17,7 +17,9 @@ executar = montar.carregar_adaptador(RAIZ).executar
 def marcas(texto):
     res = executar({"texto": texto})
     # a página só desenha marca que cai dentro do campo
-    assert montar.conferir_resultado(res, {"texto": texto}, "texto") == [], res
+    # (sem assert solto: com python -O ele some)
+    if montar.conferir_resultado(res, {"texto": texto}, "texto") != []:
+        raise AssertionError(res)
     return [(texto[m["inicio"]:m["fim"]], m["rotulo"]) for m in res["marcas"]]
 
 
@@ -43,6 +45,12 @@ class TestVitrineHtml(unittest.TestCase):
 
     def test_comeca_por_menor_que_sem_ser_tag(self):
         self.assertEqual(marcas("<3 Procure o INSS."), [("INSS", "Inciso VIII")])
+
+    def test_resumo_diz_os_incisos_e_o_aviso_as_classes(self):
+        res = executar({"texto": "Os documentos devem ser entregues no INSS até sexta-feira."})
+        self.assertTrue(res["resumo"].startswith("2 trechos marcados (VIII: 1, XII: 1); 12 dos 18"), res["resumo"])
+        self.assertIn("Num sinal, nenhuma ocorrência não garante", res["aviso"])
+        self.assertTrue(executar({"texto": "Texto curto."})["resumo"].startswith("0 trechos marcados; "))
 
 
 if __name__ == "__main__":

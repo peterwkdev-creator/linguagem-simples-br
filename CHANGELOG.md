@@ -1,8 +1,45 @@
 # Histórico de versões
 
 A versão segue `linguagem_simples.__version__`; cada uma tem uma tag
-`vX.Y.Z` no commit que a publicou. O formato do relatório e as opções da
-linha de comando só mudam numa versão 2; detector novo sai numa 1.x.
+`vX.Y.Z` no commit que a publicou. As linhas que o relatório em texto já
+tem, os campos do JSON e as opções da linha de comando só mudam numa
+versão 2; detector novo, linha nova, campo novo e opção nova saem numa 1.x.
+
+## 1.10.0 — 11/10/2026
+
+- Relatório em texto: duas linhas novas no topo, as de antes iguais. Uma
+  diz quantos trechos revisar e em que incisos ("Trechos a revisar: 2
+  (VIII: 1, XII: 1)") ou que não há nada; a outra explica as classes e
+  avisa que, num sinal, nenhuma ocorrência não garante que o inciso foi
+  cumprido.
+- Linha de comando em português: ajuda, uso e erros (antes "usage:" e as
+  mensagens do argparse em inglês). A ajuda (`-h` ou `--ajuda`) traz
+  exemplos, o código de saída e o endereço da vitrine.
+- Sem arquivo, a mensagem dá um exemplo. Arquivo que não existe, pasta no
+  lugar do arquivo e número inválido em `--max-palavras` dizem o que
+  fazer.
+- Word (.docx, .doc), LibreOffice (.odt), PDF e RTF são reconhecidos: a
+  mensagem pede para copiar o texto para o Bloco de Notas, em vez de
+  "não está em UTF-8". Arquivo no padrão antigo do Bloco de Notas (ANSI)
+  é lido como Windows-1252, com um aviso; o "Unicode" dele (UTF-16)
+  também é lido.
+- Vitrine: o resumo diz em que incisos estão os trechos ("2 trechos
+  marcados (VIII: 1, XII: 1)"), e o aviso explica as classes.
+- `--saida` grava também o relatório (texto ou JSON) num arquivo novo,
+  sem `--reescrever`; a tela mostra uma linha com o resumo.
+- Reescrita: os endereços da Anthropic são os novos
+  (platform.claude.com, chave e crédito); a falta da chave diz para rodar
+  no PowerShell e colar quando for pedida; a recusa diz o que fazer.
+  Resposta fora do formato da API vira mensagem, não erro do Python; o
+  texto não consegue fechar o bloco do original no pedido à IA.
+- Correções: o sinal "×" (e "÷") derrubava o verificador; o VIII levava
+  21 s num texto de 2 mil siglas e agora leva menos de meio segundo, com
+  a mesma saída em 4.386 textos comparados; limiar menor que 1 é
+  recusado; um defeito do verificador sai com código 2 e o aviso de onde
+  reportar, nunca com o 1 de "achou trechos".
+- README: "Primeira vez? (Windows)", exemplo com a saída real (testada),
+  classes explicadas numa lista, siglas dos guias por extenso, seção
+  "Para quem automatiza" e a promessa de compatibilidade mais precisa.
 
 ## 1.9.0 — 11/10/2026
 
