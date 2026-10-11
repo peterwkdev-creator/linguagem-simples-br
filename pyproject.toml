@@ -13,14 +13,35 @@ license-files = ["LICENSE"]
 authors = [{ name = "Peter" }]
 requires-python = ">=3.11"
 dependencies = []
-keywords = ["linguagem-simples", "lei-15263", "acessibilidade", "plain-language", "portugues", "setor-publico"]
+# os tópicos do repositório no GitHub, na mesma ordem
+keywords = ["acessibilidade", "linguagem-simples", "plain-language", "portugues", "python",
+            "setor-publico", "lei-15263", "brasil", "brazil", "emag", "gov-br", "legibilidade",
+            "pyodide", "readability", "linguagem-clara"]
 classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "Natural Language :: Portuguese (Brazilian)",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Text Processing :: Linguistic",
 ]
 
+# O comando que o pip instala no PATH, além do `python -m linguagem_simples`.
+[project.scripts]
+linguagem-simples = "linguagem_simples.__main__:comando"
+
 [project.urls]
-Homepage = "https://github.com/peterwkdev-creator/linguagem-simples-br"
+# como no GitHub: a página inicial é a vitrine; o código, o repositório
+Homepage = "https://peterwkdev-creator.github.io/linguagem-simples-br/"
+Source = "https://github.com/peterwkdev-creator/linguagem-simples-br"
 Issues = "https://github.com/peterwkdev-creator/linguagem-simples-br/issues"
+Changelog = "https://github.com/peterwkdev-creator/linguagem-simples-br/blob/main/CHANGELOG.md"
 
 [tool.setuptools]
 packages = ["linguagem_simples"]

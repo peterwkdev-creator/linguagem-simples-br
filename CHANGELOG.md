@@ -4,6 +4,22 @@ A versão segue `linguagem_simples.__version__`; cada uma tem uma tag
 `vX.Y.Z` no commit que a publicou. O formato do relatório e as opções da
 linha de comando só mudam numa versão 2; detector novo sai numa 1.x.
 
+## 1.9.0 — 11/10/2026
+
+- Comando `linguagem-simples` no PATH depois do `pip install`
+  (`linguagem-simples texto.txt`), com as mesmas opções de
+  `python -m linguagem_simples`.
+- PyPI igual ao GitHub: a página do pacote mostra o GIF e os links do
+  README (endereços absolutos); as palavras-chave são os tópicos do
+  repositório; a página inicial é a vitrine, com o código, as issues e
+  este histórico ao lado; classifiers com as versões do Python (3.11 a
+  3.14), a língua e o tema.
+- README: selos da versão no PyPI e das versões do Python.
+- `SECURITY.md`: como avisar uma falha de segurança sem expô-la (aviso
+  privado do GitHub) e o que a biblioteca acessa.
+- Actions dos testes e da vitrine fixadas pelo SHA do commit, como as
+  da publicação.
+
 ## 1.8.0 — 11/10/2026
 
 - A chave da API ficou mais fácil e mais segura: sem a variável

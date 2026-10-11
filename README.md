@@ -1,15 +1,16 @@
 # linguagem-simples-br
 
 [![testes](https://github.com/peterwkdev-creator/linguagem-simples-br/actions/workflows/testes.yml/badge.svg)](https://github.com/peterwkdev-creator/linguagem-simples-br/actions/workflows/testes.yml)
-[![versão](https://img.shields.io/github/v/release/peterwkdev-creator/linguagem-simples-br?label=vers%C3%A3o)](https://github.com/peterwkdev-creator/linguagem-simples-br/releases/latest)
-[![licença: MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-blue)](LICENSE)
+[![PyPI](https://img.shields.io/pypi/v/linguagem-simples-br?label=PyPI)](https://pypi.org/project/linguagem-simples-br/)
+[![Python](https://img.shields.io/pypi/pyversions/linguagem-simples-br?label=Python)](https://pypi.org/project/linguagem-simples-br/)
+[![licença: MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-blue)](https://github.com/peterwkdev-creator/linguagem-simples-br/blob/main/LICENSE)
 
 Verificador aberto da **Lei 15.263/2025**, a Política Nacional de Linguagem
 Simples. Confere um texto contra as 18 técnicas do art. 5º e diz, técnica por
 técnica, o que achou, onde achou e o que não confere. Feito para servidor
 público, órgão e quem escreve para o cidadão.
 
-![Um texto de órgão colado na página; um clique marca a frase longa, a voz passiva e a oração intercalada, e lista os 18 incisos](docs/vitrine.gif)
+![Um texto de órgão colado na página; um clique marca a frase longa, a voz passiva e a oração intercalada, e lista os 18 incisos](https://raw.githubusercontent.com/peterwkdev-creator/linguagem-simples-br/main/docs/vitrine.gif)
 
 **[Experimente no navegador](https://peterwkdev-creator.github.io/linguagem-simples-br/)**:
 cole o texto, ou o HTML de uma página, e clique. A página roda esta mesma biblioteca no seu
@@ -20,7 +21,7 @@ conexão rápida). Depois disso, conferir o texto do exemplo leva uns 5 ms.
 **Precisão medida** em páginas de serviço do gov.br, por inciso: XII 100%,
 XV 98%, XVII 98%, VI 96%, II 95%, XIV 88%, VIII 78%; o XIII acerta 31% e por isso
 só aponta trechos para quem lê decidir. Intervalos em
-[Precisão medida](#precisão-medida).
+[Precisão medida](https://github.com/peterwkdev-creator/linguagem-simples-br#precisão-medida).
 
 > O resultado aponta trechos para revisão. **Não é parecer jurídico** e não
 > certifica que um texto cumpre a lei.
@@ -36,7 +37,7 @@ pip install linguagem-simples-br
 Ou direto da tag no GitHub:
 
 ```bash
-pip install "git+https://github.com/peterwkdev-creator/linguagem-simples-br@v1.8.0"
+pip install "git+https://github.com/peterwkdev-creator/linguagem-simples-br@v1.9.0"
 ```
 
 Também roda sem instalar, de dentro da pasta do repositório.
@@ -48,6 +49,9 @@ Na linha de comando:
 ```bash
 python -m linguagem_simples texto.txt
 ```
+
+Instalado pelo `pip`, o mesmo vale como `linguagem-simples texto.txt`,
+com as mesmas opções (`linguagem-simples --help` lista todas).
 
 Em Python:
 
@@ -63,7 +67,7 @@ for resultado in conferir(texto):
 
 O arquivo é texto, Markdown ou HTML; `-` lê da entrada padrão. O relatório
 lista os 18 incisos, na ordem da lei, cada um com a classe e o que
-aconteceu. Mais exemplos [abaixo](#mais-exemplos).
+aconteceu. Mais exemplos [abaixo](https://github.com/peterwkdev-creator/linguagem-simples-br#mais-exemplos).
 
 ### Reescrita sugerida por IA
 
@@ -144,7 +148,7 @@ o trecho não dá) e 25 mantiveram o sentido: **89% (73% a 96%)**. Nas
 outras 3, a reescrita afirmou que o mandado foi cumprido, escreveu
 "Aceitamos" onde o original não diz quem decidiu e trocou "peticionar"
 por "entrar com uma ação judicial", a mesma troca que o guia da SES-DF
-faz. Método em [docs/precisao.md](docs/precisao.md); para medir de novo
+faz. Método em [docs/precisao.md](https://github.com/peterwkdev-creator/linguagem-simples-br/blob/main/docs/precisao.md); para medir de novo
 com a sua chave, `python docs/medir_reescrita.py medida.jsonl`.
 
 ## Por quê
@@ -259,7 +263,7 @@ técnicos que duas passagens às cegas listaram em 30 delas ("autos",
 "liminar", "mérito", "precatórios"), não apontou nenhum (**0%**, de 0% a
 5%). Sem marca do V não quer dizer sem jargão. Cada
 amostra, o método e o que os erros mostram estão em
-[docs/precisao.md](docs/precisao.md).
+[docs/precisao.md](https://github.com/peterwkdev-creator/linguagem-simples-br/blob/main/docs/precisao.md).
 
 ## Mais exemplos
 
@@ -479,15 +483,15 @@ do Planalto (epígrafe de ato normativo em maiúsculas).
   monta e publica a cada push que muda a biblioteca, a página ou os testes
   (`.github/workflows/pages.yml`).
 - `docs/`: o GIF do começo deste README, o
-  [histórico da precisão](docs/precisao.md) e `medir_reescrita.py`, que
+  [histórico da precisão](https://github.com/peterwkdev-creator/linguagem-simples-br/blob/main/docs/precisao.md) e `medir_reescrita.py`, que
   refaz a medida da reescrita.
-- [`CHANGELOG.md`](CHANGELOG.md): o que mudou em cada versão.
+- [`CHANGELOG.md`](https://github.com/peterwkdev-creator/linguagem-simples-br/blob/main/CHANGELOG.md): o que mudou em cada versão.
 
 ## Compatibilidade
 
 Versão semântica: o formato do relatório (texto e JSON) e as opções da
 linha de comando só mudam numa versão 2; detector novo sai numa 1.x. O que
-mudou em cada versão está no [CHANGELOG.md](CHANGELOG.md).
+mudou em cada versão está no [CHANGELOG.md](https://github.com/peterwkdev-creator/linguagem-simples-br/blob/main/CHANGELOG.md).
 
 ## Contribuir
 
@@ -495,9 +499,9 @@ Resultado diferente do esperado ou caso que falta?
 [Abra uma issue](https://github.com/peterwkdev-creator/linguagem-simples-br/issues/new/choose)
 pelo modelo "Resultado diferente do esperado", com texto inventado ou de
 página pública, sem dado de pessoa. Para mandar código, veja o
-[CONTRIBUTING.md](CONTRIBUTING.md); a conversa segue o
-[código de conduta](CODE_OF_CONDUCT.md).
+[CONTRIBUTING.md](https://github.com/peterwkdev-creator/linguagem-simples-br/blob/main/CONTRIBUTING.md); a conversa segue o
+[código de conduta](https://github.com/peterwkdev-creator/linguagem-simples-br/blob/main/CODE_OF_CONDUCT.md).
 
 ## Licença
 
-[MIT](LICENSE).
+[MIT](https://github.com/peterwkdev-creator/linguagem-simples-br/blob/main/LICENSE).

@@ -35,7 +35,9 @@ def _ler(arquivo, html):
 
 def main(argv=None):
     p = argparse.ArgumentParser(
-        prog="python -m linguagem_simples",
+        # pelo pip, o nome do comando; por python -m, argv[0] é o caminho do .py
+        prog=("linguagem-simples" if Path(sys.argv[0]).stem == "linguagem-simples"
+              else "python -m linguagem_simples"),
         description="Confere um texto contra os 18 incisos do art. 5º da Lei "
         "15.263/2025 (Política Nacional de Linguagem Simples). " + AVISO,
     )
@@ -173,9 +175,14 @@ def _perguntar_chave(da_entrada_padrao=False):
     return chave
 
 
-if __name__ == "__main__":
-    # Acentos em UTF-8 também quando a saída vai para arquivo ou pipe (no
-    # Windows, o padrão seria a página de código local).
+def comando():
+    """O comando ``linguagem-simples`` e o ``python -m``: acentos em UTF-8
+    também quando a saída vai para arquivo ou pipe (no Windows, o padrão
+    seria a página de código local)."""
     sys.stdout.reconfigure(encoding="utf-8")
     sys.stderr.reconfigure(encoding="utf-8")
-    sys.exit(main())
+    return main()
+
+
+if __name__ == "__main__":
+    sys.exit(comando())

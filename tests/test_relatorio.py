@@ -9,6 +9,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from linguagem_simples import __version__
 from linguagem_simples.__main__ import main
@@ -186,6 +187,16 @@ class TestLinhaDeComando(unittest.TestCase):
         with contextlib.redirect_stdout(io.StringIO()) as saida, self.assertRaises(SystemExit) as fim:
             main(["--versao"])
         self.assertEqual((fim.exception.code, saida.getvalue()), (0, f"linguagem_simples {__version__}\n"))
+
+    def test_nome_do_comando_instalado(self):
+        # pelo pip, a ajuda e os erros dizem o comando que se digitou
+        for argv0, nome in (("bin/linguagem-simples", "linguagem-simples"),
+                            ("Scripts/linguagem-simples.exe", "linguagem-simples"),
+                            ("linguagem_simples/__main__.py", "python -m linguagem_simples")):
+            with self.subTest(argv0), mock.patch.object(sys, "argv", [argv0]), \
+                    contextlib.redirect_stderr(io.StringIO()) as erro, self.assertRaises(SystemExit):
+                main([])
+            self.assertTrue(erro.getvalue().startswith(f"usage: {nome} "), erro.getvalue())
 
     def test_erros_de_uso_saem_com_2(self):
         erro = io.StringIO()

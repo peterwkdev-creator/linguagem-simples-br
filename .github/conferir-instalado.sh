@@ -13,8 +13,13 @@ cd "$RUNNER_TEMP"
 # a versão que o pip instalou é a do __version__ (a CLI responde --version)
 v=$("$venv/bin/python" -I -c 'import linguagem_simples as p; print(p.__version__)')
 "$venv/bin/python" -I -m linguagem_simples --version | grep -F "$v"
-# Um valor do README, pelo que o pip instalou: sem [project.scripts], o
-# exemplo do HTML pelo import. O XVII lê lexicos/links-vagos.txt, que só
+"$venv/bin/linguagem-simples" --version | grep -F "$v"
+# com ocorrência o código é 1; o que se confere é o apontamento
+printf '<main><p>Para pedir, <a href="/pedir">clique aqui</a>.</p></main>' \
+  | "$venv/bin/linguagem-simples" --html - > "$RUNNER_TEMP/saida.txt" || test $? -eq 1
+grep -F "clique aqui" "$RUNNER_TEMP/saida.txt"
+# Um valor do README, pelo que o pip instalou: o exemplo do HTML pelo
+# comando, acima, e pelo import. O XVII lê lexicos/links-vagos.txt, que só
 # vai no wheel pelo package-data.
 "$venv/bin/python" -I - <<'EOF' | grep -F "XVII clique aqui link com texto que não diz o destino (eMAG 3.5)"
 from linguagem_simples.pagina import ler_html
