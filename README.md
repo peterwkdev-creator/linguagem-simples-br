@@ -38,7 +38,7 @@ python -m pip install linguagem-simples-br
 Ou direto da tag no GitHub:
 
 ```bash
-python -m pip install "git+https://github.com/peterwkdev-creator/linguagem-simples-br@v1.10.0"
+python -m pip install "git+https://github.com/peterwkdev-creator/linguagem-simples-br@v1.10.1"
 ```
 
 Sem instalar nada, cole o texto na
@@ -195,7 +195,21 @@ o trecho não dá) e 25 mantiveram o sentido: **89% (73% a 96%)**. Nas
 outras 3, a reescrita afirmou que o mandado foi cumprido, escreveu
 "Aceitamos" onde o original não diz quem decidiu e trocou "peticionar"
 por "entrar com uma ação judicial", a mesma troca que o guia da SES-DF
-faz. Método em [docs/precisao.md](https://github.com/peterwkdev-creator/linguagem-simples-br/blob/main/docs/precisao.md); para medir de novo
+faz. Na 1.10.1, que desliga o pensamento do modelo, os mesmos 28 deram
+**86% (69% a 94%)**, dentro da margem.
+
+**Em página longa, o sentido mudou em todas.** Em 10 páginas de serviço
+do gov.br com mais de mil palavras (1.10.1), as 10 reescritas foram
+aceitas e os apontamentos caíram de 378 para 92, mas nenhuma manteve o
+sentido inteiro: **0 de 10 (0% a 28%)**. Nas 10, a reescrita diz quem
+faz a ação onde a voz passiva do original não diz ("Os números são
+atualizados" virou "O sistema atualiza"), às vezes errado. Em 5, mudou
+algo além disso: a omissão deixou de ser crime numa página que cita o
+art. 299 do Código Penal, e siglas ganharam nomes por extenso que a
+página não dá. Nenhuma perdeu link, e-mail, telefone, prazo ou valor.
+Em página longa, use a reescrita como rascunho e leia frase por frase.
+
+Método em [docs/precisao.md](https://github.com/peterwkdev-creator/linguagem-simples-br/blob/main/docs/precisao.md); para medir de novo
 com a sua chave, `python docs/medir_reescrita.py medida.jsonl`.
 
 ## Por quê
@@ -444,8 +458,9 @@ do Planalto (epígrafe de ato normativo em maiúsculas).
 ### Limites conhecidos
 
 - A reescrita por IA foi medida em 28 trechos curtos (de 4 a 68
-  palavras), tirados de guias públicos que o modelo pode ter lido; em
-  texto longo, ainda não há número. O aceite confere números, siglas e
+  palavras), tirados de guias públicos que o modelo pode ter lido, e em
+  10 páginas longas do gov.br; nas longas, o sentido mudou em todas (ver
+  "O que se mediu"). O aceite confere números, siglas e
   links, não nomes, condições nem quem faz a ação. Um texto com ordens
   dirigidas à IA pode desviar a reescrita, ainda que o pedido mande não
   obedecer: o aceite e a sua leitura são a proteção.

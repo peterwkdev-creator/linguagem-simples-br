@@ -400,8 +400,45 @@ petição pode não ser ação), embora seja a troca que o guia da SES-DF
 → "Aceitamos o pedido" põe quem decidiu, que o original não diz (a
 CAPES, p. 8, escreve "O pedido foi aceito").
 
-Limites: trechos curtos, de guias públicos que o modelo pode ter lido;
-em texto longo e em página real de órgão, ainda sem número.
+Limites: trechos curtos, de guias públicos que o modelo pode ter lido.
+
+**Os mesmos 28 sem o pensamento do modelo (1.10.1, 11/10/2026).** A
+1.10.1 desliga o pensamento do `claude-sonnet-5-5` (na 1.10.0 ele gastava
+o limite de saída numa página longa). Mesmos trechos e critério: 28 / 28
+aceitas (2 na 2ª tentativa), 42 → 0 apontamentos (os detectores mudaram
+desde a 1.7.0), mesmo sentido em 24 / 28 = **86% (69% a 94%)**, dentro da
+margem da 1.7.0. Mudaram: "DTI" ganhou um nome por extenso que o trecho
+não dá; "a CAPES organiza" e "Aplique a pomada" põem quem faz, que o
+original não diz; "peticionar" virou "entrar com uma ação judicial", como
+antes. 19.275 tokens de entrada e 2.007 de saída, 64 segundos ao todo.
+
+**Reescrita de página longa (1.10.1, 11/10/2026).** 10 páginas sorteadas
+(semente 20261011) entre as 133 páginas de serviço do gov.br com mil
+palavras ou mais, de 490 já baixadas para a precisão; de 1.024 a 1.584
+palavras cada, com a moldura do portal (avaliação, ouvidoria), como para
+quem usa. Mesmo critério, com uma regra a mais escrita antes: um só fato
+mudado faz a página inteira contar como "mudou".
+
+| Medida | Resultado | Intervalo de 95% (Wilson) |
+|---|---|---|
+| Aceitas pelo verificador | 10 / 10 (7 na 1ª tentativa) | — |
+| Apontamentos | 378 → 92 | — |
+| Mesmo sentido | 0% (0 / 10) | 0% a 28% |
+
+As duas passagens (a 2ª às cegas, em outra ordem) deram "mudou" nas 10.
+Em todas, a reescrita põe quem faz a ação onde a passiva não diz: "Os
+números são atualizados diariamente", da moldura, virou "O sistema
+atualiza" em 9 e "O IFSP atualiza" em 1 (errado: a avaliação é do
+gov.br); numa página de vacinação, "os dados já foram enviados" virou "O
+profissional já enviou", e a mesma página diz que quem envia é a gestão
+estadual ou municipal. Em 5, as duas passagens acham outra mudança: "campos
+em branco ou informação falsa [...] pode configurar crime" virou "A
+informação falsa também pode configurar crime" (a omissão sai do crime);
+siglas (PSOA, SINTAC, SACI, CHT) ganharam nomes por extenso que a página
+não dá, um deles errado; "sujeita à perda do direito" virou "perde o
+direito"; o rótulo do ícone "PDF" ganhou o nome por extenso, que não está
+na tela. Nenhuma perdeu link, e-mail, telefone, prazo ou valor. 116.264
+tokens de entrada e 50.862 de saída; mediana de 19 segundos por página.
 
 Para refazer, com a sua chave: `python docs/medir_reescrita.py
 medida.jsonl`, da pasta do repositório. O script grava o resultado de

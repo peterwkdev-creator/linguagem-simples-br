@@ -34,8 +34,13 @@ ONDE_CRIAR_A_CHAVE = "https://platform.claude.com/settings/keys"
 ONDE_COMPRAR_CREDITO = "https://platform.claude.com/settings/billing"
 MODELO_PADRAO = "claude-sonnet-5-5"
 TENTATIVAS = 3  # a primeira e mais duas, sabendo o que falhou
-MAX_TOKENS = 16000
+MAX_TOKENS = 16000  # a saída inteira, inclusive o pensamento do modelo que pensa
 TEMPO_LIMITE = 120  # segundos por chamada
+# Sem pensar antes de responder: o pensamento conta no MAX_TOKENS e, numa
+# página longa, a resposta era cortada. Cada modelo desliga de um jeito
+# (platform.claude.com/docs/en/build-with-claude/thinking, consultada em
+# 11/10/2026); os 4.x não pensam sem o campo, e o Opus 5.5 sempre pensa.
+SEM_PENSAMENTO = {"claude-sonnet-5-5": {"type": "between_tools"}, "claude-haiku-5-5": {"type": "disabled"}}
 
 AVISO_SENTIDO = (
     "Reescrita sugerida por IA. O verificador confere os apontamentos, os "
@@ -186,9 +191,13 @@ def _sem_endereco(texto):
 
 
 def _contem(texto, fato):
+    # O número se acha como foi extraído, inteiro: o "29" de "Art.29." e o
+    # "2" de "2ª" contam, o "5" de "1.5" não.
+    if _NUMERO.fullmatch(fato):
+        return fato in _numeros(texto)
     # Sem diferença de caixa: "PRAZO" de título que vira "Prazo" não é fato
-    # perdido; a sigla que some de todo, sim.
-    return re.search(r"(?<![\w.])%s(?!\w)" % re.escape(fato), texto, re.I) is not None
+    # perdido; a sigla que some de todo, sim. O ponto antes vale: "Fala.BR".
+    return re.search(r"(?<!\w)%s(?!\w)" % re.escape(fato), texto, re.I) is not None
 
 
 def _extrair(resposta):
@@ -279,8 +288,11 @@ class _Claude:
         import http.client
         import urllib.error
         import urllib.request
-        corpo = json.dumps({"model": self.modelo, "max_tokens": MAX_TOKENS, "system": sistema,
-                            "messages": mensagens}).encode("utf-8")
+        campos = {"model": self.modelo, "max_tokens": MAX_TOKENS, "system": sistema, "messages": mensagens}
+        pensamento = _pensamento(self.modelo)
+        if pensamento:
+            campos["thinking"] = pensamento
+        corpo = json.dumps(campos).encode("utf-8")
         pedido = urllib.request.Request(URL, data=corpo, method="POST", headers={
             "x-api-key": self._chave, "anthropic-version": VERSAO_DA_API, "content-type": "application/json",
         })
@@ -309,8 +321,22 @@ class _Claude:
                 "a resposta da API veio incompleta ou não é da API (rede instável ou proxy no caminho?): "
                 "tente de novo") from None
         if parar == "max_tokens":
-            raise ErroDeReescrita("o texto é longo demais para uma resposta só: divida em partes e reescreva cada uma")
+            raise ErroDeReescrita(
+                f"a resposta foi cortada no limite de {MAX_TOKENS} tokens de saída"
+                + (": divida o texto em partes e reescreva cada uma" if _pensamento(self.modelo) else
+                   f" (o modelo {self.modelo} pensa antes de responder, e o pensamento conta no limite): "
+                   f"use o modelo padrão, {MODELO_PADRAO}, que responde sem pensar antes, "
+                   "ou divida o texto em partes"))
         return texto
+
+
+def _pensamento(modelo):
+    """O campo ``thinking`` que desliga o pensamento do modelo, ou ``None``
+    (o nome pode trazer data no fim: ``claude-sonnet-5-5-20260901``)."""
+    for nome, valor in SEM_PENSAMENTO.items():
+        if modelo == nome or modelo.startswith(nome + "-"):
+            return valor
+    return None
 
 
 def _abrir(pedido):

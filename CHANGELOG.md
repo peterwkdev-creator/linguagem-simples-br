@@ -5,6 +5,28 @@ A versão segue `linguagem_simples.__version__`; cada uma tem uma tag
 tem, os campos do JSON e as opções da linha de comando só mudam numa
 versão 2; detector novo, linha nova, campo novo e opção nova saem numa 1.x.
 
+## 1.10.1 — 11/10/2026
+
+Correções da reescrita por IA (`--reescrever`), achadas ao medi-la em
+páginas longas do gov.br:
+
+- A página longa falhava sempre com "o texto é longo demais". O modelo
+  padrão pensa antes de responder, e o pensamento gastava o limite de
+  saída. Agora o pedido desliga o pensamento no `claude-sonnet-5-5` e no
+  `claude-haiku-5-5`; a resposta sai mais rápida e mais barata.
+- Quando a resposta é cortada, a mensagem diz o motivo; com um modelo que
+  sempre pensa (o `claude-opus-5-5`), sugere o modelo padrão.
+- A conferência da reescrita não achava, nem no próprio original, a sigla
+  colada num ponto ("Fala.BR", "GOV.BR"), o número depois de ponto
+  ("Art.29.", "n.10.048/2000") e o número com ordinal ("2ª", "5º"): a
+  reescrita era recusada como se tivesse perdido o fato. Isso acontecia em
+  277 das 491 páginas de serviço do gov.br do corpus; agora, em nenhuma.
+- Medida nova no README e em `docs/precisao.md`: em 10 páginas longas, as
+  10 reescritas foram aceitas (378 → 92 apontamentos), mas o sentido
+  mudou em todas, sobretudo porque a reescrita diz quem faz a ação onde
+  a passiva não diz. Nos 28 trechos curtos, sem o pensamento, 86% de
+  mesmo sentido (89% na 1.7.0).
+
 ## 1.10.0 — 11/10/2026
 
 - Relatório em texto: duas linhas novas no topo, as de antes iguais. Uma

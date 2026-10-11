@@ -170,6 +170,24 @@ class TestFatos(unittest.TestCase):
         # em qualquer ponto da sigla: no meio, antes da última letra e no fim
         self.assertEqual(fatos("Peça A×B, AB×C e o CPF."), ["AB", "CPF"])
 
+    def test_o_original_nao_perde_nada_para_si_mesmo(self):
+        # Achado na medida 2 (11/10/2026): seis de dez páginas do gov.br
+        # "perdiam" fatos para si mesmas, e toda reescrita era recusada.
+        for texto in ("Acesse o Fala.BR com a conta GOV.BR.", "De acordo com a portaria:\n\nArt.29.\n\nFicam",
+                      "conforme a Lei n.10.048/2000.", "Ausência de 1ª, 2ª doses (art. 5º).", ORIGINAL):
+            with self.subTest(texto=texto):
+                self.assertTrue(fatos(texto))
+                self.assertEqual([f for f in fatos(texto) if not reescrita._contem(texto, f)], [])
+
+    def test_fato_colado_em_ponto_ou_ordinal_se_acha(self):
+        self.assertTrue(reescrita._contem("Use a conta gov.br.", "BR"))  # a caixa muda, o fato fica
+        self.assertTrue(reescrita._contem("Veja o art. 29.", "29"))
+        self.assertTrue(reescrita._contem("Tome a 2ª dose.", "2"))
+        # o número se acha inteiro: parte de outro não conta
+        self.assertFalse(reescrita._contem("Taxa de 1.5 ponto.", "5"))
+        self.assertFalse(reescrita._contem("Lei 10.048/2001.", "10.048/2000"))
+        self.assertFalse(reescrita._contem("Use o BRT.", "BR"))
+
     def test_titulo_que_muda_de_caixa_nao_some(self):
         original = "PRAZO: 10 dias para o INSS responder."
         self.assertEqual(_problemas(original, "Prazo: 10 dias para o INSS responder.", (("XII", 1),), (("XII", 0),)), [])
@@ -202,6 +220,19 @@ class TestChamada(unittest.TestCase):
         self.assertEqual(corpo["model"], "modelo-x")
         self.assertEqual(corpo["messages"][0]["role"], "user")
         self.assertNotIn(self.CHAVE, pedido.data.decode("utf-8"))  # a chave só vai no cabeçalho
+        self.assertNotIn("thinking", corpo)  # modelo sem regra: o campo fica de fora
+
+    def test_sem_pensamento(self):
+        # O pensamento conta no limite de saída e cortava a página longa.
+        for modelo, esperado in (("claude-sonnet-5-5", {"type": "between_tools"}),
+                                 ("claude-sonnet-5-5-20260901", {"type": "between_tools"}),
+                                 ("claude-haiku-5-5", {"type": "disabled"}),
+                                 ("claude-opus-5-5", None), ("claude-sonnet-4-5", None),
+                                 ("claude-sonnet-5-55", None)):
+            with self.subTest(modelo=modelo), mock.patch.dict(os.environ, {reescrita.VARIAVEL_DA_CHAVE: self.CHAVE}), \
+                    mock.patch.object(reescrita, "_abrir", return_value=_resposta_da_api(em_tags(BOM))) as abrir:
+                reescrever(ORIGINAL, modelo=modelo)
+                self.assertEqual(json.loads(abrir.call_args.args[0].data).get("thinking"), esperado)
 
     def test_sem_chave_nao_chama_a_rede(self):
         with mock.patch.dict(os.environ, {reescrita.VARIAVEL_DA_CHAVE: ""}), \
@@ -342,8 +373,14 @@ class TestChamada(unittest.TestCase):
     def test_resposta_cortada_vira_erro(self):
         with mock.patch.dict(os.environ, {reescrita.VARIAVEL_DA_CHAVE: self.CHAVE}), \
                 mock.patch.object(reescrita, "_abrir", return_value=_resposta_da_api("<texto>O pe", "max_tokens")):
-            with self.assertRaisesRegex(ErroDeReescrita, "longo demais"):
+            with self.assertRaisesRegex(ErroDeReescrita, r"cortada no limite de 16000 tokens de saída: divida"):
                 reescrever(ORIGINAL)
+        # o modelo que pensa: a mensagem diz o motivo e o modelo que não pensa
+        with mock.patch.dict(os.environ, {reescrita.VARIAVEL_DA_CHAVE: self.CHAVE}), \
+                mock.patch.object(reescrita, "_abrir", return_value=_resposta_da_api("<texto>O pe", "max_tokens")):
+            with self.assertRaisesRegex(ErroDeReescrita, r"claude-opus-5-5 pensa antes .* use o modelo padrão, "
+                                                         r"claude-sonnet-5-5"):
+                reescrever(ORIGINAL, modelo="claude-opus-5-5")
 
 
 class TestLinhaDeComando(unittest.TestCase):
