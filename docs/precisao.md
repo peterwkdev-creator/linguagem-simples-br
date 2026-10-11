@@ -367,6 +367,42 @@ licença será expedida"), em que a CAPES dá "mandar, enviar", e 1 de
 que é palavra difícil depende de quem lê (TJRS, p. 31), e a lista do que
 falta pede critério próprio.
 
+**Reescrita por IA, aceite e sentido (1.7.0, 11/10/2026).** A reescrita
+(`--reescrever`) rodou nos 28 trechos "antes" dos pares dos guias
+(`tests/guias.py`) que têm ao menos um apontamento, de 32 pares; 4 a 68
+palavras cada. Modelo `claude-sonnet-5-5`, padrões de fábrica, 73
+segundos ao todo.
+
+| Medida | Resultado | Intervalo de 95% (Wilson) |
+|---|---|---|
+| Aceitas pelo verificador | 28 / 28 (25 na 1ª tentativa, 3 na 2ª) | — |
+| Apontamentos | 41 → 1 | — |
+| Mesmo sentido | 89% (25 / 28) | 73% a 96% |
+
+Por inciso, antes → depois: XII 9 → 0, XIV 9 → 0, IV 6 → 0, II 5 → 0,
+VI 3 → 0, VIII 3 → 1, XIII 3 → 0, V 2 → 0, IX 1 → 0, XV 1 → 0. O que
+sobrou é "A DTI vai atender.": o trecho não dá o nome da sigla, e a
+reescrita não o inventou. Nenhuma foi recusada nesta medida; a recusa só
+está provada nos testes, com IA simulada.
+
+**Como se mediu o sentido.** Critério escrito antes de ver as
+reescritas: o sentido é o mesmo quando nenhum fato, prazo, valor,
+condição, sujeito, obrigação ou direito mudou ou sumiu, nada foi
+acrescentado (salvo o nome por extenso certo da sigla) e ordem continua
+ordem. Duas passagens, a segunda às cegas, em outra ordem e sem o nome
+dos pares; 25 dos 28 rótulos iguais. As 3 divergências, resolvidas pelo
+critério: "Compareça pessoalmente" → "Compareça" fica como mesmo (a
+CAPES, p. 11, dá "pessoalmente" como redundante); "dando cumprimento ao
+mandado" → "cumpri o mandado" mudou (a certidão passa a afirmar o
+cumprimento); "peticionar" → "entrar com uma ação judicial" mudou (a
+petição pode não ser ação), embora seja a troca que o guia da SES-DF
+(p. 10) faz. A 4ª mudança, nas duas passagens: "O pedido foi deferido"
+→ "Aceitamos o pedido" põe quem decidiu, que o original não diz (a
+CAPES, p. 8, escreve "O pedido foi aceito").
+
+Limites: trechos curtos, de guias públicos que o modelo pode ter lido;
+em texto longo e em página real de órgão, ainda sem número.
+
 **Como se mediu.** 30 páginas sorteadas (semente 20261009) entre as 5.735
 páginas de serviço do sitemap do gov.br de 08/10/2026. Os 621 apontamentos
 viraram 431 sem os repetidos (o modelo do portal se repete em toda página);

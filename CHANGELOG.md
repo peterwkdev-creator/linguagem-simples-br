@@ -4,6 +4,22 @@ A versão segue `linguagem_simples.__version__`; cada uma tem uma tag
 `vX.Y.Z` no commit que a publicou. O formato do relatório e as opções da
 linha de comando só mudam numa versão 2; detector novo sai numa 1.x.
 
+## 1.7.0 — 11/10/2026
+
+- Reescrita sugerida por IA (`--reescrever`, `reescrita.reescrever`): o
+  Claude, com a chave de quem usa (`ANTHROPIC_API_KEY`), reescreve o
+  texto a partir dos apontamentos. Só é aceita se o verificador medir
+  menos apontamentos, nenhum inciso pior, e se todo número, data, sigla,
+  link e e-mail do original continuar, sem número novo; senão, mais duas
+  tentativas, e a recusa diz o motivo sem mostrar o texto. `--saida`
+  grava o texto aceito, nunca no arquivo lido; `--modelo` troca o modelo
+  (padrão `claude-sonnet-5-5`). Só a biblioteca padrão, como antes.
+- Medida nos 28 trechos "antes" dos guias oficiais com apontamento: 28
+  aceitas, 41 apontamentos → 1; mesmo sentido em 25: 89% (73–96), duas
+  passagens às cegas. O verificador não confere o sentido: a saída manda
+  comparar com o original.
+- Sem mudança no que o verificador aponta.
+
 ## 1.6.1 — 11/10/2026
 
 - No PyPI: `pip install linguagem-simples-br`. Publicado pela publicação

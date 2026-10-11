@@ -36,7 +36,7 @@ pip install linguagem-simples-br
 Ou direto da tag no GitHub:
 
 ```bash
-pip install "git+https://github.com/peterwkdev-creator/linguagem-simples-br@v1.6.1"
+pip install "git+https://github.com/peterwkdev-creator/linguagem-simples-br@v1.7.0"
 ```
 
 Também roda sem instalar, de dentro da pasta do repositório.
@@ -64,6 +64,35 @@ for resultado in conferir(texto):
 O arquivo é texto, Markdown ou HTML; `-` lê da entrada padrão. O relatório
 lista os 18 incisos, na ordem da lei, cada um com a classe e o que
 aconteceu. Mais exemplos [abaixo](#mais-exemplos).
+
+### Reescrita sugerida por IA
+
+```bash
+python -m linguagem_simples texto.txt --reescrever --saida texto-simples.txt
+```
+
+Com `--reescrever`, o Claude, IA da Anthropic, reescreve o texto a partir
+dos apontamentos do relatório. A chave da API é a sua, na variável
+`ANTHROPIC_API_KEY`: a biblioteca não tem chave nem guarda a sua, e o
+texto vai para a API da Anthropic (não use com dado pessoal que você não
+possa enviar). A reescrita só é aceita se o verificador medir nela menos
+apontamentos, nenhum inciso pior, e se todo número, data, sigla, link e
+e-mail do original continuar nela, sem número novo. Senão, a IA tenta mais
+duas vezes, sabendo o que falhou; depois disso, a saída diz por que
+recusou e não mostra o texto. O texto aceito vai para a tela ou para
+`--saida`, nunca por cima do arquivo lido. `--modelo` troca o modelo
+(padrão `claude-sonnet-5-5`); com `--json`, sai o antes e depois por
+inciso. Código de saída: 0 aceita, 1 recusada, 2 erro. Não roda na
+vitrine: a página no navegador não leva chave.
+
+O verificador não confere o sentido: compare com o original antes de
+usar. Nos 28 trechos "antes" dos guias oficiais que têm apontamento, as
+28 reescritas foram aceitas (41 apontamentos → 1, a sigla DTI, cujo nome
+o trecho não dá) e 25 mantiveram o sentido: **89% (73% a 96%)**. Nas
+outras 3, a reescrita afirmou que o mandado foi cumprido, escreveu
+"Aceitamos" onde o original não diz quem decidiu e trocou "peticionar"
+por "entrar com uma ação judicial", a mesma troca que o guia da SES-DF
+faz. Método em [docs/precisao.md](docs/precisao.md).
 
 ## Por quê
 
@@ -280,6 +309,11 @@ do Planalto (epígrafe de ato normativo em maiúsculas).
 
 ### Limites conhecidos
 
+- A reescrita por IA foi medida em 28 trechos curtos (de 4 a 68
+  palavras), tirados de guias públicos que o modelo pode ter lido; em
+  texto longo, ainda não há número. O aceite confere números, siglas e
+  links, não nomes, condições nem quem faz a ação.
+
 - Sigla escrita como nome próprio ("Lacen", "Anvisa") não é reconhecida.
 - Com o padrão de 20 palavras, o "depois" da CAPES e o da Anvisa ainda
   têm uma frase acima de 20 (de 21 a 23 palavras); os dois guias aceitam até
@@ -380,7 +414,8 @@ do Planalto (epígrafe de ato normativo em maiúsculas).
   o texto da lei e a classe de cada um; `texto.py` divide o texto em
   blocos e frases; `pagina.py` lê o HTML; `detectores.py`, um detector por
   inciso; `limiares.py`, os limiares com a fonte; `relatorio.py`, o
-  relatório em texto e JSON; `__main__.py`, a linha de comando.
+  relatório em texto e JSON; `reescrita.py`, a reescrita por IA e o
+  aceite dela; `__main__.py`, a linha de comando.
 - `linguagem_simples/lexicos/`: os léxicos, uma entrada por linha, com a
   fonte.
 - `tests/`: os testes; `tests/guias.py` traz os trechos dos guias, com a
