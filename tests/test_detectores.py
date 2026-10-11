@@ -512,7 +512,7 @@ class TestIncisoVI(unittest.TestCase):
         self.assertEqual(estrangeirismos("Se vê primo ictu\n\noculi."), [])
 
     def test_palavra_inteira(self):
-        for texto in ("A expertise da equipe.", "Faça o relogin.", "O loginho.", "Um checklist2."):
+        for texto in ("O expertismo da equipe.", "Faça o relogin.", "O loginho.", "Um checklist2."):
             with self.subTest(texto):
                 self.assertEqual(estrangeirismos(texto), [])
 
@@ -531,6 +531,8 @@ class TestIncisoVI(unittest.TestCase):
         texto = ("O marketing do blog, o design da startup, o office boy, o royalty, a commodity, "
                  "o download on-line, o free shop, o iceberg e o menu do portal.")
         self.assertEqual(estrangeirismos(texto), [])
+        # Senado (sem itálico, sem forma a usar) e TRF3 ("já incorporou")
+        self.assertEqual(estrangeirismos("O status do pedido, vide o art. 2º, data venia."), [])
 
     def test_pares_do_senado(self):
         texto = "O folder, os posters, o whisky, o standard, o premier e a avant-première."
@@ -538,6 +540,16 @@ class TestIncisoVI(unittest.TestCase):
                          ["folder", "posters", "whisky", "standard", "premier", "avant-première"])
         self.assertIn("“pré-estreia”", estrangeirismos("A avant-première.")[0].mensagem)
         for texto in ("O fôlder e o pôster.", "Os premiers.", "Um standardizado."):
+            with self.subTest(texto):
+                self.assertEqual(estrangeirismos(texto), [])
+
+    def test_pares_do_tjrs(self):
+        texto = ("A expertise e a performance da equipe; in casu, o fruto in natura "
+                 "e, ipso facto, o jus utendi.")
+        self.assertEqual(trechos(estrangeirismos, texto),
+                         ["expertise", "performance", "in casu", "in natura", "ipso facto", "jus utendi"])
+        self.assertIn("“no caso”", estrangeirismos("Assim, in casu.")[0].mensagem)
+        for texto in ("A especialidade e o desempenho; no caso, ao natural.", "O casu in.", "Um jus."):
             with self.subTest(texto):
                 self.assertEqual(estrangeirismos(texto), [])
 
@@ -555,20 +567,21 @@ class TestIncisoVI(unittest.TestCase):
     def test_lexico_de_estrangeirismos_tem_fonte(self):
         caminho = Path(detectores.__file__).parent / "lexicos" / "estrangeirismos.txt"
         linhas = [l for l in caminho.read_text(encoding="utf-8").splitlines() if l.strip() and not l.startswith("#")]
-        self.assertEqual(len(linhas), 24)
+        self.assertEqual(len(linhas), 36)
         palavras_ = set()
         for linha in linhas:
             with self.subTest(linha):
                 palavra, forma, fonte = (c.strip() for c in linha.split("|"))
                 self.assertTrue(palavra and forma)
                 self.assertRegex(fonte, r'^(?:CAPES p\. 9 \(8\)|Anvisa p\. 12|TJGO p\. 10|'
-                                        r'Senado, Manual de Comunicação, "Estrangeirismo", regra [12])')
+                                        r'Senado, Manual de Comunicação, "Estrangeirismo", regra [12]|'
+                                        r'TJRS p\. 3[45] \(3[56]\))')
                 palavras_.add(palavra.casefold())
         # nenhuma das que o guia dá como de uso corrente, nem o menu
         self.assertFalse(palavras_ & {
             "mouse", "e-mail", "site", "notebook", "office-boy", "outdoor", "pedigree", "dna",
             "marketing", "office boy", "blog", "startup", "royalty", "commodity", "design",
-            "download", "free shop", "on-line", "iceberg", "menu",
+            "download", "free shop", "on-line", "iceberg", "menu", "vide", "status", "data venia",
         })
 
 

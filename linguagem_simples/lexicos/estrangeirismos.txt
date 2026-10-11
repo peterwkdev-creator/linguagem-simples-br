@@ -14,9 +14,15 @@
 # Comunicação, verbete "Estrangeirismo", regra 3: "São palavras de uso
 # amplo"). Também de fora: menu, que o Senado troca por cardápio, mas que nas
 # páginas de serviço do gov.br é sempre o menu da tela (13 de 410, 10/10/2026).
+# E vide, status e data venia: o Senado as lista entre os "Estrangeirismos
+# grafados sem itálico ou aspas", sem forma a usar no lugar, e o TRF3 (EMAG,
+# "Expressões latinas em textos jurídicos", 11/03/2021) diz que "a língua
+# portuguesa já incorporou" as três.
 # O verbete do Senado é página da web, sem número: a fonte cita a regra,
 # conferida em 10/10/2026 em
 # www12.senado.leg.br/manualdecomunicacao/estilos/estrangeirismo.
+# TJRS: Guia de Linguagem Simples (Inovajus, 2022), PDF de 108 páginas,
+# conferido em 10/10/2026.
 checklist | lista de verificação | CAPES p. 9 (8): "Antes: Faça um checklist antes de enviar. Depois: Faça uma lista de verificação antes de enviar."; tabela "Dicas de substituições": "Checklist / Lista de Verificação"
 checklists | listas de verificação | CAPES p. 9 (8), plural da entrada acima
 budget | orçamento | CAPES p. 9 (8), tabela "Dicas de substituições": "Budget / Orçamento"
@@ -41,3 +47,15 @@ whisky | uísque | Senado, Manual de Comunicação, "Estrangeirismo", regra 1: "
 standard | padrão | Senado, Manual de Comunicação, "Estrangeirismo", regra 2: "padrão, e não standard"
 premier | primeiro-ministro ou premiê | Senado, Manual de Comunicação, "Estrangeirismo", regra 2: "primeiro-ministro ou premiê, e não premier"
 avant-première | pré-estreia | Senado, Manual de Comunicação, "Estrangeirismo", regra 2: "pré-estreia, e não avant-première"
+expertise | especialidade | TJRS p. 35 (36), quadro "EVITE / USE": "expertise (inglês) / especialidade"
+performance | desempenho | TJRS p. 35 (36), quadro "EVITE / USE": "performance (inglês) / desempenho"
+performances | desempenhos | TJRS p. 35 (36), plural da entrada acima
+in casu | no caso | TJRS p. 34 (35): "Por que usar in casu se é possível usar no caso?"
+in concreto | em concreto | TJRS p. 35 (36), quadro "EVITE / USE": "in concreto (latim) / em concreto"
+in genere | em geral | TJRS p. 35 (36), quadro "EVITE / USE": "in genere (latim) / em geral"
+in melius | para melhor | TJRS p. 35 (36), quadro "EVITE / USE": "in melius (latim) / para melhor"
+in natura | ao natural | TJRS p. 35 (36), quadro "EVITE / USE": "in natura (latim) / ao natural"
+ipso facto | pelo mesmo fato, por isso mesmo | TJRS p. 35 (36), quadro "EVITE / USE": "ipso facto (latim) / pelo mesmo fato, por isso mesmo"
+ipso jure | pelo próprio direito | TJRS p. 35 (36), quadro "EVITE / USE": "ipso jure (latim) / pelo próprio direito"
+jus possessionis | direito de posse | TJRS p. 35 (36), quadro "EVITE / USE": "jus possessionis (latim) / direito de posse"
+jus utendi | direito de usar | TJRS p. 35 (36), quadro "EVITE / USE": "jus utendi (latim) / direito de usar"

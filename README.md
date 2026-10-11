@@ -30,7 +30,7 @@ só aponta trechos para quem lê decidir. Intervalos em
 Python 3.11 ou mais novo; só a biblioteca padrão, sem outra dependência.
 
 ```bash
-pip install "git+https://github.com/peterwkdev-creator/linguagem-simples-br@v1.4.0"
+pip install "git+https://github.com/peterwkdev-creator/linguagem-simples-br@v1.5.0"
 ```
 
 Também roda sem instalar, de dentro da pasta do repositório.
@@ -78,7 +78,7 @@ a página.
 |---|---|---|---|
 | II | redigir frases curtas | frase longa | mais de 20 palavras |
 | III | desenvolver uma ideia por parágrafo | parágrafo longo, sinal de mais de uma ideia | mais de 8 frases |
-| VI | evitar palavras estrangeiras que não sejam de uso corrente | palavra estrangeira que um guia oficial manda trocar ("faça o login", "um checklist") e a forma que o guia sugere | léxico em `linguagem_simples/lexicos/estrangeirismos.txt`: 24 entradas da CAPES, da Anvisa, do TJGO e do Manual de Comunicação do Senado |
+| VI | evitar palavras estrangeiras que não sejam de uso corrente | palavra estrangeira que um guia oficial manda trocar ("faça o login", "um checklist") e a forma que o guia sugere | léxico em `linguagem_simples/lexicos/estrangeirismos.txt`: 36 entradas da CAPES, da Anvisa, do TJGO, do TJRS e do Manual de Comunicação do Senado |
 | VIII | redigir o nome completo antes das siglas | primeira vez que a sigla aparece sem o nome antes | léxico de cores em `linguagem_simples/lexicos/`, com a fonte de cada palavra |
 | IX | organizar o texto de forma esquemática, quando couber, com o uso de listas, tabelas e recursos gráficos | frase de parágrafo que anuncia uma série depois dos dois-pontos, com os itens separados por vírgula ou ponto e vírgula ("leve ao atendimento os documentos: RG, CPF e comprovante") | 3 itens ou mais |
 | XII | redigir frases preferencialmente na voz ativa | verbo "ser" com particípio ("foi entregue pela empresa"), com ou sem quem faz a ação | — |
@@ -244,7 +244,10 @@ Consultado em 10/10/2026: eMAG, Modelo de Acessibilidade em Governo
 Eletrônico, versão 3.1 (obrigatório no governo federal pela Portaria SLTI
 nº 3, de 07/05/2007), recomendações 3.5, 3.6 e 3.10. Também em 10/10/2026:
 Senado Federal, Manual de Comunicação, verbete "Estrangeirismo" (pares do
-VI e a lista de palavras de uso amplo, que o VI não aponta).
+VI e a lista de palavras de uso amplo, que o VI não aponta) e a lista
+"Estrangeirismos grafados sem itálico ou aspas"; TJRS, Guia de Linguagem
+Simples (2022), quadro de expressões estrangeiras (p. 36); TRF3, Escola de
+Magistrados, "Expressões latinas em textos jurídicos" (2021).
 
 Texto da lei: publicação original no portal da Câmara dos Deputados, DOU de
 17/11/2025.
@@ -259,10 +262,16 @@ do Planalto (epígrafe de ato normativo em maiúsculas).
 - Com o padrão de 20 palavras, o "depois" da CAPES e o da Anvisa ainda
   têm uma frase acima de 20 (de 21 a 23 palavras); os dois guias aceitam até
   25. Com `--max-palavras 25`, nada aparece.
-- VI é uma lista fechada de 24 entradas, cada uma com a fonte: palavra
-  estrangeira fora dela passa (10% de cobertura, acima). Não aponta as
-  que os guias dão como de uso corrente (e-mail, site, mouse, download,
-  on-line…), nem "menu", que o Senado troca por "cardápio" mas que nas
+- VI é uma lista fechada de 36 entradas, cada uma com a fonte: palavra
+  estrangeira fora dela passa (10% de cobertura, acima). "Upload",
+  "courier", "desktop", "packing list" e "in loco", que as passagens
+  mandariam trocar, passam porque nenhum guia oficial lido dá a forma a
+  usar no lugar. As 12 entradas do TJRS (1.5.0: "performance",
+  "expertise", "in casu", "in natura"…) ficaram fora da medida de 96%:
+  nas 520 páginas do gov.br já lidas, aparecem em 2, e acertam nas 2.
+  Não aponta as que os guias dão como de uso corrente (e-mail, site,
+  mouse, download, on-line; "vide", "status" e "data venia", para o
+  Senado e o TRF3), nem "menu", que o Senado troca por "cardápio" mas que nas
   páginas de serviço é sempre o menu da tela. Não aponta a palavra dentro
   de endereço ("gov.br/login"). A sugestão é a do guia e nem sempre cabe:
   em "login e senha", cabe "usuário", não "acesso" (11 dos 25 acertos).

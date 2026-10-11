@@ -4,6 +4,19 @@ A versão segue `linguagem_simples.__version__`; cada uma tem uma tag
 `vX.Y.Z` no commit que a publicou. O formato do relatório e as opções da
 linha de comando só mudam numa versão 2; detector novo sai numa 1.x.
 
+## 1.5.0 — 10/10/2026
+
+- VI: o léxico passa de 24 para 36 entradas com os pares do Guia de
+  Linguagem Simples do TJRS (p. 35 e 36): expertise, performance(s), in
+  casu, in concreto, in genere, in melius, in natura, ipso facto, ipso
+  jure, jus possessionis e jus utendi. Ficam fora da medida de 96%: nas
+  520 páginas do gov.br já lidas, aparecem em 2 e acertam nas 2.
+- VI: "vide", "status" e "data venia" ficam de fora, como de uso amplo
+  (Senado, lista sem itálico; TRF3, "Expressões latinas em textos
+  jurídicos"). O README diz por que "upload", "courier", "desktop" e
+  outras passam: nenhum guia oficial lido dá a forma a usar no lugar.
+- Lei reconferida em 10/10/2026 (ficha do Senado): sem alteração.
+
 ## 1.4.0 — 10/10/2026
 
 - Detector do inciso VI (palavras estrangeiras, classe **sinal**): aponta
