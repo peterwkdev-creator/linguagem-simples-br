@@ -56,6 +56,13 @@ class TestAceite(unittest.TestCase):
         self.assertEqual((r.total_antes, r.total_depois), (3, 0))
         sistema, mensagens = ia.pedidos[0]
         self.assertIn("Lei nº 15.263/2025", sistema)
+        # As regras que a medida em página longa pediu (1.10.1: o sentido
+        # mudou nas 10 páginas, sobretudo por agente acrescentado).
+        for regra in ("Não diga quem faz a ação quando o original não diz",
+                      "Não troque possibilidade por certeza",
+                      "fica só como sigla",
+                      "Não mude o nome de botão, link"):
+            self.assertIn(regra, sistema)
         self.assertIn(ORIGINAL, mensagens[0]["content"])
         self.assertIn("deferido", mensagens[0]["content"])  # os apontamentos vão junto
 

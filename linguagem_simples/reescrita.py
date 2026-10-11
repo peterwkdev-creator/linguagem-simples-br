@@ -212,8 +212,22 @@ _SISTEMA = (
     "- Mantenha todo fato, prazo, valor, data, número, nome, sigla, link e "
     "e-mail do original, escritos do mesmo jeito. Não acrescente informação, "
     "número nem opinião, e não tire direito, dever ou condição.\n"
+    # As quatro regras seguintes vêm da medida em página longa (1.10.1):
+    # a reescrita punha quem faz a ação onde a passiva não diz, inventava o
+    # nome de sigla, trocava risco por certeza e mudava rótulo de tela.
+    "- Não diga quem faz a ação quando o original não diz. Na voz passiva "
+    "sem agente (\"o pedido será analisado\"), não invente o sujeito (\"o "
+    "sistema\", \"o órgão\", \"você\" ou um nome): deixe a passiva. Use "
+    "\"você\" só quando o original já fala com o leitor e a ação é dele.\n"
+    "- Não troque possibilidade por certeza nem certeza por possibilidade: "
+    "o que \"pode\" acontecer ou de que alguém \"está sujeito\" continua "
+    "assim.\n"
     "- Na primeira vez que usar uma sigla, escreva o nome completo antes, "
-    "com a sigla entre parênteses.\n"
+    "com a sigla entre parênteses, só se o nome está no próprio texto ou "
+    "você tem certeza dele. Sigla de sistema, setor, formulário, documento "
+    "ou programa de um órgão cujo nome o texto não dá fica só como sigla.\n"
+    "- Não mude o nome de botão, link, menu, aba, campo ou opção que a "
+    "pessoa procura na tela, nem o título de lei ou de artigo citado.\n"
     "- Corrija os trechos apontados pelo verificador sem criar outros "
     "problemas do mesmo tipo.\n"
     "- Mantenha a língua portuguesa e a forma do texto (parágrafos, "

@@ -440,6 +440,43 @@ direito"; o rótulo do ícone "PDF" ganhou o nome por extenso, que não está
 na tela. Nenhuma perdeu link, e-mail, telefone, prazo ou valor. 116.264
 tokens de entrada e 50.862 de saída; mediana de 19 segundos por página.
 
+**O pedido novo (1.11.0, 11/10/2026).** O pedido à IA ganhou quatro
+regras, escritas sem os exemplos da amostra: não dizer quem faz a ação
+quando o original não diz; não trocar possibilidade por certeza; pôr o
+nome por extenso da sigla só se está no texto ou é certo; não mudar o
+nome de link, botão, menu ou campo, nem o título de lei ou artigo. A
+regra de decisão foi escrita antes de rodar: o pedido fica se, nas
+longas, as páginas com agente acrescentado caírem e as com outra mudança
+não subirem, e se nos 28 curtos o sentido não cair abaixo de 69%. Mesmas
+amostras, modelo e critério; 2 passagens, a 2ª às cegas (sementes
+20261013 e 20261014).
+
+| Medida | 1.10.1 | 1.11.0 |
+|---|---|---|
+| Curtos: aceitas | 28 / 28 | 28 / 28 |
+| Curtos: apontamentos | 42 → 0 | 42 → 4 |
+| Curtos: mesmo sentido | 86% (69% a 94%) | **93% (77% a 98%)** |
+| Longas: aceitas | 10 / 10 | 10 / 10 |
+| Longas: apontamentos | 378 → 92 | 378 → 163 |
+| Longas: mesmo sentido | 0% (0% a 28%) | **40% (17% a 69%)** |
+| Longas com quem faz a ação acrescentado | 10 / 10 | 4 / 10 |
+| Longas com outra mudança | 5 / 10 | 2 / 10 |
+| Longas com nome de link trocado | 5 / 10 (contados só "Login Integrado" e o ícone "PDF") | 2 / 10 |
+
+O pedido ficou. Nos curtos, mudaram "peticionar" (de novo "entrar com
+uma ação judicial") e "Aplique a pomada", que põe o leitor como quem
+aplica; a DTI ficou sigla. Nas longas, quem faz a ação ainda aparece em 4
+("Você fará as correções", "A unidade entrega o passaporte"); "são
+atualizados diariamente" virou "mudam todos os dias"; a omissão saiu do
+crime de novo, e uma condição ("desde que atenda aos requisitos legais")
+sumiu; "Login Integrado" e o link "Requerer alteração..." mudaram de
+nome. Todas as siglas que ganharam nome por extenso estão certas. A
+concordância entre as passagens foi de 25 / 28 e 8 / 10; cada divergência
+se resolveu relendo o par (o rótulo, no HTML da página). O custo é mais
+apontamento sobrando: a voz passiva (inciso XII) fica em 77 de 121 (18
+na 1.10.1) e a sigla (VIII) em 37 de 55 (18). 109.010 tokens de entrada
+e 47.780 de saída nas longas; mediana de 16 segundos por página.
+
 Para refazer, com a sua chave: `python docs/medir_reescrita.py
 medida.jsonl`, da pasta do repositório. O script grava o resultado de
 cada trecho numa linha, na hora, num arquivo novo; o sentido se anota à parte, com o critério acima. Desde a

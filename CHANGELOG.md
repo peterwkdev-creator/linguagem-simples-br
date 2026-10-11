@@ -5,6 +5,22 @@ A versão segue `linguagem_simples.__version__`; cada uma tem uma tag
 tem, os campos do JSON e as opções da linha de comando só mudam numa
 versão 2; detector novo, linha nova, campo novo e opção nova saem numa 1.x.
 
+## 1.11.0 — 11/10/2026
+
+A reescrita por IA (`--reescrever`) muda menos o sentido:
+
+- O pedido à IA ganhou quatro regras: não dizer quem faz a ação quando o
+  original não diz (a voz passiva sem agente fica), não trocar
+  possibilidade por certeza, pôr o nome por extenso da sigla só quando
+  está no texto ou é certo, e não mudar o nome de link, botão, menu ou
+  campo, nem o título de lei ou de artigo citado.
+- Medido antes de publicar, com a regra de decisão escrita antes: nas 10
+  páginas longas do gov.br, o mesmo sentido foi de 0 para 4 de 10, e as
+  páginas em que a reescrita diz quem faz a ação caíram de 10 para 4; nos
+  28 trechos curtos, de 86% para 93%. Sobram mais apontamentos de voz
+  passiva e de sigla, que a reescrita agora deixa para quem escreve.
+  Números em `docs/precisao.md`.
+
 ## 1.10.1 — 11/10/2026
 
 Correções da reescrita por IA (`--reescrever`), achadas ao medi-la em
