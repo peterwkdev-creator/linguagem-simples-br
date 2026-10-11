@@ -5,6 +5,26 @@ A versão segue `linguagem_simples.__version__`; cada uma tem uma tag
 tem, os campos do JSON e as opções da linha de comando só mudam numa
 versão 2; detector novo, linha nova, campo novo e opção nova saem numa 1.x.
 
+## 1.13.0 — 11/10/2026
+
+A reescrita por IA (`--reescrever`) confere também os nomes da tela:
+
+- O texto entre aspas e o nome de duas ou mais palavras com maiúscula
+  ("Login Integrado", "Câmara de Comércio Exterior") continuam iguais,
+  inclusive o rótulo solto numa linha. O nome que começa a frase e o de
+  uma palavra só não entram. A sigla escrita por extenso dentro do nome
+  é aceita, como pede o inciso VIII.
+- Medido antes de publicar, com a regra de decisão escrita antes: nas 10
+  páginas longas, 10 de 10 aceitas. As duas tentativas que a conferência
+  recusou tinham trocado "Login Integrado" por "Acesso Integrado"; na
+  medida, nenhuma página trocou rótulo da tela. O mesmo sentido ficou em
+  4 de 10, como na 1.12.0. Números em `docs/precisao.md`.
+- README reorganizado: instalar e usar primeiro, passo a passo para quem
+  nunca usou o Python e para criar a chave da API. Os limites inciso por
+  inciso foram para `docs/limites.md`; `docs/precisao.md` ganhou seções.
+- Ajuda da linha de comando e mensagens de erro da reescrita mais claras
+  (o erro da API diz onde está o motivo).
+
 ## 1.12.0 — 11/10/2026
 
 A reescrita por IA (`--reescrever`) confere mais duas coisas antes de
@@ -54,7 +74,7 @@ páginas longas do gov.br:
   colada num ponto ("Fala.BR", "GOV.BR"), o número depois de ponto
   ("Art.29.", "n.10.048/2000") e o número com ordinal ("2ª", "5º"): a
   reescrita era recusada como se tivesse perdido o fato. Isso acontecia em
-  277 das 491 páginas de serviço do gov.br do corpus; agora, em nenhuma.
+  277 das 491 páginas de serviço do gov.br já baixadas; agora, em nenhuma.
 - Medida nova no README e em `docs/precisao.md`: em 10 páginas longas, as
   10 reescritas foram aceitas (378 → 92 apontamentos), mas o sentido
   mudou em todas, sobretudo porque a reescrita diz quem faz a ação onde

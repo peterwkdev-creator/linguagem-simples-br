@@ -52,6 +52,10 @@ class _Formato(argparse.RawDescriptionHelpFormatter):
     def add_usage(self, usage, actions, groups, prefix=None):
         super().add_usage(usage, actions, groups, "uso: " if prefix is None else prefix)
 
+    def _split_lines(self, text, width):
+        # Sem quebrar no hífen: "claude-sonnet-5-5" fica numa linha só.
+        return textwrap.wrap(" ".join(text.split()), width, break_on_hyphens=False)
+
 
 class _Comando(argparse.ArgumentParser):
     """O argparse em português: ``uso:``, ``erro:`` e as mensagens dele."""
@@ -120,8 +124,8 @@ def main(argv=None):
         prog=prog,
         usage="%(prog)s arquivo [opções]",
         description=textwrap.fill(
-            "Confere um texto contra os 18 incisos do art. 5º da Lei 15.263/2025 (Política Nacional "
-            "de Linguagem Simples) e aponta, inciso por inciso, os trechos a revisar. " + AVISO, 79),
+            "Confere um texto, inciso por inciso, contra o art. 5º da Lei 15.263/2025 (Política "
+            "Nacional de Linguagem Simples). " + AVISO, 79),
         epilog=_exemplos(prog),
         formatter_class=_Formato,
         add_help=False,
@@ -142,7 +146,7 @@ def main(argv=None):
                    help="inciso VIII: sigla que o leitor já conhece e dispensa o nome por extenso, "
                    "como CPF (repetível)")
     p.add_argument("--ligar", action="append", default=[], metavar="INCISO",
-                   help="liga um inciso desligado por padrão: hoje só o XI, que ainda não tem detector (repetível)")
+                   help="liga um inciso desligado por padrão: hoje só o XI, que ainda não tem detector e por isso não muda o resultado (repetível)")
     p.add_argument("--desligar", action="append", default=[], metavar="INCISO",
                    help="desliga um inciso, como --desligar XII (repetível)")
     p.add_argument("--saida", metavar="ARQUIVO",
@@ -150,7 +154,8 @@ def main(argv=None):
                    "relatório ou, com --reescrever, o texto aceito")
     p.add_argument("--reescrever", action="store_true",
                    help="pede à IA (Claude, pela API da Anthropic, com a sua chave) uma reescrita "
-                   "e só a aceita se o verificador medir menos apontamentos; o sentido é você "
+                   "e a confere antes de mostrar (apontamentos, números, siglas, links e nomes); "
+                   "o sentido é você "
                    "quem confere. A chave vem da variável %s ou, sem ela, é perguntada "
                    "na hora, sem aparecer na tela; nunca é gravada. Cada pedido é cobrado "
                    "na conta da chave" % reescrita.VARIAVEL_DA_CHAVE)

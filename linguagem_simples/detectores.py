@@ -412,7 +412,7 @@ def siglas_sem_nome(texto, ignorar=()):
 # O detector vê a forma do par da CAPES p. 7: dois-pontos e itens separados
 # por vírgula ou ponto e vírgula na mesma frase. Dois-pontos com menos de 5
 # palavras antes é rótulo de campo ("Atenção:", "Endereço:", "Horário:"),
-# não frase que anuncia a série: na 11ª rodada (corpus/amostra-11.md), 18
+# não frase que anuncia a série: na 11ª amostra (docs/precisao.md), 18
 # dos 28 erros e nenhum acerto.
 _DOIS_PONTOS = re.compile(r":(?=\s)")
 _PALAVRAS_ANTES = 5

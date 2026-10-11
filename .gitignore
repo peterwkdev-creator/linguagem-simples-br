@@ -13,3 +13,6 @@ build/
 dist/
 *.egg-info/
 _site/
+
+# Resultado de docs/medir_reescrita.py
+*.jsonl

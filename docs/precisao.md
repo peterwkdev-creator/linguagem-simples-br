@@ -1,9 +1,16 @@
 # Precisão medida
 
 Histórico e método das medições de precisão do
-[linguagem-simples-br](../README.md). Os números a usar estão na tabela
-"Precisão medida" do README; aqui fica cada amostra, na ordem em que foi
-medida, com o que mudou entre uma e outra.
+[linguagem-simples-br](../README.md). **Os números atuais estão na tabela
+"Precisão medida" do README**; aqui fica cada amostra, na ordem em que
+foi medida, com o que mudou entre uma e outra. Por isso a tabela da 1ª
+amostra, logo abaixo, tem números que as correções seguintes mudaram.
+
+- [1ª amostra](#1ª-amostra-09102026): o método de todas as medidas.
+- [Detectores, amostra por amostra](#detectores-amostra-por-amostra).
+- [Reescrita por IA](#reescrita-por-ia): aceite e sentido.
+
+## 1ª amostra (09/10/2026)
 
 Dos trechos que cada detector aponta, quantos uma pessoa, lendo o trecho na
 página, confirma. Medido em 09/10/2026, no commit `041d83e`, com os padrões
@@ -18,6 +25,66 @@ de fábrica:
 | XIV | 45% | 23 / 51 | 32% a 59% | 9 |
 
 III não apontou nada nas 30 páginas: sem número.
+
+**Como se mediu.** 30 páginas sorteadas (semente 20261009) entre as 5.735
+páginas de serviço do sitemap do gov.br de 08/10/2026. Os 621 apontamentos
+viraram 431 sem os repetidos (o modelo do portal se repete em toda página);
+de cada inciso, até 60 sorteados. Duas passagens: a segunda às cegas, sem
+ver a primeira, com o mesmo critério escrito antes de anotar; 208 dos 243
+rótulos iguais (86%), cada divergência resolvida com uma nota. Precisão não
+é cobertura: o que o detector deixa passar não entrou nesta conta.
+
+**O que os números dizem:**
+
+- XII acerta a voz passiva; se cada uma deve mudar, a lei deixa a quem
+  escreve ("preferencialmente").
+- II errava quando a frase apresentava uma lista com marcador "·" no
+  mesmo parágrafo: a lista contava como parte da frase. Corrigido: "·"
+  marca item de lista.
+- VIII: 6 dos 10 erros tinham o nome por extenso antes da sigla, numa
+  forma que o detector não reconhecia ("circuito fechado de TV (CFTV)",
+  "Coordenação-Geral de Ingresso - CGI"). A correção reconhece 5 deles; o
+  sexto pula quatro palavras do nome. Os outros 4 erros são abreviatura de
+  mês ("DEZ") e palavra comum em caixa alta, que seguem.
+- VIII na amostra nova: dos 10 erros, 6 não são sigla (palavra em caixa
+  alta como "SISTEMA" e "SENHA", nome de portal, "BR" de "GOV.BR", pedaço
+  de URL) e 4 têm o nome antes numa forma que o detector não liga
+  ("Procuradoria-Geral da Fazenda Nacional" antes de "PGFN", "Senatran"
+  antes de "SENATRAN", o nome em inglês). O ganho da correção não aparece
+  fora da amostra que a motivou: 77% antes, 79% agora, dentro do
+  intervalo.
+- VIII na 3ª amostra: dos 12 erros, 7 são palavra comum ou rótulo em
+  caixa alta que não aparece em minúscula na página ("VERMELHO", "BUSCAR",
+  "DEZ", "DE") e 5 têm o nome antes numa forma que o detector não liga
+  ("Receita Federal" antes de "RFB", nome colado à sigla sem separador).
+  A 2ª correção também não sobe a precisão fora da amostra que a motivou
+  (79% antes, 75% agora, dentro do intervalo): o que ela tira está quase
+  todo na lista de recomendados, que já ficava fora da conta.
+- VIII na 4ª amostra: dos 11 erros, 2 são palavra comum em caixa alta
+  ("NORMATIVA", "BUSCAR"). Os outros 9 têm o nome antes. Em 8 deles, as
+  letras da sigla não saem das iniciais do nome: sigla em inglês ("Torres
+  de Controle de Aeródromo (TWR)") ou que pega sílabas ("CAFIR",
+  "JJAER"). No 9º, o nome é o começo de um nome maior ("Domicílio
+  Tributário Eletrônico do Simples Nacional e MEI – DTE"). Cada amostra
+  nova traz formas novas de escrever o nome antes da sigla: nas quatro
+  medidas sem viés, a precisão fica entre 75% e 79% (77%, 79%, 75%, 78%).
+- II na amostra nova: os 3 erros são título ou link colado à frase seguinte
+  sem ponto; um deles é o título da página somado aos "nomes populares" do
+  serviço, que o gov.br põe num `<span>` dentro do título.
+- XIV aponta substantivo que nomeia uma coisa, não uma ação. Nome de
+  documento com "de" ("Guia de Recolhimento da União") saiu na correção;
+  ficam o nome de serviço ("Solicitar Análise de Fotoluminescência") e o
+  documento com outra palavra antes do "de" ("Formulário padronizado de
+  solicitação", "Requerimento de solicitação de Importação"), o nome de
+  sistema ("Solicitação de Divulgação de Informações Aeronáuticas") e a
+  solicitação como pedido enviado ("anuência da solicitação"). Na 5ª
+  amostra, 3 dos 24 apontamentos foram erro. Use o XIV como lista para
+  revisar, não como erro certo.
+- Nas páginas do gov.br, a lista "Serviços recomendados para você" está
+  dentro do `<main>` e entra no texto lido: dos 60 apontamentos do VIII
+  anotados, 16 vinham dela.
+
+## Detectores, amostra por amostra
 
 **Depois da correção (09/10/2026).** Os erros do II e do VIII levaram a
 uma correção (abaixo). Nas mesmas 30 páginas e com os mesmos rótulos, a
@@ -367,6 +434,8 @@ licença será expedida"), em que a CAPES dá "mandar, enviar", e 1 de
 que é palavra difícil depende de quem lê (TJRS, p. 31), e a lista do que
 falta pede critério próprio.
 
+## Reescrita por IA
+
 **Reescrita por IA, aceite e sentido (1.7.0, 11/10/2026).** A reescrita
 (`--reescrever`) rodou nos 28 trechos "antes" dos pares dos guias
 (`tests/guias.py`) que têm ao menos um apontamento, de 32 pares; 4 a 68
@@ -401,6 +470,12 @@ petição pode não ser ação), embora seja a troca que o guia da SES-DF
 CAPES, p. 8, escreve "O pedido foi aceito").
 
 Limites: trechos curtos, de guias públicos que o modelo pode ter lido.
+
+Para refazer, com a sua chave: `python docs/medir_reescrita.py
+medida.jsonl`, da pasta do repositório. O script grava o resultado de
+cada trecho numa linha, na hora, num arquivo novo; o sentido se anota à parte, com o critério acima. Desde a
+1.8.0, o arquivo traz também os tokens de cada reescrita (esta medida, da
+1.7.0, não os registrou).
 
 **Os mesmos 28 sem o pensamento do modelo (1.10.1, 11/10/2026).** A
 1.10.1 desliga o pensamento do `claude-sonnet-5-5` (na 1.10.0 ele gastava
@@ -511,66 +586,36 @@ de direito" virou "perde o direito", e o título "Login Integrado" virou
 rodada). As duas passagens deram a mesma classe nas 10 páginas. 118.616
 tokens de entrada e 51.533 de saída, 252 s.
 
-Para refazer, com a sua chave: `python docs/medir_reescrita.py
-medida.jsonl`, da pasta do repositório. O script grava o resultado de
-cada trecho numa linha, na hora, num arquivo novo; o sentido se anota à parte, com o critério acima. Desde a
-1.8.0, o arquivo traz também os tokens de cada reescrita (esta medida, da
-1.7.0, não os registrou).
+**Nome e rótulo da tela (1.13.0, 11/10/2026).** O título "Login
+Integrado", que aparece em 5 das 10 páginas, virava "Acesso Integrado"
+numa delas a cada rodada. A reescrita agora volta à IA quando muda o
+texto entre aspas ou o nome de duas ou mais palavras com maiúscula,
+inclusive o rótulo solto numa linha. A sigla por extenso dentro do nome
+passa, como pede o inciso VIII. Provas antes de medir, sem chave: pega o
+"Login Integrado" trocado em todas as rodadas anteriores; o original
+contra ele mesmo dá zero acusação em 55 textos; nos curtos, nada. Mesma
+regra de decisão da 1.12.0, mesmas 10 páginas, mesmo pedido e mesmo
+critério de sentido, com 2 passagens, a 2ª às cegas (semente 20261016;
+9 de 10 classes iguais, a divergência resolvida pelo critério).
 
-**Como se mediu.** 30 páginas sorteadas (semente 20261009) entre as 5.735
-páginas de serviço do sitemap do gov.br de 08/10/2026. Os 621 apontamentos
-viraram 431 sem os repetidos (o modelo do portal se repete em toda página);
-de cada inciso, até 60 sorteados. Duas passagens: a segunda às cegas, sem
-ver a primeira, com o mesmo critério escrito antes de anotar; 208 dos 243
-rótulos iguais (86%), cada divergência resolvida com uma nota. Precisão não
-é cobertura: o que o detector deixa passar não entrou nesta conta.
+| Medida | 1.12.0 | 1.13.0 |
+|---|---|---|
+| Longas: aceitas | 10 / 10 (4 na 2ª tentativa) | 10 / 10 (4 na 2ª tentativa) |
+| Longas: apontamentos | 378 → 176 | 378 → 159 |
+| Longas: mesmo sentido | 40% (17% a 69%) | **40% (17% a 69%)** |
+| Longas com quem faz a ação acrescentado | 4 / 10 | 4 / 10 |
+| Longas com outra mudança | 4 / 10 | 3 / 10 |
+| Longas com rótulo da tela trocado | 1 / 10 | **0 / 10** |
 
-**O que os números dizem:**
-
-- XII acerta a voz passiva; se cada uma deve mudar, a lei deixa a quem
-  escreve ("preferencialmente").
-- II errava quando a frase apresentava uma lista com marcador "·" no
-  mesmo parágrafo: a lista contava como parte da frase. Corrigido: "·"
-  marca item de lista.
-- VIII: 6 dos 10 erros tinham o nome por extenso antes da sigla, numa
-  forma que o detector não reconhecia ("circuito fechado de TV (CFTV)",
-  "Coordenação-Geral de Ingresso - CGI"). A correção reconhece 5 deles; o
-  sexto pula quatro palavras do nome. Os outros 4 erros são abreviatura de
-  mês ("DEZ") e palavra comum em caixa alta, que seguem.
-- VIII na amostra nova: dos 10 erros, 6 não são sigla (palavra em caixa
-  alta como "SISTEMA" e "SENHA", nome de portal, "BR" de "GOV.BR", pedaço
-  de URL) e 4 têm o nome antes numa forma que o detector não liga
-  ("Procuradoria-Geral da Fazenda Nacional" antes de "PGFN", "Senatran"
-  antes de "SENATRAN", o nome em inglês). O ganho da correção não aparece
-  fora da amostra que a motivou: 77% antes, 79% agora, dentro do
-  intervalo.
-- VIII na 3ª amostra: dos 12 erros, 7 são palavra comum ou rótulo em
-  caixa alta que não aparece em minúscula na página ("VERMELHO", "BUSCAR",
-  "DEZ", "DE") e 5 têm o nome antes numa forma que o detector não liga
-  ("Receita Federal" antes de "RFB", nome colado à sigla sem separador).
-  A 2ª correção também não sobe a precisão fora da amostra que a motivou
-  (79% antes, 75% agora, dentro do intervalo): o que ela tira está quase
-  todo na lista de recomendados, que já ficava fora da conta.
-- VIII na 4ª amostra: dos 11 erros, 2 são palavra comum em caixa alta
-  ("NORMATIVA", "BUSCAR"). Os outros 9 têm o nome antes. Em 8 deles, as
-  letras da sigla não saem das iniciais do nome: sigla em inglês ("Torres
-  de Controle de Aeródromo (TWR)") ou que pega sílabas ("CAFIR",
-  "JJAER"). No 9º, o nome é o começo de um nome maior ("Domicílio
-  Tributário Eletrônico do Simples Nacional e MEI – DTE"). Cada amostra
-  nova traz formas novas de escrever o nome antes da sigla: nas quatro
-  medidas sem viés, a precisão fica entre 75% e 79% (77%, 79%, 75%, 78%).
-- II na amostra nova: os 3 erros são título ou link colado à frase seguinte
-  sem ponto; um deles é o título da página somado aos "nomes populares" do
-  serviço, que o gov.br põe num `<span>` dentro do título.
-- XIV aponta substantivo que nomeia uma coisa, não uma ação. Nome de
-  documento com "de" ("Guia de Recolhimento da União") saiu na correção;
-  ficam o nome de serviço ("Solicitar Análise de Fotoluminescência") e o
-  documento com outra palavra antes do "de" ("Formulário padronizado de
-  solicitação", "Requerimento de solicitação de Importação"), o nome de
-  sistema ("Solicitação de Divulgação de Informações Aeronáuticas") e a
-  solicitação como pedido enviado ("anuência da solicitação"). Na 5ª
-  amostra, 3 dos 24 apontamentos foram erro. Use o XIV como lista para
-  revisar, não como erro certo.
-- Nas páginas do gov.br, a lista "Serviços recomendados para você" está
-  dentro do `<main>` e entra no texto lido: dos 60 apontamentos do VIII
-  anotados, 16 vinham dela.
+A conferência ficou. Ela recusou duas tentativas, e as duas tinham
+trocado "Login Integrado" por "Acesso Integrado"; a tentativa seguinte
+manteve o nome. As outras quatro recusas (incisos piorados, texto de
+link, a palavra "EDITOR" que sumiu) também eram mudança real. Escapou
+um título de etapa: "Aguardar Análise do IPHAN" virou "Aguardar o
+resultado da análise do Instituto do Patrimônio Histórico e Artístico
+Nacional (IPHAN)"; a conferência só olha o nome com maiúscula, e ele
+ficou. O sentido não subiu: o que mais muda continua sendo a frase que
+ganha quem faz a ação ("A autorização deve ser encaminhada" virou "O
+solicitante deve encaminhar"), que nenhuma conferência pega. Nenhuma
+página mudou só por explicar termo técnico. 143.055 tokens de entrada e
+58.561 de saída, 294 s.

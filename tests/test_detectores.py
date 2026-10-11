@@ -122,7 +122,7 @@ class TestIncisoVIII(unittest.TestCase):
         )
         self.assertEqual(self.siglas(texto), [])
 
-    # Os casos a seguir vêm dos erros da amostra anotada (corpus/amostra.md,
+    # Os casos a seguir vêm dos erros da amostra anotada (docs/precisao.md,
     # 09/10/2026): o nome vinha antes, numa forma que o detector não via.
     def test_mais_de_uma_letra_da_mesma_palavra(self):
         self.assertEqual(self.siglas("Centro de Pesquisa em Medicina Tropical (CEPEM)."), [])
@@ -166,7 +166,7 @@ class TestIncisoVIII(unittest.TestCase):
         # Na amostra, "Complementar do Exército - Rua ... Pituba, Salvador/BA - CEP".
         self.assertEqual(self.siglas("Colégio Estadual na Rua Nova do Porto - CEP"), ["CEP"])
 
-    # Os casos a seguir vêm dos erros da 2ª amostra (corpus/amostra-2.md,
+    # Os casos a seguir vêm dos erros da 2ª amostra (docs/precisao.md,
     # 09/10/2026).
     def test_endereco_nao_tem_sigla(self):
         self.assertEqual(self.siglas("Avalie o serviço no Portal GOV.BR"), [])
@@ -199,7 +199,7 @@ class TestIncisoVIII(unittest.TestCase):
         self.assertEqual(self.siglas("Serviço da Senatran. Use o SENATRAN."), ["SENATRAN"])
         self.assertEqual(self.siglas("Use o SENATRAN. Secretaria Nacional de Trânsito — Senatran."), ["SENATRAN"])
 
-    # Os dois a seguir vêm dos erros da 3ª amostra (corpus/amostra-3.md, 09/10/2026).
+    # Os dois a seguir vêm dos erros da 3ª amostra (docs/precisao.md, 09/10/2026).
     def test_cor_em_caixa_alta(self):
         texto = "Prioridade: VERMELHO - Emergência, AZUL - Não Urgente."
         self.assertEqual(self.siglas(texto), [])

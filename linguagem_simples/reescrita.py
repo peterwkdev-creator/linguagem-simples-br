@@ -5,8 +5,9 @@ texto e os apontamentos do relatório. A reescrita só é aceita se o
 verificador medir nela menos apontamentos, nenhum inciso pior, e se todo
 número, data, sigla, link e e-mail do original continuar no texto novo,
 sem número que o original não tinha. O texto de cada link também fica
-igual, e a frase de crime ou punição não perde nenhuma das alternativas
-ligadas por "ou". Senão, a IA tenta de novo sabendo o
+igual, assim como o nome com maiúscula ("Login Integrado") e o texto entre
+aspas, e a frase de crime ou punição não perde nenhuma das
+alternativas ligadas por "ou". Senão, a IA tenta de novo sabendo o
 que falhou; esgotadas as tentativas, a reescrita é recusada e o motivo
 vem junto.
 
@@ -48,7 +49,8 @@ SEM_PENSAMENTO = {"claude-sonnet-5-5": {"type": "between_tools"}, "claude-haiku-
 
 AVISO_SENTIDO = (
     "Reescrita sugerida por IA. O verificador confere os apontamentos, os "
-    "números, as datas, as siglas e os links, não o sentido: compare com o "
+    "números, as datas, as siglas, os links, o texto entre aspas e os nomes com "
+    "maiúscula, não o sentido: compare com o "
     "original antes de usar."
 )
 
@@ -74,6 +76,14 @@ _VAZIAS = frozenset(
     "a o as os um uma uns umas de do da dos das em no na nos nas ao aos à às por para com sem "
     "e ou que se seu sua seus suas".split()
 )
+# Nome e rótulo que a reescrita não muda: o texto entre aspas ("Exportar
+# Documento") e o nome de duas ou mais palavras com maiúscula ("Login
+# Integrado", "Meu SUS Digital"), que é o que quem lê procura na tela.
+_ASPAS = re.compile(r"[\"“”]([^\"“”\n]{1,60})[\"“”]")
+_PALAVRA_DE_NOME = re.compile(r"[^\W\d_][\w-]*")
+_LINHA_SO_DE_PALAVRAS = re.compile(r"[^\W\d_][\w-]*(?: [^\W\d_][\w-]*){1,7}")
+_LIGA_NOME = frozenset("de da do das dos e em".split())  # "Ministério da Saúde"
+_FIM_DE_FRASE = re.compile(r"[.!?:;]\s+")
 
 
 class ErroDeReescrita(Exception):
@@ -197,6 +207,9 @@ def _problemas(original, novo, antes, depois, links=None):
     mudaram = [t for t in (_textos_de_link(original) if links is None else links) if _igual(t) not in igual]
     if mudaram:
         problemas.append("mudou o texto de link: " + ", ".join(f"“{t}”" for t in mudaram))
+    nomes = [t for t in _nomes(original) if not _nome_ficou(t, igual)]
+    if nomes:
+        problemas.append("mudou nome, rótulo da tela ou texto entre aspas: " + ", ".join(f"“{t}”" for t in nomes))
     return problemas
 
 
@@ -221,6 +234,55 @@ def _textos_de_link(fonte):
     textos = (_MARCA_DE_BLOCO.sub("", " ".join(next((l for l in t.splitlines() if l.strip()), "").split()))
               for t in textos)
     return list(dict.fromkeys(t for t in textos if _igual(t) and _igual(t) in onde))
+
+
+def _nomes(texto):
+    """Texto entre aspas e nome de duas ou mais palavras com maiúscula. A
+    primeira palavra da frase não conta ("Selecione Renovação"), salvo
+    quando a linha inteira é o nome: o rótulo solto da página ("Login
+    Integrado")."""
+    achados = [m.group(1).strip() for m in _ASPAS.finditer(texto)]
+    for linha in texto.splitlines():
+        linha = _MARCA_DE_ITEM.sub("", _MARCA_DE_BLOCO.sub("", linha.strip()))
+        palavras = list(_PALAVRA_DE_NOME.finditer(linha))
+        if (_LINHA_SO_DE_PALAVRAS.fullmatch(linha) and palavras[-1].group()[0].isupper()
+                and all(p.group()[0].isupper() or p.group() in _LIGA_NOME for p in palavras)):
+            achados.append(linha)
+            continue
+        inicios = {0} | {m.end() for m in _FIM_DE_FRASE.finditer(linha)}
+        seq = []
+        for p in palavras + [None]:
+            if (p is not None and seq and linha[seq[-1].end():p.start()] == " "
+                    and (p.group()[0].isupper() or p.group() in _LIGA_NOME)):
+                seq.append(p)
+                continue
+            if seq and seq[0].start() in inicios:
+                seq = seq[1:]
+            while seq and seq[0].group() in _LIGA_NOME:
+                seq = seq[1:]
+            while seq and (seq[-1].group() in _LIGA_NOME or len(seq[-1].group()) == 1):
+                seq.pop()  # o "R" de "R$" não é parte do nome
+            if sum(s.group()[0].isupper() for s in seq) >= 2:
+                achados.append(linha[seq[0].start():seq[-1].end()])
+            seq = [p] if p is not None and p.group()[0].isupper() else []
+    return list(dict.fromkeys(a for a in achados if _igual(a) and not _SIGLA.fullmatch(a)))
+
+
+def _nome_ficou(nome, igual):
+    # "Laissez-passer e Passaporte para Estrangeiro" pode virar dois itens
+    # de lista: basta cada parte ligada por "e".
+    return _parte_ficou(nome, igual) or all(_parte_ficou(parte, igual) for parte in nome.split(" e "))
+
+
+def _parte_ficou(nome, igual):
+    # A sigla dentro do nome pode ganhar o nome por extenso antes dela, como
+    # pede o inciso VIII: "Análise do IPHAN" vira "Análise do Instituto do
+    # Patrimônio Histórico e Artístico Nacional (IPHAN)".
+    partes = []
+    for palavra in nome.split():
+        p = re.escape(_igual(palavra))
+        partes.append(f"(?:{p}|.{{1,150}}?\\({p}\\))" if _SIGLA.fullmatch(palavra) else p)
+    return re.search(" ".join(partes), igual) is not None
 
 
 def _frases_de_punicao(texto):
@@ -496,7 +558,7 @@ def _explicar(codigo, tipo, mensagem, modelo):
     elif codigo >= 500:
         o_que = "a API está fora do ar ou sobrecarregada: tente de novo em alguns minutos"
     else:
-        o_que = "a API recusou o pedido"
+        o_que = "a API recusou o pedido: o motivo está entre parênteses"
     return f"{o_que} (resposta {codigo}: {mensagem})"
 
 

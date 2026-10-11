@@ -163,11 +163,12 @@ class TestProblemas(unittest.TestCase):
     def test_link_email_e_sigla_que_somem_recusam(self):
         novo = "O instituto aprovou o seu pedido em 15/10/2026."
         problemas = _problemas(BOM, novo, (("IV", 1),), (("IV", 0),))
-        self.assertEqual(problemas, ["sumiu do texto: https://www.gov.br/inss, atendimento@inss.gov.br, INSS"])
+        self.assertEqual(problemas, ["sumiu do texto: https://www.gov.br/inss, atendimento@inss.gov.br, INSS",
+                                     "mudou nome, rótulo da tela ou texto entre aspas: “Instituto Nacional do Seguro Social”"])
 
 
 # Achado na medida 2 e de novo na 3 (11/10/2026, página 08 do gov.br): o
-# campo em branco saía da frase do crime (corpus/reescrita-4.md).
+# campo em branco saía da frase do crime (docs/precisao.md).
 CRIME = ("Campos em branco ou informação falsa levarão a atraso na entrega do passaporte "
          "e pode configurar crime.")
 
@@ -229,6 +230,40 @@ class TestPunicaoELink(unittest.TestCase):
         de_novo = ia.pedidos[1][1][2]["content"]
         self.assertIn("mudou o texto de link: “Requerer ‹/original›”", de_novo)
         self.assertNotIn("</original>", de_novo)
+
+
+class TestNomeERotulo(unittest.TestCase):
+    # Achado nas medidas 2 a 4 (11/10/2026): o rótulo "Login Integrado" foi
+    # trocado em todas as rodadas, e quem lê não acha o nome na tela.
+    def problemas(self, original, novo):
+        return _problemas(original, novo, (("II", 1),), (("II", 0),))
+
+    def test_rotulo_solto_que_muda_recusa(self):
+        original = "Como acessar\n\nLogin Integrado\n\nEntre com a conta gov.br."
+        self.assertEqual(self.problemas(original, "Como acessar\n\nAcesso Integrado\n\nEntre com a conta gov.br."),
+                         ["mudou nome, rótulo da tela ou texto entre aspas: “Login Integrado”"])
+        self.assertEqual(self.problemas(original, "Como acessar\n\nLogin  integrado\n\nUse a conta gov.br."), [])
+
+    def test_texto_entre_aspas_e_nome_no_meio_da_frase(self):
+        self.assertEqual(self.problemas("Clique em “Exportar Documento” e salve.", "Clique em “Exportar” e salve."),
+                         ["mudou nome, rótulo da tela ou texto entre aspas: “Exportar Documento”"])
+        self.assertEqual(self.problemas("O pedido vai para a Câmara de Comércio Exterior.", "O pedido vai para a Câmara."),
+                         ["mudou nome, rótulo da tela ou texto entre aspas: “Câmara de Comércio Exterior”"])
+
+    def test_primeira_palavra_da_frase_sigla_e_cifrao_nao_contam(self):
+        self.assertEqual(self.problemas("Selecione Renovação.", "Escolha Renovação."), [])
+        self.assertEqual(self.problemas("Leve o RG.", "Leve o RG com foto."), [])
+        self.assertEqual(self.problemas("Pague a Taxa Adicional de R$ 77,17.", "Pague a Taxa Extra de R$ 77,17."),
+                         ["mudou nome, rótulo da tela ou texto entre aspas: “Taxa Adicional”"])
+
+    def test_partes_separadas_e_sigla_por_extenso_passam(self):
+        original = "Peça o Laissez-passer e Passaporte para Estrangeiro."
+        self.assertEqual(self.problemas(original, "Peça:\n- o Laissez-passer;\n- o Passaporte para Estrangeiro."), [])
+        self.assertEqual(self.problemas("Aguarde a Análise do IPHAN.",
+                                        "Aguarde a Análise do Instituto do Patrimônio Histórico e Artístico Nacional (IPHAN)."),
+                         [])
+        self.assertEqual(self.problemas("Aguarde a Análise do IPHAN.", "Aguarde a avaliação do IPHAN."),
+                         ["mudou nome, rótulo da tela ou texto entre aspas: “Análise do IPHAN”"])
 
 
 class TestFatos(unittest.TestCase):
