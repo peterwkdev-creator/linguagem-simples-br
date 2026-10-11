@@ -1,0 +1,43 @@
+# Inciso VI: palavras estrangeiras que um guia oficial manda trocar.
+# Uma entrada por linha: palavra ou expressão | forma que o guia sugere | fonte.
+# Página do arquivo PDF; entre parênteses, a impressa, quando é outra.
+# Plural escrito à parte, com a fonte do singular. Lista fechada: palavra
+# estrangeira fora dela passa, e a lei só pede evitar a que "não seja de uso
+# corrente"; quem lê decide se a apontada é.
+# De fora, porque o guia as dá como de uso corrente: mouse, e-mail e site
+# (CAPES p. 9 (8): "Uma palavra estrangeira deve ser usada quando ela for
+# mais conhecida que o seu termo em português como mouse, e-mail, site");
+# mouse, notebook, office-boy, outdoor, pedigree e DNA (TRE-AL p. 20 (18):
+# "são não só conhecidos do público, como mais usados que seu equivalente
+# em português"); marketing, office boy, blog, startup, royalty, commodity,
+# design, download, free shop, on-line e iceberg (Senado, Manual de
+# Comunicação, verbete "Estrangeirismo", regra 3: "São palavras de uso
+# amplo"). Também de fora: menu, que o Senado troca por cardápio, mas que nas
+# páginas de serviço do gov.br é sempre o menu da tela (13 de 410, 10/10/2026).
+# O verbete do Senado é página da web, sem número: a fonte cita a regra,
+# conferida em 10/10/2026 em
+# www12.senado.leg.br/manualdecomunicacao/estilos/estrangeirismo.
+checklist | lista de verificação | CAPES p. 9 (8): "Antes: Faça um checklist antes de enviar. Depois: Faça uma lista de verificação antes de enviar."; tabela "Dicas de substituições": "Checklist / Lista de Verificação"
+checklists | listas de verificação | CAPES p. 9 (8), plural da entrada acima
+budget | orçamento | CAPES p. 9 (8), tabela "Dicas de substituições": "Budget / Orçamento"
+budgets | orçamentos | CAPES p. 9 (8), plural da entrada acima
+feedback | retorno | CAPES p. 9 (8), tabela "Dicas de substituições": "Feedback / Retorno"
+feedbacks | retornos | CAPES p. 9 (8), plural da entrada acima
+deadline | prazo | CAPES p. 9 (8), tabela "Dicas de substituições": "Deadline / Prazo"
+deadlines | prazos | CAPES p. 9 (8), plural da entrada acima
+upgrade | atualização | CAPES p. 9 (8), tabela "Dicas de substituições": "Upgrade / Atualização"
+upgrades | atualizações | CAPES p. 9 (8), plural da entrada acima
+login | acesso | CAPES p. 9 (8), tabela "Dicas de substituições": "Login / Acesso"
+logins | acessos | CAPES p. 9 (8), plural da entrada acima
+logout | sair | CAPES p. 9 (8), tabela "Dicas de substituições": "Logout / Sair"
+experts | especialistas | Anvisa p. 12: "Antes: O grupo de experts solicitará dados adicionais sobre o novo estudo. Depois: O grupo de especialistas solicitará dados adicionais sobre o novo estudo."
+expert | especialista | Anvisa p. 12, singular da entrada acima
+primo ictu oculi | na primeira leitura | TJGO p. 10, em "Evite estrangeirismos, jargões, termos técnicos": ✗ "quando se apresente primo ictu oculi" / ✓ "erros claros que podem ser vistos na primeira leitura" (rótulo em ícone, conferido na página renderizada em 10/10/2026)
+folder | fôlder | Senado, Manual de Comunicação, "Estrangeirismo", regra 1: "É o caso de fôlder, em vez de folder"
+folders | fôlderes | Senado, Manual de Comunicação, "Estrangeirismo", regra 1, lista "Prefira a forma aportuguesada": "fôlder, fôlderes"
+poster | pôster | Senado, Manual de Comunicação, "Estrangeirismo", regra 1: "pôster, em vez de poster"
+posters | pôsteres | Senado, Manual de Comunicação, "Estrangeirismo", regra 1, lista "Prefira a forma aportuguesada": "pôster, pôsteres"
+whisky | uísque | Senado, Manual de Comunicação, "Estrangeirismo", regra 1: "uísque, em vez de whisky"
+standard | padrão | Senado, Manual de Comunicação, "Estrangeirismo", regra 2: "padrão, e não standard"
+premier | primeiro-ministro ou premiê | Senado, Manual de Comunicação, "Estrangeirismo", regra 2: "primeiro-ministro ou premiê, e não premier"
+avant-première | pré-estreia | Senado, Manual de Comunicação, "Estrangeirismo", regra 2: "pré-estreia, e não avant-première"

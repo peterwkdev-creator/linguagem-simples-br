@@ -284,6 +284,36 @@ O filtro não vê a série só com vírgulas, sem "e" nem "ou" no fim, e 11
 apontamentos do IX nessas páginas são dessa forma: a medida vale para a
 série com "e", "ou" ou ponto e vírgula.
 
+**VI, precisão e cobertura (1.4.0, 10/10/2026).** O VI aponta a palavra
+estrangeira que um guia oficial manda trocar: 24 entradas, da CAPES
+(p. 9), da Anvisa (p. 12), do TJGO (p. 10) e do verbete "Estrangeirismo"
+do Manual de Comunicação do Senado. As 410 páginas das amostras
+anteriores serviram para escolher o léxico ("menu" ficou de fora: ali é
+sempre o menu da tela) e por isso não medem. A medida foi em 120 páginas
+novas, sorteadas antes de baixar (semente 2026101018). O VI apontou 103
+vezes, em 63 páginas (login 96, checklist 7); 60 sorteadas. 34 delas são
+o título "Login Integrado" do rodapé do portal, fora da conta como defeito
+da leitura do HTML; as 26 do corpo do serviço foram anotadas com duas
+passagens (26 dos 26 rótulos iguais).
+
+| Medida | Resultado | Intervalo de 95% (Wilson) | Amostra |
+|---|---|---|---|
+| Precisão | 96% (25 / 26) | 81% a 99% | 120 páginas novas |
+| Cobertura | 10% (2 / 20) | 3% a 30% | 30 dessas páginas, lidas inteiras |
+
+O erro é "login único", nome do serviço de entrada do gov.br. Em 11 dos
+25 acertos, a sugestão da CAPES não cabe: "login e senha" pede "usuário",
+não "acesso". Na cobertura, duas passagens às cegas leram o corpo do
+serviço de 30 páginas e listaram cada palavra estrangeira (174 itens, 168
+iguais; 6 divergências resolvidas com nota), dizendo se é de uso corrente
+ou se há palavra portuguesa tão usada. Das 20 para trocar, o VI aponta os
+2 "checklist"; passam courier, upload, vide, in loco, status, campi,
+desktop, mobile, packing-list, timecode e termos técnicos em inglês de
+uma página da Anac. Das 154 de uso corrente (web, e-mail, site, drone,
+link…), o VI aponta 7, todas "login": a CAPES manda trocá-la, mas quem lê
+a achou corrente. A lei só pede evitar a palavra que não é de uso
+corrente; por isso o VI é sinal.
+
 **Como se mediu.** 30 páginas sorteadas (semente 20261009) entre as 5.735
 páginas de serviço do sitemap do gov.br de 08/10/2026. Os 621 apontamentos
 viraram 431 sem os repetidos (o modelo do portal se repete em toda página);

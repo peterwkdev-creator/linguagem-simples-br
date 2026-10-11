@@ -7,7 +7,7 @@ from pathlib import Path
 
 from linguagem_simples import detectores, limiares
 from linguagem_simples.detectores import (
-    acessibilidade, enumeracoes, frases_intercaladas, frases_longas, paragrafos_longos,
+    acessibilidade, enumeracoes, estrangeirismos, frases_intercaladas, frases_longas, paragrafos_longos,
     redundancias, siglas_sem_nome, substantivos_no_lugar_de_verbos, voz_passiva,
 )
 from linguagem_simples.pagina import ler_html
@@ -496,6 +496,80 @@ class TestIncisoXIV(unittest.TestCase):
                     palavra, acepcao, fonte = (c.strip() for c in linha.split("|"))
                     self.assertTrue(palavra and acepcao)
                     self.assertRegex(fonte, r'^Dicionário Priberam, verbete "\w+"')
+
+
+class TestIncisoVI(unittest.TestCase):
+    def test_plantado(self):
+        achadas = estrangeirismos("Faça o login no sistema.")
+        self.assertEqual([(o.inciso, o.trecho) for o in achadas], [("VI", "login")])
+        self.assertEqual((achadas[0].inicio, achadas[0].fim), (len("Faça o "), len("Faça o login")))
+        self.assertIn("“acesso”", achadas[0].mensagem)
+
+    def test_plural_caixa_e_expressao(self):
+        self.assertEqual(trechos(estrangeirismos, "Os FEEDBACKS e os Checklists do Expert."),
+                         ["FEEDBACKS", "Checklists", "Expert"])
+        self.assertEqual(trechos(estrangeirismos, "Se vê primo ictu\noculi."), ["primo ictu\noculi"])
+        self.assertEqual(estrangeirismos("Se vê primo ictu\n\noculi."), [])
+
+    def test_palavra_inteira(self):
+        for texto in ("A expertise da equipe.", "Faça o relogin.", "O loginho.", "Um checklist2."):
+            with self.subTest(texto):
+                self.assertEqual(estrangeirismos(texto), [])
+
+    def test_endereco_nao_conta(self):
+        for texto in ("Acesse https://sso.acesso.gov.br/login.", "Acesse gov.br/login hoje.",
+                      "Escreva para login@orgao.gov.br.", "Veja login.gov.br ou login/senha."):
+            with self.subTest(texto):
+                self.assertEqual(estrangeirismos(texto), [])
+        self.assertEqual(trechos(estrangeirismos, "Faça o login. Depois, o logout."), ["login", "logout"])
+
+    def test_uso_corrente_dos_guias_passa(self):
+        # CAPES p. 9 (8) e TRE-AL p. 20 (18) dão estas como de uso corrente
+        texto = "Envie um e-mail pelo site; use o mouse, o notebook, o outdoor, o DNA e o pedigree."
+        self.assertEqual(estrangeirismos(texto), [])
+        # e o Senado, regra 3 ("uso amplo"); o menu é o da tela nas páginas do gov.br
+        texto = ("O marketing do blog, o design da startup, o office boy, o royalty, a commodity, "
+                 "o download on-line, o free shop, o iceberg e o menu do portal.")
+        self.assertEqual(estrangeirismos(texto), [])
+
+    def test_pares_do_senado(self):
+        texto = "O folder, os posters, o whisky, o standard, o premier e a avant-première."
+        self.assertEqual(trechos(estrangeirismos, texto),
+                         ["folder", "posters", "whisky", "standard", "premier", "avant-première"])
+        self.assertIn("“pré-estreia”", estrangeirismos("A avant-première.")[0].mensagem)
+        for texto in ("O fôlder e o pôster.", "Os premiers.", "Um standardizado."):
+            with self.subTest(texto):
+                self.assertEqual(estrangeirismos(texto), [])
+
+    def test_texto_bom_e_par_do_guia(self):
+        for par in guias.ESTRANGEIRISMO:
+            with self.subTest(par.fonte.guia):
+                self.assertEqual((len(estrangeirismos(par.antes)), len(estrangeirismos(par.depois))), (1, 0))
+        bons = [guias.TREAL_PARAGRAFOS, guias.ANVISA_SEI_DEPOIS, guias.FRASE_CAPES.depois,
+                guias.FRASE_ANVISA.depois, guias.FRASE_TJGO.depois, guias.INTERCALADA_CAPES.depois]
+        bons += [p.depois for p in guias.PASSIVA + guias.NOMINALIZACAO]
+        for texto in bons:
+            with self.subTest(texto[:30]):
+                self.assertEqual(estrangeirismos(texto), [])
+
+    def test_lexico_de_estrangeirismos_tem_fonte(self):
+        caminho = Path(detectores.__file__).parent / "lexicos" / "estrangeirismos.txt"
+        linhas = [l for l in caminho.read_text(encoding="utf-8").splitlines() if l.strip() and not l.startswith("#")]
+        self.assertEqual(len(linhas), 24)
+        palavras_ = set()
+        for linha in linhas:
+            with self.subTest(linha):
+                palavra, forma, fonte = (c.strip() for c in linha.split("|"))
+                self.assertTrue(palavra and forma)
+                self.assertRegex(fonte, r'^(?:CAPES p\. 9 \(8\)|Anvisa p\. 12|TJGO p\. 10|'
+                                        r'Senado, Manual de Comunicação, "Estrangeirismo", regra [12])')
+                palavras_.add(palavra.casefold())
+        # nenhuma das que o guia dá como de uso corrente, nem o menu
+        self.assertFalse(palavras_ & {
+            "mouse", "e-mail", "site", "notebook", "office-boy", "outdoor", "pedigree", "dna",
+            "marketing", "office boy", "blog", "startup", "royalty", "commodity", "design",
+            "download", "free shop", "on-line", "iceberg", "menu",
+        })
 
 
 class TestIncisoXV(unittest.TestCase):

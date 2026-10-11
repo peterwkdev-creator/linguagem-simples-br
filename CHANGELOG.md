@@ -4,6 +4,22 @@ A versão segue `linguagem_simples.__version__`; cada uma tem uma tag
 `vX.Y.Z` no commit que a publicou. O formato do relatório e as opções da
 linha de comando só mudam numa versão 2; detector novo sai numa 1.x.
 
+## 1.4.0 — 10/10/2026
+
+- Detector do inciso VI (palavras estrangeiras, classe **sinal**): aponta
+  a palavra que um guia oficial manda trocar e diz a forma que ele sugere.
+  Léxico `lexicos/estrangeirismos.txt`, 24 entradas com a fonte em cada
+  linha: CAPES p. 9 (checklist, budget, feedback, deadline, upgrade,
+  login, logout), Anvisa p. 12 (experts), TJGO p. 10 (primo ictu oculi) e
+  o Manual de Comunicação do Senado (folder, poster, whisky, standard,
+  premier, avant-première). Não aponta as que os guias dão como de uso
+  corrente, nem a palavra dentro de endereço.
+- Precisão do VI: 96% (81–99) em 120 páginas novas do gov.br; cobertura:
+  10% (3–30) das palavras estrangeiras para trocar, em 30 delas. Quase
+  tudo o que ele aponta é "login". Método e números em
+  `docs/precisao.md`.
+- Lei reconferida em 10/10/2026 (ficha do Senado): sem alteração.
+
 ## 1.3.0 — 10/10/2026
 
 - Detector do inciso IX (texto esquemático, classe **sinal**): frase de

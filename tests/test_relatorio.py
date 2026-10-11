@@ -56,6 +56,12 @@ class TestRelatorio(unittest.TestCase):
         por = {r.inciso.numero: r for r in conferir("Será feito em breve.")}
         self.assertEqual((por["XVI"].inciso.classe, por["XVI"].estado), ("sinal", SEM_DETECTOR))
 
+    def test_vi_e_sinal_e_roda(self):
+        # A lei aceita a palavra estrangeira de uso corrente: quem lê decide.
+        por = {r.inciso.numero: r for r in conferir("Faça o login no sistema.")}
+        self.assertEqual((por["VI"].inciso.classe, por["VI"].estado), ("sinal", CONFERIDO))
+        self.assertEqual([o.trecho for o in por["VI"].ocorrencias], ["login"])
+
     def test_xiii_e_sinal_e_roda(self):
         # 31% de precisão (amostra 6): o XIII aponta para quem lê decidir.
         texto = "O documento, que deve ser apresentado pelo requerente, fica no protocolo."

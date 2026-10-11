@@ -192,6 +192,24 @@ NOMINALIZACAO = (
 _CAPES_11 = Fonte("CAPES, O uso da Linguagem Simples na CAPES (2026)", 11, CAPES, _CAPES_SHA)
 REDUNDANCIA_CAPES = Par(_CAPES_11, "Compareça pessoalmente ao local.", "Compareça ao local.")
 
+# Inciso VI. A CAPES, item 9, "Evite palavras estrangeiras que não sejam de
+# uso corrente"; a Anvisa, "evite siglas, palavras estrangeiras e termos
+# técnicos"; o TJGO, "Evite estrangeirismos" (rótulo em ícone, conferido na
+# página renderizada em 10/10/2026).
+_CAPES_9 = Fonte("CAPES, O uso da Linguagem Simples na CAPES (2026)", 9, CAPES, _CAPES_SHA)
+_ANVISA_12 = Fonte("Anvisa, Guia de Linguagem Simples, 1ª ed.", 12, ANVISA, _ANVISA_SHA)
+_TJGO_10 = Fonte("TJGO, Guia de Linguagem Simples do TJGO", 10, TJGO, _TJGO_SHA)
+ESTRANGEIRISMO = (
+    Par(_CAPES_9, "Faça um checklist antes de enviar.", "Faça uma lista de verificação antes de enviar."),
+    Par(_ANVISA_12, "O grupo de experts solicitará dados adicionais sobre o novo estudo.",
+        "O grupo de especialistas solicitará dados adicionais sobre o novo estudo."),
+    Par(_TJGO_10, "É possível a anulação judicial de questão objetiva de concurso público, em "
+        "caráter excepcional, quando o vício que a macula se manifesta de forma evidente e "
+        "insofismável, ou seja, quando se apresente primo ictu oculi.",
+        "Às vezes, quando uma questão objetiva de prova de concurso público tem erros claros "
+        "que podem ser vistos na primeira leitura, ela pode ser anulada por meio judicial."),
+)
+
 # Inciso IX. A CAPES, item 2, "Organize o texto de forma esquemática (listas,
 # tabelas, gráficos)". No "depois", cada linha de ação é um item com
 # marcador (um quadrado desenhado no PDF, escrito aqui "- "; conferido em

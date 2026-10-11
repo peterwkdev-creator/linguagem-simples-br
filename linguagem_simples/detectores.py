@@ -517,6 +517,27 @@ def redundancias(texto):
     return sorted(achadas, key=lambda o: o.inicio)
 
 
+# Inciso VI: palavra estrangeira que um guia manda trocar. A barra fica de
+# fora como letra ("gov.br/login"): é caminho de endereço, que quem escreve
+# o texto não escolhe.
+_ESTRANGEIRISMOS = {
+    re.compile(r"(?<![\w/])" + _ESPACO.join(map(re.escape, e.split())) + r"(?![\w/])", re.IGNORECASE): forma
+    for e, forma in _ler_lexico("estrangeirismos.txt").items()
+}
+
+
+def estrangeirismos(texto):
+    """Inciso VI: palavra estrangeira da lista dos guias ("Faça um checklist
+    antes de enviar": CAPES p. 9). É sinal: a lei só pede evitar a que não é
+    de uso corrente, e quem lê decide."""
+    achadas = [
+        Ocorrencia("VI", m.start(), m.end(), m.group(), f"palavra estrangeira: o guia sugere “{forma}”")
+        for padrao, forma in _ESTRANGEIRISMOS.items() for m in padrao.finditer(texto)
+        if not _em_endereco(texto, m.start(), m.end())
+    ]
+    return sorted(achadas, key=lambda o: o.inicio)
+
+
 # Inciso XVII: o que o eMAG 3.1 pede no HTML e se confere sem ver a imagem nem
 # seguir o link: texto de link que diz o destino (Recomendação 3.5), texto
 # alternativo na imagem (3.6) e célula de cabeçalho na tabela (3.10). O eMAG

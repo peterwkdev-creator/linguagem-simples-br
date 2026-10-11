@@ -18,7 +18,7 @@ ela baixa cerca de 6 MB e fica pronta em 1,7 s (medido em 10/10/2026, numa
 conexão rápida). Depois disso, conferir o texto do exemplo leva uns 5 ms.
 
 **Precisão medida** em páginas de serviço do gov.br, por inciso: XII 100%,
-XV 98%, XVII 98%, II 95%, XIV 88%, VIII 78%; o XIII acerta 31% e por isso
+XV 98%, XVII 98%, VI 96%, II 95%, XIV 88%, VIII 78%; o XIII acerta 31% e por isso
 só aponta trechos para quem lê decidir. Intervalos em
 [Precisão medida](#precisão-medida).
 
@@ -30,7 +30,7 @@ só aponta trechos para quem lê decidir. Intervalos em
 Python 3.11 ou mais novo; só a biblioteca padrão, sem outra dependência.
 
 ```bash
-pip install "git+https://github.com/peterwkdev-creator/linguagem-simples-br@v1.3.0"
+pip install "git+https://github.com/peterwkdev-creator/linguagem-simples-br@v1.4.0"
 ```
 
 Também roda sem instalar, de dentro da pasta do repositório.
@@ -78,6 +78,7 @@ a página.
 |---|---|---|---|
 | II | redigir frases curtas | frase longa | mais de 20 palavras |
 | III | desenvolver uma ideia por parágrafo | parágrafo longo, sinal de mais de uma ideia | mais de 8 frases |
+| VI | evitar palavras estrangeiras que não sejam de uso corrente | palavra estrangeira que um guia oficial manda trocar ("faça o login", "um checklist") e a forma que o guia sugere | léxico em `linguagem_simples/lexicos/estrangeirismos.txt`: 24 entradas da CAPES, da Anvisa, do TJGO e do Manual de Comunicação do Senado |
 | VIII | redigir o nome completo antes das siglas | primeira vez que a sigla aparece sem o nome antes | léxico de cores em `linguagem_simples/lexicos/`, com a fonte de cada palavra |
 | IX | organizar o texto de forma esquemática, quando couber, com o uso de listas, tabelas e recursos gráficos | frase de parágrafo que anuncia uma série depois dos dois-pontos, com os itens separados por vírgula ou ponto e vírgula ("leve ao atendimento os documentos: RG, CPF e comprovante") | 3 itens ou mais |
 | XII | redigir frases preferencialmente na voz ativa | verbo "ser" com particípio ("foi entregue pela empresa"), com ou sem quem faz a ação | — |
@@ -86,12 +87,14 @@ a página.
 | XV | evitar redundâncias e palavras desnecessárias | expressão do léxico com palavras sobrando ("compareça pessoalmente", "a fim de", "de acordo com") e a forma que o guia sugere | léxico em `linguagem_simples/lexicos/redundancias.txt`: 29 entradas do TRE-AL, do CJF e da CAPES, com a página |
 | XVII | usar linguagem acessível à pessoa com deficiência (Lei 13.146/2015) | no HTML, link de texto vago ("clique aqui", "saiba mais"), imagem sem `alt` e tabela sem célula de cabeçalho (`th`); no texto e no Markdown, só o link vago | eMAG 3.1, recomendações 3.5, 3.6 e 3.10; léxico em `linguagem_simples/lexicos/links-vagos.txt`: 46 entradas |
 
-O IX, o XIII e o XVII são **sinal**, não automáticos: o IX acerta 73% das
-vezes, e a lei diz "quando couber"; o XIII acerta 31%; o XVII confere só
-três pontos do que a Lei 13.146/2015 pede. Os três apontam trechos para
-quem lê decidir. Os outros seis são automáticos.
+O VI, o IX, o XIII e o XVII são **sinal**, não automáticos: o VI só
+conhece as palavras que um guia manda trocar, e a lei aceita a de uso
+corrente; o IX acerta 73% das vezes, e a lei diz "quando couber"; o XIII
+acerta 31%; o XVII confere só três pontos do que a Lei 13.146/2015 pede.
+Os quatro apontam trechos para quem lê decidir. Os outros seis são
+automáticos.
 
-Os outros 9 incisos aparecem no relatório com a classe de cada um:
+Os outros 8 incisos aparecem no relatório com a classe de cada um:
 **automático** (dá para contar; detector ainda não escrito), **sinal** (dá
 para apontar, quem lê decide) ou **fora do alcance** (X e XVIII: só uma
 pessoa confere). O inciso XI vem desligado por padrão.
@@ -125,6 +128,7 @@ cegas:
 | XII | 100% | 59 / 59 | 94% a 100% | 30 páginas, 09/10/2026 |
 | XV | 98% | 59 / 60 | 91% a 100% | 150 páginas, 10/10/2026 |
 | XVII | 98% | 49 / 50 | 90% a 100% | 150 páginas, 10/10/2026 |
+| VI | 96% | 25 / 26 | 81% a 99% | 120 páginas novas, 10/10/2026 |
 | II | 95% | 57 / 60 | 86% a 98% | 30 páginas, 09/10/2026 |
 | XIV | 88% | 21 / 24 | 69% a 96% | 30 páginas, 09/10/2026 |
 | VIII | 78% | 38 / 49 | 64% a 87% | 30 páginas, 09/10/2026 |
@@ -145,7 +149,13 @@ versão tinha visto. A cobertura do IX é baixa por desenho: das 59
 enumerações dentro de parágrafo numa amostra de 150 frases com série
 ("Pix, cartão de crédito ou boleto"), ele aponta 4 (**7%**, de 3% a 16%),
 porque 52 delas não têm dois-pontos. Sem marca do IX não quer dizer sem
-enumeração. Cada
+enumeração. O VI erra pouco e deixa passar muito: o único erro foi "login
+único", nome de serviço; mas, das 20 palavras estrangeiras que duas
+passagens às cegas mandariam trocar em 30 páginas novas ("courier",
+"upload", "in loco", "vide"), ele aponta 2 (**10%**, de 3% a 30%), porque
+só conhece as que um guia lista. E quase tudo o que ele aponta é "login"
+(96 de 103 nas 120 páginas), que a CAPES manda trocar por "acesso", mas
+que as mesmas passagens deram como de uso corrente: quem lê decide. Cada
 amostra, o método e o que os erros mostram estão em
 [docs/precisao.md](docs/precisao.md).
 
@@ -232,7 +242,9 @@ Consultados em 09/10/2026:
 
 Consultado em 10/10/2026: eMAG, Modelo de Acessibilidade em Governo
 Eletrônico, versão 3.1 (obrigatório no governo federal pela Portaria SLTI
-nº 3, de 07/05/2007), recomendações 3.5, 3.6 e 3.10.
+nº 3, de 07/05/2007), recomendações 3.5, 3.6 e 3.10. Também em 10/10/2026:
+Senado Federal, Manual de Comunicação, verbete "Estrangeirismo" (pares do
+VI e a lista de palavras de uso amplo, que o VI não aponta).
 
 Texto da lei: publicação original no portal da Câmara dos Deputados, DOU de
 17/11/2025.
@@ -247,6 +259,15 @@ do Planalto (epígrafe de ato normativo em maiúsculas).
 - Com o padrão de 20 palavras, o "depois" da CAPES e o da Anvisa ainda
   têm uma frase acima de 20 (de 21 a 23 palavras); os dois guias aceitam até
   25. Com `--max-palavras 25`, nada aparece.
+- VI é uma lista fechada de 24 entradas, cada uma com a fonte: palavra
+  estrangeira fora dela passa (10% de cobertura, acima). Não aponta as
+  que os guias dão como de uso corrente (e-mail, site, mouse, download,
+  on-line…), nem "menu", que o Senado troca por "cardápio" mas que nas
+  páginas de serviço é sempre o menu da tela. Não aponta a palavra dentro
+  de endereço ("gov.br/login"). A sugestão é a do guia e nem sempre cabe:
+  em "login e senha", cabe "usuário", não "acesso" (11 dos 25 acertos).
+  Numa página do gov.br lida inteira, aponta o título "Login Integrado"
+  do rodapé do portal.
 - IX não aponta série de dois itens ("RG e CPF"): com dois, o "e" não
   separa a enumeração de uma frase comum. Os pares da DICAS (p. 2) e da
   SES-DF (p. 6), que põem dois itens em tópicos, passam sem marca. Também
