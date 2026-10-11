@@ -36,7 +36,7 @@ pip install linguagem-simples-br
 Ou direto da tag no GitHub:
 
 ```bash
-pip install "git+https://github.com/peterwkdev-creator/linguagem-simples-br@v1.7.0"
+pip install "git+https://github.com/peterwkdev-creator/linguagem-simples-br@v1.8.0"
 ```
 
 Também roda sem instalar, de dentro da pasta do repositório.
@@ -67,32 +67,85 @@ aconteceu. Mais exemplos [abaixo](#mais-exemplos).
 
 ### Reescrita sugerida por IA
 
+Com `--reescrever`, o Claude, a IA da Anthropic, reescreve o texto a
+partir dos apontamentos do relatório, e o verificador confere a reescrita
+antes de mostrar:
+
 ```bash
 python -m linguagem_simples texto.txt --reescrever --saida texto-simples.txt
 ```
 
-Com `--reescrever`, o Claude, IA da Anthropic, reescreve o texto a partir
-dos apontamentos do relatório. A chave da API é a sua, na variável
-`ANTHROPIC_API_KEY`: a biblioteca não tem chave nem guarda a sua, e o
-texto vai para a API da Anthropic (não use com dado pessoal que você não
-possa enviar). A reescrita só é aceita se o verificador medir nela menos
-apontamentos, nenhum inciso pior, e se todo número, data, sigla, link e
-e-mail do original continuar nela, sem número novo. Senão, a IA tenta mais
-duas vezes, sabendo o que falhou; depois disso, a saída diz por que
-recusou e não mostra o texto. O texto aceito vai para a tela ou para
-`--saida`, nunca por cima do arquivo lido. `--modelo` troca o modelo
-(padrão `claude-sonnet-5-5`); com `--json`, sai o antes e depois por
-inciso. Código de saída: 0 aceita, 1 recusada, 2 erro. Não roda na
-vitrine: a página no navegador não leva chave.
+#### A chave da API: como funciona
+
+1. **O que é.** A reescrita usa a API da Anthropic, que cobra por uso. A
+   chave da API funciona como a senha da sua conta nela, e a biblioteca
+   não traz chave nenhuma. Crie a sua em
+   [console.anthropic.com](https://console.anthropic.com), em **API Keys**;
+   o crédito se compra lá mesmo, em **Billing**.
+2. **O jeito mais simples.** Rode o comando acima num terminal. Sem chave
+   configurada, ele pergunta: cole a chave e tecle Enter (se o Ctrl+V não
+   colar, use o botão direito do mouse). Ela não aparece na tela e vale
+   só para essa execução. Com o texto pela entrada padrão (`-`), não há
+   pergunta: use o passo 3.
+3. **Para não colar toda vez, ou num script**, ponha a chave na variável
+   `ANTHROPIC_API_KEY` antes de rodar. A variável vale até fechar o
+   terminal, mas o comando com a chave fica gravado no histórico do
+   terminal, em disco, mesmo depois de fechar: por isso o passo 2 é o mais
+   seguro.
+   - Windows, PowerShell: `$env:ANTHROPIC_API_KEY = "sua-chave"`
+   - Windows, Prompt de Comando: `set ANTHROPIC_API_KEY=sua-chave` (sem aspas)
+   - Linux e macOS: `export ANTHROPIC_API_KEY="sua-chave"`
+4. **O que a biblioteca faz com ela.** Só a põe no cabeçalho da
+   requisição HTTPS para `api.anthropic.com`, sem seguir redirecionamento
+   para outro endereço. Não grava em arquivo, não imprime, não põe no
+   relatório nem no JSON, e nenhuma mensagem de erro a mostra. Chave com
+   espaço, quebra de linha ou caractere invisível no meio é recusada antes
+   de sair do computador.
+5. **Quem paga.** Cada reescrita faz de uma a três chamadas, cobradas na
+   conta da chave. A saída diz quantos tokens usou, de entrada e de saída,
+   também quando para num erro depois de uma chamada já paga; o preço por
+   token está na página de preços da Anthropic.
+6. **Para onde vai o texto.** O texto vai para a Anthropic. Antes de
+   mandar dado pessoal ou sigiloso (LGPD), leia os termos e a política de
+   privacidade dela. A [vitrine](https://peterwkdev-creator.github.io/linguagem-simples-br/)
+   não faz reescrita: a página no navegador não leva chave, e o texto
+   colado nela não sai do seu computador.
+
+Se a chave não for aceita, se faltar crédito, se o modelo não existir ou
+se a API estiver fora do ar, a mensagem diz o que fazer.
+
+#### Como a reescrita é aceita
+
+- O total de apontamentos cai, e nenhum inciso piora.
+- Todo número, data, sigla, link e e-mail do original continua no texto,
+  e não aparece número novo.
+
+Senão, a IA tenta mais duas vezes, sabendo o que falhou. Se ainda não
+passar, a saída diz por que recusou e não mostra o texto.
+
+O texto aceito vai para a tela ou para o arquivo de `--saida`, que tem de
+ser novo: a reescrita nunca grava por cima de um arquivo. Se a gravação
+falhar, o texto vai para a tela, para não se perder. Num HTML, só o
+texto é reescrito, sem a marcação. `--modelo` troca o modelo (padrão
+`claude-sonnet-5-5`). Com `--json`, sai o antes e o depois por inciso, e
+os tokens. Código de saída: 0 aceita (ou nada a reescrever), 1 recusada,
+2 erro (sem chave, sem rede ou erro da API). Em Python,
+`reescrita.reescrever(texto, chave=...)` faz o mesmo; sem `chave`, vale a
+variável.
 
 O verificador não confere o sentido: compare com o original antes de
-usar. Nos 28 trechos "antes" dos guias oficiais que têm apontamento, as
+usar.
+
+#### O que se mediu
+
+Nos 28 trechos "antes" dos guias oficiais que têm apontamento, as
 28 reescritas foram aceitas (41 apontamentos → 1, a sigla DTI, cujo nome
 o trecho não dá) e 25 mantiveram o sentido: **89% (73% a 96%)**. Nas
 outras 3, a reescrita afirmou que o mandado foi cumprido, escreveu
 "Aceitamos" onde o original não diz quem decidiu e trocou "peticionar"
 por "entrar com uma ação judicial", a mesma troca que o guia da SES-DF
-faz. Método em [docs/precisao.md](docs/precisao.md).
+faz. Método em [docs/precisao.md](docs/precisao.md); para medir de novo
+com a sua chave, `python docs/medir_reescrita.py medida.jsonl`.
 
 ## Por quê
 
@@ -312,7 +365,9 @@ do Planalto (epígrafe de ato normativo em maiúsculas).
 - A reescrita por IA foi medida em 28 trechos curtos (de 4 a 68
   palavras), tirados de guias públicos que o modelo pode ter lido; em
   texto longo, ainda não há número. O aceite confere números, siglas e
-  links, não nomes, condições nem quem faz a ação.
+  links, não nomes, condições nem quem faz a ação. Um texto com ordens
+  dirigidas à IA pode desviar a reescrita, ainda que o pedido mande não
+  obedecer: o aceite e a sua leitura são a proteção.
 
 - Sigla escrita como nome próprio ("Lacen", "Anvisa") não é reconhecida.
 - Com o padrão de 20 palavras, o "depois" da CAPES e o da Anvisa ainda
@@ -423,8 +478,9 @@ do Planalto (epígrafe de ato normativo em maiúsculas).
 - `vitrine/`: a página do "Experimente no navegador". O GitHub Actions a
   monta e publica a cada push que muda a biblioteca, a página ou os testes
   (`.github/workflows/pages.yml`).
-- `docs/`: o GIF do começo deste README e o
-  [histórico da precisão](docs/precisao.md).
+- `docs/`: o GIF do começo deste README, o
+  [histórico da precisão](docs/precisao.md) e `medir_reescrita.py`, que
+  refaz a medida da reescrita.
 - [`CHANGELOG.md`](CHANGELOG.md): o que mudou em cada versão.
 
 ## Compatibilidade

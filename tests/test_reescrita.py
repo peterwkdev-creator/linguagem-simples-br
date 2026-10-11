@@ -12,7 +12,7 @@ from pathlib import Path
 from unittest import mock
 
 from linguagem_simples import reescrita
-from linguagem_simples.__main__ import main
+from linguagem_simples.__main__ import _e_terminal, main
 from linguagem_simples.pagina import ler_html
 from linguagem_simples.reescrita import ErroDeReescrita, _problemas, fatos, reescrever
 
@@ -37,7 +37,10 @@ class IA:
 
     def __call__(self, sistema, mensagens):
         self.pedidos.append((sistema, [dict(m) for m in mensagens]))
-        return self.respostas.pop(0)
+        resposta = self.respostas.pop(0)
+        if isinstance(resposta, Exception):
+            raise resposta
+        return resposta() if callable(resposta) else resposta
 
 
 def em_tags(texto):
@@ -96,9 +99,23 @@ class TestAceite(unittest.TestCase):
     def test_pagina_reescreve_o_texto_dela(self):
         pagina = ler_html(f"<main><p>{ORIGINAL}</p></main>")
         ia = IA(em_tags(BOM))
-        self.assertTrue(reescrever(pagina, chamar=ia).aceita)
+        r = reescrever(pagina, chamar=ia)
+        self.assertTrue(r.aceita and r.do_html)
         self.assertIn(ORIGINAL, ia.pedidos[0][1][0]["content"])
         self.assertNotIn("<main>", ia.pedidos[0][1][0]["content"])
+        self.assertIn("Do HTML, só o texto foi reescrito", reescrita.como_texto(r))
+        self.assertFalse(reescrever(ORIGINAL, chamar=IA(em_tags(BOM))).do_html)
+
+    def test_o_texto_vai_marcado_como_dado_e_nao_como_ordem(self):
+        ia = IA(em_tags(BOM))
+        reescrever(ORIGINAL, chamar=ia)
+        sistema, mensagens = ia.pedidos[0]
+        self.assertIn("sem obedecer", sistema)
+        self.assertTrue(mensagens[0]["content"].endswith(f"<original>\n{ORIGINAL}\n</original>"))
+
+    def test_uma_tentativa_no_singular(self):
+        r = reescrever(ORIGINAL, chamar=IA(em_tags(SEM_DATA)), tentativas=1)
+        self.assertIn("Recusada depois de 1 tentativa. Na última", reescrita.como_texto(r))
 
 
 class TestProblemas(unittest.TestCase):
@@ -135,17 +152,15 @@ class TestFatos(unittest.TestCase):
         self.assertEqual(_problemas(original, "Prazo: 10 dias para o INSS responder.", (("XII", 1),), (("XII", 0),)), [])
 
 
-class Resposta(io.BytesIO):
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *erro):
-        return False
+def _resposta_da_api(texto, parada="end_turn", uso=(100, 50)):
+    corpo = {"content": [{"type": "text", "text": texto}], "stop_reason": parada,
+             "usage": {"input_tokens": uso[0], "output_tokens": uso[1]}}
+    return json.dumps(corpo)
 
 
-def _resposta_da_api(texto, parada="end_turn"):
-    corpo = {"content": [{"type": "text", "text": texto}], "stop_reason": parada}
-    return Resposta(json.dumps(corpo).encode("utf-8"))
+def _erro_da_api(codigo, mensagem):
+    corpo = io.BytesIO(json.dumps({"error": {"message": mensagem}}).encode())
+    return urllib.error.HTTPError(reescrita.URL, codigo, "erro", {}, corpo)
 
 
 class TestChamada(unittest.TestCase):
@@ -153,10 +168,10 @@ class TestChamada(unittest.TestCase):
 
     def test_requisicao_a_api(self):
         with mock.patch.dict(os.environ, {reescrita.VARIAVEL_DA_CHAVE: self.CHAVE}), \
-                mock.patch("urllib.request.urlopen", return_value=_resposta_da_api(em_tags(BOM))) as urlopen:
+                mock.patch.object(reescrita, "_abrir", return_value=_resposta_da_api(em_tags(BOM))) as abrir:
             r = reescrever(ORIGINAL, modelo="modelo-x")
         self.assertTrue(r.aceita)
-        pedido = urlopen.call_args.args[0]
+        pedido = abrir.call_args.args[0]
         self.assertEqual(pedido.full_url, reescrita.URL)
         self.assertEqual(pedido.get_header("X-api-key"), self.CHAVE)
         self.assertEqual(pedido.get_header("Anthropic-version"), reescrita.VERSAO_DA_API)
@@ -167,24 +182,126 @@ class TestChamada(unittest.TestCase):
 
     def test_sem_chave_nao_chama_a_rede(self):
         with mock.patch.dict(os.environ, {reescrita.VARIAVEL_DA_CHAVE: ""}), \
-                mock.patch("urllib.request.urlopen") as urlopen:
+                mock.patch.object(reescrita, "_abrir") as abrir:
             with self.assertRaisesRegex(ErroDeReescrita, reescrita.VARIAVEL_DA_CHAVE):
                 reescrever(ORIGINAL)
-        urlopen.assert_not_called()
+        abrir.assert_not_called()
 
-    def test_erro_da_api_diz_o_codigo_e_nao_a_chave(self):
-        corpo = io.BytesIO(json.dumps({"error": {"message": "invalid x-api-key"}}).encode())
-        erro = urllib.error.HTTPError(reescrita.URL, 401, "Unauthorized", {}, corpo)
-        with mock.patch.dict(os.environ, {reescrita.VARIAVEL_DA_CHAVE: self.CHAVE}), \
-                mock.patch("urllib.request.urlopen", side_effect=erro):
+    def test_chave_no_parametro_vale_sem_a_variavel(self):
+        with mock.patch.dict(os.environ, {reescrita.VARIAVEL_DA_CHAVE: ""}), \
+                mock.patch.object(reescrita, "_abrir", return_value=_resposta_da_api(em_tags(BOM))) as abrir:
+            self.assertTrue(reescrever(ORIGINAL, chave=f"  {self.CHAVE}\n").aceita)
+        self.assertEqual(abrir.call_args.args[0].get_header("X-api-key"), self.CHAVE)
+
+    def test_chave_que_se_pergunta_so_quando_ha_o_que_reescrever(self):
+        perguntar = mock.Mock(return_value=self.CHAVE)
+        reescrever(BOM, chave=perguntar)
+        perguntar.assert_not_called()
+        with mock.patch.object(reescrita, "_abrir", return_value=_resposta_da_api(em_tags(BOM))):
+            reescrever(ORIGINAL, chave=perguntar)
+        perguntar.assert_called_once()
+
+    def test_a_chave_nao_aparece_no_repr(self):
+        self.assertNotIn(self.CHAVE, repr(reescrita._Claude("m", self.CHAVE)))
+
+    def test_tokens_somados_nas_tentativas(self):
+        respostas = [_resposta_da_api(em_tags(SEM_DATA), uso=(1000, 200)), _resposta_da_api(em_tags(BOM), uso=(1500, 210))]
+        with mock.patch.object(reescrita, "_abrir", side_effect=respostas):
+            r = reescrever(ORIGINAL, chave=self.CHAVE)
+        self.assertEqual((r.tentativas, r.tokens), (2, (2500, 410)))
+        self.assertEqual(reescrita.como_dict(r)["tokens"], {"entrada": 2500, "saida": 410})
+        self.assertIn("Uso da API: 2500 tokens de entrada e 410 de saída", reescrita.como_texto(r))
+        self.assertNotIn("Uso da API", reescrita.como_texto(reescrever(ORIGINAL, chamar=IA(em_tags(BOM)))))
+
+    def test_erro_da_api_diz_o_que_fazer_o_codigo_e_nao_a_chave(self):
+        casos = [
+            (401, "invalid x-api-key", "a chave não foi aceita"),
+            (400, "Your credit balance is too low", "sem crédito"),
+            (404, "model: modelo-x", "o modelo modelo-x não está disponível"),
+            (429, "rate_limit_error", "limite de uso"),
+            (529, "Overloaded", "sobrecarregada"),
+            (418, "outra coisa", "a API recusou o pedido"),
+        ]
+        for codigo, mensagem, o_que in casos:
+            with self.subTest(codigo=codigo), \
+                    mock.patch.object(reescrita, "_abrir", side_effect=_erro_da_api(codigo, mensagem)):
+                with self.assertRaises(ErroDeReescrita) as pego:
+                    reescrever(ORIGINAL, chave=self.CHAVE, modelo="modelo-x")
+                self.assertIn(o_que, str(pego.exception))
+                self.assertIn(f"{codigo}: {mensagem}", str(pego.exception))
+                self.assertNotIn(self.CHAVE, str(pego.exception))
+
+    def test_chave_com_quebra_de_linha_ou_invisivel_nao_vai_nem_aparece(self):
+        for chave in (self.CHAVE + "\nlinha-2", self.CHAVE[:5] + "​" + self.CHAVE[5:], "sk ant"):
+            with self.subTest(chave=chave), mock.patch.object(reescrita, "_abrir") as abrir:
+                with self.assertRaisesRegex(ErroDeReescrita, "copie de novo") as pego:
+                    reescrever(ORIGINAL, chave=chave)
+                self.assertNotIn(chave.split()[0][:12], str(pego.exception))
+                abrir.assert_not_called()
+
+    def test_erro_depois_de_tentativa_paga_leva_os_tokens(self):
+        respostas = [_resposta_da_api(em_tags(SEM_DATA), uso=(1000, 200)), _erro_da_api(529, "Overloaded")]
+        with mock.patch.object(reescrita, "_abrir", side_effect=respostas):
             with self.assertRaises(ErroDeReescrita) as pego:
-                reescrever(ORIGINAL)
-        self.assertIn("401: invalid x-api-key", str(pego.exception))
-        self.assertNotIn(self.CHAVE, str(pego.exception))
+                reescrever(ORIGINAL, chave=self.CHAVE)
+        self.assertEqual(pego.exception.tokens, (1000, 200))
+
+    def test_resposta_que_nao_e_da_api(self):
+        with mock.patch.object(reescrita, "_abrir", return_value="<html>proxy da rede</html>"):
+            with self.assertRaisesRegex(ErroDeReescrita, "não é da API"):
+                reescrever(ORIGINAL, chave=self.CHAVE)
+
+    def test_erros_que_nao_sao_do_modelo_nao_culpam_o_modelo(self):
+        casos = [
+            (403, "", "permission denied", "não tem permissão"),
+            (400, "invalid_request_error", "model: modelo-x", "o modelo modelo-x"),
+            (400, "invalid_request_error", "temperature is not supported for this model", "a API recusou"),
+            (302, "", "Found", "não vai para outro endereço"),
+        ]
+        for codigo, tipo, mensagem, o_que in casos:
+            with self.subTest(codigo=codigo, mensagem=mensagem):
+                self.assertIn(o_que, reescrita._explicar(codigo, tipo, mensagem, "modelo-x"))
+
+    def test_redirecionamento_nao_leva_a_chave(self):
+        import threading
+        from http.server import BaseHTTPRequestHandler, HTTPServer
+        chegou = []
+
+        class Servidor(BaseHTTPRequestHandler):
+            def do_POST(self):
+                self.send_response(302)
+                self.send_header("Location", "/outro")
+                self.end_headers()
+
+            def do_GET(self):
+                chegou.append(self.headers.get("x-api-key"))
+                self.send_response(200)
+                self.end_headers()
+
+            def log_message(self, *args):
+                pass
+
+        servidor = HTTPServer(("127.0.0.1", 0), Servidor)
+        threading.Thread(target=servidor.serve_forever, daemon=True).start()
+        self.addCleanup(servidor.server_close)
+        self.addCleanup(servidor.shutdown)
+        import urllib.request
+        pedido = urllib.request.Request(f"http://127.0.0.1:{servidor.server_port}/", data=b"{}", method="POST",
+                                        headers={"x-api-key": self.CHAVE})
+        with mock.patch.dict(os.environ, {"NO_PROXY": "*", "no_proxy": "*"}):
+            with self.assertRaises(urllib.error.HTTPError) as pego:
+                reescrita._abrir(pedido)
+        self.assertEqual(pego.exception.code, 302)
+        self.assertEqual(chegou, [])
+
+    def test_sem_rede(self):
+        with mock.patch.object(reescrita, "_abrir", side_effect=urllib.error.URLError("sem DNS")):
+            with self.assertRaisesRegex(ErroDeReescrita, r"sem resposta da API \(sem DNS\): confira a internet"):
+                reescrever(ORIGINAL, chave=self.CHAVE)
 
     def test_resposta_cortada_vira_erro(self):
         with mock.patch.dict(os.environ, {reescrita.VARIAVEL_DA_CHAVE: self.CHAVE}), \
-                mock.patch("urllib.request.urlopen", return_value=_resposta_da_api("<texto>O pe", "max_tokens")):
+                mock.patch.object(reescrita, "_abrir", return_value=_resposta_da_api("<texto>O pe", "max_tokens")):
             with self.assertRaisesRegex(ErroDeReescrita, "longo demais"):
                 reescrever(ORIGINAL)
 
@@ -196,10 +313,10 @@ class TestLinhaDeComando(unittest.TestCase):
         self.arquivo = Path(self.tmp.name) / "texto.txt"
         self.arquivo.write_text(ORIGINAL, encoding="utf-8")
 
-    def rodar(self, *args, respostas=(em_tags(BOM),)):
+    def rodar(self, *args, respostas=(em_tags(BOM),), ia=None):
         saida, erro = io.StringIO(), io.StringIO()
-        ia = IA(*respostas)
-        with mock.patch.object(reescrita, "_chamar_claude", return_value=ia), \
+        ia = ia or IA(*respostas)
+        with mock.patch.object(reescrita, "_Claude", return_value=ia), \
                 contextlib.redirect_stdout(saida), contextlib.redirect_stderr(erro):
             try:
                 codigo = main(list(args))
@@ -230,6 +347,21 @@ class TestLinhaDeComando(unittest.TestCase):
         self.assertIn("nunca grava por cima do original", erro)
         self.assertEqual(self.arquivo.read_text(encoding="utf-8"), ORIGINAL)
 
+    def test_saida_nunca_sobrescreve_arquivo_que_existe(self):
+        destino = Path(self.tmp.name) / "ja-existe.txt"
+        destino.write_text("não mexer", encoding="utf-8")
+        codigo, _, erro = self.rodar(str(self.arquivo), "--reescrever", "--saida", str(destino))
+        self.assertEqual(codigo, 2)
+        self.assertIn("já existe", erro)
+        self.assertEqual(destino.read_text(encoding="utf-8"), "não mexer")
+
+    def test_html_avisa_que_so_o_texto_foi_reescrito(self):
+        pagina = Path(self.tmp.name) / "pagina.html"
+        pagina.write_text(f"<main><p>{ORIGINAL}</p></main>", encoding="utf-8")
+        codigo, saida, _ = self.rodar(str(pagina), "--reescrever")
+        self.assertEqual(codigo, 0)
+        self.assertIn("Do HTML, só o texto foi reescrito", saida)
+
     def test_recusada_sai_com_1_e_sem_o_texto(self):
         codigo, saida, _ = self.rodar(str(self.arquivo), "--reescrever", respostas=[em_tags(SEM_DATA)] * 3)
         self.assertEqual(codigo, 1)
@@ -250,13 +382,101 @@ class TestLinhaDeComando(unittest.TestCase):
             self.assertEqual(codigo, 2)
             self.assertIn("só valem com --reescrever", erro)
 
-    def test_sem_chave_sai_com_2(self):
+    def rodar_de_verdade(self, *args, terminal, digitado="", entrada=""):
+        """A CLI sem IA simulada: rede, terminal e getpass simulados."""
         saida, erro = io.StringIO(), io.StringIO()
         with mock.patch.dict(os.environ, {reescrita.VARIAVEL_DA_CHAVE: ""}), \
+                mock.patch("sys.stdin", mock.Mock(buffer=io.BytesIO(entrada.encode()))), \
+                mock.patch("linguagem_simples.__main__._e_terminal", return_value=terminal), \
+                mock.patch("getpass.getpass", return_value=digitado) as getpass, \
+                mock.patch.object(reescrita, "_abrir", return_value=_resposta_da_api(em_tags(BOM))) as abrir, \
                 contextlib.redirect_stdout(saida), contextlib.redirect_stderr(erro):
-            codigo = main([str(self.arquivo), "--reescrever"])
+            codigo = main(list(args))
+        return codigo, saida.getvalue(), erro.getvalue(), getpass, abrir
+
+    def test_sem_chave_e_sem_terminal_sai_com_2_dizendo_como(self):
+        codigo, _, erro, getpass, abrir = self.rodar_de_verdade(str(self.arquivo), "--reescrever", terminal=False)
         self.assertEqual(codigo, 2)
-        self.assertIn(reescrita.VARIAVEL_DA_CHAVE, erro.getvalue())
+        self.assertIn(reescrita.VARIAVEL_DA_CHAVE, erro)
+        self.assertIn("console.anthropic.com", erro)
+        getpass.assert_not_called()
+        abrir.assert_not_called()
+
+    def test_no_terminal_pergunta_a_chave_sem_mostrar(self):
+        chave = TestChamada.CHAVE
+        codigo, saida, erro, getpass, abrir = self.rodar_de_verdade(
+            str(self.arquivo), "--reescrever", terminal=True, digitado=chave + "\n")
+        self.assertEqual(codigo, 0)
+        getpass.assert_called_once()
+        self.assertEqual(abrir.call_args.args[0].get_header("X-api-key"), chave)
+        self.assertIn("não é gravada", erro)
+        self.assertNotIn(chave, saida + erro)
+
+    def test_nul_e_arquivo_nao_sao_terminal(self):
+        # No Windows, o isatty diz sim para o NUL, e o getpass esperaria o console para sempre.
+        for caminho in (os.devnull, self.arquivo):
+            with open(caminho, encoding="utf-8") as entrada, mock.patch("sys.stdin", entrada):
+                self.assertFalse(_e_terminal(), caminho)
+
+    def test_enter_vazio_cancela(self):
+        codigo, _, erro, _, abrir = self.rodar_de_verdade(str(self.arquivo), "--reescrever", terminal=True)
+        self.assertEqual(codigo, 2)
+        self.assertIn("cancelada: nenhuma chave digitada", erro)
+        abrir.assert_not_called()
+
+    def test_texto_pela_entrada_padrao_nao_pergunta_a_chave(self):
+        codigo, _, erro, getpass, _ = self.rodar_de_verdade("-", "--reescrever", terminal=True, entrada=ORIGINAL)
+        self.assertEqual(codigo, 2)
+        self.assertIn("entrada padrão ('-')", erro)
+        getpass.assert_not_called()
+
+    def test_saida_traco_e_pasta_que_nao_existe_param_antes_de_chamar_a_ia(self):
+        for destino, mensagem in (("-", "já vai para a tela"),
+                                  (str(Path(self.tmp.name) / "nao-existe" / "x.txt"), "não existe")):
+            ia = IA(em_tags(BOM))
+            codigo, _, erro = self.rodar(str(self.arquivo), "--reescrever", "--saida", destino, ia=ia)
+            self.assertEqual(codigo, 2)
+            self.assertIn(mensagem, erro)
+            self.assertEqual(ia.pedidos, [])
+
+    def test_texto_aceito_nao_se_perde_se_a_gravacao_falhar(self):
+        destino = Path(self.tmp.name) / "novo.txt"
+
+        def outro_programa_cria_o_arquivo():
+            destino.write_text("de outro programa", encoding="utf-8")
+            return em_tags(BOM)
+
+        codigo, saida, erro = self.rodar(str(self.arquivo), "--reescrever", "--saida", str(destino),
+                                         respostas=[outro_programa_cria_o_arquivo])
+        self.assertEqual(codigo, 2)
+        self.assertIn("não consegui gravar", erro)
+        self.assertIn(BOM, saida)
+        self.assertEqual(destino.read_text(encoding="utf-8"), "de outro programa")
+
+    def test_erro_no_meio_mostra_os_tokens_ja_cobrados(self):
+        ia = IA(em_tags(SEM_DATA), ErroDeReescrita("limite de uso da API atingido"))
+        ia.tokens = (1000, 200)
+        codigo, _, erro = self.rodar(str(self.arquivo), "--reescrever", ia=ia)
+        self.assertEqual(codigo, 2)
+        self.assertIn("limite de uso", erro)
+        self.assertIn("Uso da API até o erro: 1000 tokens de entrada e 200 de saída", erro)
+
+    @unittest.skipUnless(os.name == "nt", "o NUL que se diz terminal é do Windows")
+    def test_no_windows_terminal_e_o_que_tem_console(self):
+        import ctypes
+        import msvcrt
+        entrada = mock.Mock(isatty=mock.Mock(return_value=True), fileno=mock.Mock(return_value=0))
+        for console, esperado in ((1, True), (0, False)):
+            with mock.patch("sys.stdin", entrada), mock.patch.object(msvcrt, "get_osfhandle", return_value=7), \
+                    mock.patch.object(ctypes.windll.kernel32, "GetConsoleMode", return_value=console):
+                self.assertIs(_e_terminal(), esperado)
+
+    def test_nada_a_reescrever_nao_pergunta_a_chave(self):
+        self.arquivo.write_text(BOM, encoding="utf-8")
+        codigo, saida, _, getpass, _ = self.rodar_de_verdade(str(self.arquivo), "--reescrever", terminal=True)
+        self.assertEqual(codigo, 0)
+        self.assertIn("Nenhum apontamento", saida)
+        getpass.assert_not_called()
 
 
 if __name__ == "__main__":

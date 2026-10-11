@@ -7,7 +7,9 @@ leitura. Com ``--reescrever``: 0 reescrita aceita (ou nada a reescrever),
 """
 
 import argparse
+import getpass
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -52,13 +54,14 @@ def main(argv=None):
     p.add_argument("--desligar", action="append", default=[], metavar="INCISO",
                    help="desliga um inciso (repetível)")
     p.add_argument("--reescrever", action="store_true",
-                   help="pede à IA (Claude, com a sua chave em %s) uma reescrita e só a "
-                   "aceita se o verificador medir menos apontamentos; o sentido é você "
-                   "quem confere" % reescrita.VARIAVEL_DA_CHAVE)
+                   help="pede à IA (Claude, pela API da Anthropic, com a sua chave) uma reescrita "
+                   "e só a aceita se o verificador medir menos apontamentos; o sentido é você "
+                   "quem confere. A chave vem da variável %s ou, sem ela, é perguntada "
+                   "no terminal sem aparecer; nunca é gravada" % reescrita.VARIAVEL_DA_CHAVE)
     p.add_argument("--modelo", default=reescrita.MODELO_PADRAO, metavar="NOME",
                    help="com --reescrever: modelo da API (padrão %(default)s)")
     p.add_argument("--saida", metavar="ARQUIVO",
-                   help="com --reescrever: grava o texto aceito neste arquivo (nunca no arquivo lido)")
+                   help="com --reescrever: grava o texto aceito neste arquivo novo (nunca por cima de um que já existe)")
     p.add_argument("--versao", "--version", action="version",
                    version=f"linguagem_simples {__version__}", help="mostra a versão e sai")
     a = p.parse_args(argv)
@@ -66,6 +69,12 @@ def main(argv=None):
         p.error("--modelo e --saida só valem com --reescrever")
     if a.saida and a.arquivo != "-" and Path(a.saida).resolve() == Path(a.arquivo).resolve():
         p.error("--saida não pode ser o arquivo lido: a reescrita nunca grava por cima do original")
+    if a.saida == "-":
+        p.error("--saida -: sem --saida, o texto reescrito já vai para a tela")
+    if a.saida and Path(a.saida).exists():
+        p.error(f"--saida: {a.saida} já existe; escolha outro nome (a reescrita nunca grava por cima de um arquivo)")
+    if a.saida and not Path(a.saida).resolve().parent.is_dir():
+        p.error(f"--saida: a pasta de {a.saida} não existe")
 
     try:
         origem = _ler(a.arquivo, a.html)
@@ -94,25 +103,74 @@ def _reescrever(p, a, origem):
     (sem chave, sem rede, resposta de erro da API)."""
     try:
         r = reescrita.reescrever(
-            origem, modelo=a.modelo, max_palavras=a.max_palavras, max_frases=a.max_frases,
+            origem, chave=lambda: _perguntar_chave(da_entrada_padrao=a.arquivo == "-"), modelo=a.modelo,
+            max_palavras=a.max_palavras, max_frases=a.max_frases,
             ignorar_siglas=a.ignorar_sigla, ligar=a.ligar, desligar=a.desligar)
     except ValueError as erro:
         p.error(str(erro))
     except reescrita.ErroDeReescrita as erro:
         print(f"{p.prog}: reescrita: {erro}", file=sys.stderr)
+        if any(erro.tokens):
+            print(f"Uso da API até o erro: {erro.tokens[0]} tokens de entrada e {erro.tokens[1]} de saída, "
+                  "cobrados pela Anthropic na conta da chave.", file=sys.stderr)
         return 2
-    destino = None
+    destino, codigo = None, 0 if r.aceita or not r.tentativas else 1
     if r.aceita and a.saida:
         try:
-            Path(a.saida).write_text(r.texto + "\n", encoding="utf-8")
+            with open(a.saida, "x", encoding="utf-8") as f:
+                f.write(r.texto + "\n")
+            destino = a.saida
         except OSError as erro:
-            p.error(f"não consegui gravar {a.saida}: {erro.strerror or erro}")
-        destino = a.saida
+            # A reescrita já foi paga: o texto vai para a tela em vez de se perder.
+            print(f"{p.prog}: não consegui gravar {a.saida} ({erro.strerror or erro}); o texto vai abaixo.",
+                  file=sys.stderr)
+            codigo = 2
     if a.json:
         print(json.dumps(reescrita.como_dict(r), ensure_ascii=False, indent=2))
     else:
         print(reescrita.como_texto(r, destino))
-    return 0 if r.aceita or not r.tentativas else 1
+    return codigo
+
+
+def _e_terminal():
+    """A entrada é um terminal em que se pode digitar. No Windows, o
+    ``isatty`` também diz sim para o NUL (``< NUL``, ``< /dev/null``), e o
+    ``getpass``, que lê do console, esperaria para sempre: lá se confere
+    o console."""
+    try:
+        if not sys.stdin.isatty():
+            return False
+        if os.name != "nt":
+            return True
+        import ctypes
+        import msvcrt
+        modo = ctypes.c_ulong()
+        return bool(ctypes.windll.kernel32.GetConsoleMode(msvcrt.get_osfhandle(sys.stdin.fileno()), ctypes.byref(modo)))
+    except (AttributeError, OSError, TypeError, ValueError):
+        return False
+
+
+def _perguntar_chave(da_entrada_padrao=False):
+    """Sem a variável de ambiente, pergunta a chave no terminal, sem mostrar
+    o que se digita; ela fica só na memória, nesta execução."""
+    chave = reescrita.chave_do_ambiente()
+    if chave or not _e_terminal():
+        return chave
+    if da_entrada_padrao:
+        raise reescrita.ErroDeReescrita(
+            f"com o texto pela entrada padrão ('-'), a chave não tem como ser perguntada: ponha-a na variável "
+            f"{reescrita.VARIAVEL_DA_CHAVE} ou passe o texto num arquivo")
+    print(f"A reescrita usa a API da Anthropic com a sua chave (crie em {reescrita.ONDE_CRIAR_A_CHAVE}).\n"
+          "Ela não aparece ao digitar ou colar (no console antigo do Windows, cole com o botão direito),\n"
+          "não é gravada e só vai para api.anthropic.com.",
+          file=sys.stderr)
+    try:
+        chave = getpass.getpass("Chave da API (Enter vazio cancela): ")
+    except (EOFError, KeyboardInterrupt):
+        chave = ""
+    if not chave.strip():
+        raise reescrita.ErroDeReescrita("cancelada: nenhuma chave digitada")
+    return chave
 
 
 if __name__ == "__main__":

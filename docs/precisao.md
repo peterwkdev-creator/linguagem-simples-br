@@ -403,6 +403,12 @@ CAPES, p. 8, escreve "O pedido foi aceito").
 Limites: trechos curtos, de guias públicos que o modelo pode ter lido;
 em texto longo e em página real de órgão, ainda sem número.
 
+Para refazer, com a sua chave: `python docs/medir_reescrita.py
+medida.jsonl`, da pasta do repositório. O script grava o resultado de
+cada trecho numa linha, na hora, num arquivo novo; o sentido se anota à parte, com o critério acima. Desde a
+1.8.0, o arquivo traz também os tokens de cada reescrita (esta medida, da
+1.7.0, não os registrou).
+
 **Como se mediu.** 30 páginas sorteadas (semente 20261009) entre as 5.735
 páginas de serviço do sitemap do gov.br de 08/10/2026. Os 621 apontamentos
 viraram 431 sem os repetidos (o modelo do portal se repete em toda página);

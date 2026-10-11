@@ -4,6 +4,32 @@ A versão segue `linguagem_simples.__version__`; cada uma tem uma tag
 `vX.Y.Z` no commit que a publicou. O formato do relatório e as opções da
 linha de comando só mudam numa versão 2; detector novo sai numa 1.x.
 
+## 1.8.0 — 11/10/2026
+
+- A chave da API ficou mais fácil e mais segura: sem a variável
+  `ANTHROPIC_API_KEY`, a linha de comando pergunta a chave no terminal,
+  sem mostrar o que se cola, e só quando há o que reescrever. Em Python,
+  `reescrever(texto, chave=...)`. A chave nunca é gravada nem impressa;
+  chave com espaço, quebra de linha ou caractere invisível é recusada sem
+  aparecer na mensagem, e a chamada não segue redirecionamento para outro
+  endereço.
+- Os erros da API dizem o que fazer: chave não aceita, conta sem
+  crédito, modelo indisponível, limite de uso, API fora do ar, sem
+  internet ou resposta que não é da API (proxy). A mensagem da API vai
+  junto.
+- A saída mostra os tokens usados, de entrada e de saída, cobrados na
+  conta da chave, também quando para num erro depois de uma chamada paga;
+  o JSON ganha `tokens` e `do_html`.
+- `--saida` recusa arquivo que já existe, `-` e pasta que não existe,
+  antes de chamar a IA; se a gravação falhar, o texto aceito vai para a
+  tela.
+- Num HTML, a saída avisa que só o texto foi reescrito, sem a marcação.
+- O pedido à IA marca o texto como dado: ordens dentro dele não devem ser
+  obedecidas.
+- `docs/medir_reescrita.py` refaz a medida da reescrita, gravando cada
+  texto na hora num arquivo novo.
+- README: "A chave da API: como funciona", passo a passo.
+
 ## 1.7.0 — 11/10/2026
 
 - Reescrita sugerida por IA (`--reescrever`, `reescrita.reescrever`): o
