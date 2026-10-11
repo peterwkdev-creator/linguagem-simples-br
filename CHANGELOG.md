@@ -4,6 +4,29 @@ A versão segue `linguagem_simples.__version__`; cada uma tem uma tag
 `vX.Y.Z` no commit que a publicou. O formato do relatório e as opções da
 linha de comando só mudam numa versão 2; detector novo sai numa 1.x.
 
+## 1.6.0 — 11/10/2026
+
+- Detector do inciso IV (palavras comuns, classe **sinal**): aponta a
+  palavra pouco comum que um guia oficial manda trocar ("o pedido foi
+  deferido", "dez dias ininterruptos") e diz a forma que ele sugere.
+  Léxico `lexicos/palavras-complexas.txt`, 86 linhas com a fonte em cada
+  uma: TJRS p. 31 e 32 (quadro de palavras complexas), CAPES p. 8 (Dicas
+  de substituições), Anvisa p. 12 e SES-DF p. 9. As formas do verbo vêm
+  uma a uma onde o radical pegaria outra palavra ("protocolo",
+  "requisito", "expediente", "Executivo").
+- Precisão do IV: 98% (87–100), 40 de 41, em 490 páginas do gov.br. Em 5
+  acertos a forma do guia não cabe ("expedir" no sentido de emitir).
+- Detector do inciso V (termos técnicos e jargões, classe **sinal**):
+  aponta o termo que um guia manda trocar ou explicar, quando o texto não
+  o explica logo depois (entre parênteses, com "ou seja", "isto é" ou
+  "quer dizer"); explicado na primeira vez, vale para o texto todo.
+  Léxico `lexicos/jargoes.txt`, 32 entradas: TJRS p. 107 e p. 34, SES-DF
+  p. 10 e Anvisa p. 12.
+- Precisão do V: 8 de 8 (amostra pequena) no gov.br e 1 de 1 em 120
+  notícias do CNJ; cobertura 0% (0–5) do jargão do processo nessas
+  notícias. Sem marca do V não quer dizer sem jargão.
+- Lei reconferida em 11/10/2026 (ficha do Senado): sem alteração.
+
 ## 1.5.0 — 10/10/2026
 
 - VI: o léxico passa de 24 para 36 entradas com os pares do Guia de

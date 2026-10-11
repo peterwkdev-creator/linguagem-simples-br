@@ -8,8 +8,8 @@ from dataclasses import dataclass
 
 from . import limiares
 from .detectores import (
-    acessibilidade, enumeracoes, estrangeirismos, frases_intercaladas, frases_longas, paragrafos_longos,
-    redundancias, siglas_sem_nome, substantivos_no_lugar_de_verbos, voz_passiva,
+    acessibilidade, enumeracoes, estrangeirismos, frases_intercaladas, frases_longas, jargoes, palavras_complexas,
+    paragrafos_longos, redundancias, siglas_sem_nome, substantivos_no_lugar_de_verbos, voz_passiva,
 )
 from .incisos import FONTE_LEI, FORA_DO_ALCANCE, INCISOS, POR_NUMERO, Inciso
 from .pagina import Pagina
@@ -48,6 +48,8 @@ def conferir(texto, max_palavras=None, max_frases=None, ignorar_siglas=(), ligar
     rodar = {
         "II": lambda: frases_longas(texto, max_palavras),
         "III": lambda: paragrafos_longos(texto, max_frases),
+        "IV": lambda: palavras_complexas(texto),
+        "V": lambda: jargoes(texto),
         "VI": lambda: estrangeirismos(texto),
         "VIII": lambda: siglas_sem_nome(texto, ignorar_siglas),
         "IX": lambda: enumeracoes(texto),

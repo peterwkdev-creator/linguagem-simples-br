@@ -1,0 +1,51 @@
+# Inciso V: termos técnicos e jargões que um guia oficial manda trocar ou
+# explicar no próprio texto.
+# Uma entrada por linha: expressão | sinônimo ou explicação que o guia dá | fonte.
+# Página do arquivo PDF; entre parênteses, a impressa, quando é outra.
+# "*" no fim de uma palavra vale por qualquer terminação ("transitou",
+# "transitada"). Lista fechada: termo técnico fora dela passa.
+# Fontes:
+# - TJRS, Guia de Linguagem Simples (Inovajus, 2022), PDF de 108 páginas,
+#   conferido em 10/10/2026: quadro "Expressões que devem ser evitadas",
+#   p. 107 (108), "EVITE / USE"; seção "Jargões e termos técnicos", p. 33
+#   (34), com os exemplos da p. 34 (35).
+# - SES-DF, Guia para simplificar documentos (2024), p. 10, "Passo 6 Evite
+#   o uso de siglas, estrangeirismos, jargões e termos técnicos".
+# - Anvisa, Guia de Linguagem Simples, 1ª ed., p. 12: "evite siglas,
+#   palavras estrangeiras e termos técnicos. Quando for necessário usar,
+#   explique o que significam."
+# De fora: palavras do quadro de "palavras complexas" do TJRS (p. 31 e 32)
+# e as "Dicas de substituições" da CAPES (p. 8, em "Use palavras comuns"):
+# são do inciso IV, não deste.
+apelo extremo | recurso extraordinário | TJRS p. 107 (108), quadro "Expressões que devem ser evitadas": "apelo extremo / recurso extraordinário"
+auto flagrancial | auto de prisão em flagrante | TJRS p. 107 (108), quadro "Expressões que devem ser evitadas": "auto flagrancial / auto de prisão em flagrante"
+com espeque | com base no artigo | TJRS p. 107 (108), quadro "Expressões que devem ser evitadas": "com espeque [no artigo] / com base no artigo"
+com supedâneo | com base no artigo | TJRS p. 107 (108), quadro "Expressões que devem ser evitadas": "com supedâneo [no artigo] / com base no artigo"
+estribad* | com base no artigo | TJRS p. 107 (108), quadro "Expressões que devem ser evitadas": "estribado [no artigo] / com base no artigo"
+citação editalícia | citação por edital | TJRS p. 107 (108), quadro "Expressões que devem ser evitadas": "citação editalícia / citação por edital"
+depoimento policial | depoimento prestado na Polícia | TJRS p. 107 (108), quadro "Expressões que devem ser evitadas": "depoimento policial / depoimento prestado na Polícia"
+depoimento vitimário | depoimento da vítima | TJRS p. 107 (108), quadro "Expressões que devem ser evitadas": "depoimento vitimário / depoimento da vítima"
+egrégio pretório supremo | Supremo Tribunal Federal (STF) | TJRS p. 107 (108), quadro "Expressões que devem ser evitadas": "egrégio pretório supremo / Supremo Tribunal Federal – STF"
+excelso sodalício | Supremo Tribunal Federal (STF) | TJRS p. 107 (108), quadro "Expressões que devem ser evitadas": "excelso sodalício / Supremo Tribunal Federal – STF"
+ergástulo público | cadeia, presídio | TJRS p. 107 (108), quadro "Expressões que devem ser evitadas": "ergástulo público / cadeia, presídio"
+exordial acusatória | denúncia | TJRS p. 107 (108), quadro "Expressões que devem ser evitadas": "exordial acusatória / denúncia"
+peça incoativa | peça inicial ou petição inicial | TJRS p. 107 (108), quadro "Expressões que devem ser evitadas": "peça incoativa / peça inicial ou petição inicial"
+peça-ovo | peça inicial ou petição inicial | TJRS p. 107 (108), quadro "Expressões que devem ser evitadas": "peça-ovo / peça inicial ou petição inicial"
+peça vestibular | peça inicial ou petição inicial | TJRS p. 107 (108), quadro "Expressões que devem ser evitadas": "peça vestibular / peça inicial ou petição inicial"
+lei maior | Constituição Federal | TJRS p. 107 (108), quadro "Expressões que devem ser evitadas": "lei maior ou Carta Magna / Constituição Federal"
+carta magna | Constituição Federal | TJRS p. 107 (108), quadro "Expressões que devem ser evitadas": "lei maior ou Carta Magna / Constituição Federal"
+sentença vergastada | sentença recorrida | TJRS p. 107 (108), quadro "Expressões que devem ser evitadas": "sentença/decisão vergastada/fustigada/hostilizada / sentença/decisão recorrida"
+sentença fustigada | sentença recorrida | TJRS p. 107 (108), quadro "Expressões que devem ser evitadas": "sentença/decisão vergastada/fustigada/hostilizada / sentença/decisão recorrida"
+sentença hostilizada | sentença recorrida | TJRS p. 107 (108), quadro "Expressões que devem ser evitadas": "sentença/decisão vergastada/fustigada/hostilizada / sentença/decisão recorrida"
+decisão vergastada | decisão recorrida | TJRS p. 107 (108), quadro "Expressões que devem ser evitadas": "sentença/decisão vergastada/fustigada/hostilizada / sentença/decisão recorrida"
+decisão fustigada | decisão recorrida | TJRS p. 107 (108), quadro "Expressões que devem ser evitadas": "sentença/decisão vergastada/fustigada/hostilizada / sentença/decisão recorrida"
+decisão hostilizada | decisão recorrida | TJRS p. 107 (108), quadro "Expressões que devem ser evitadas": "sentença/decisão vergastada/fustigada/hostilizada / sentença/decisão recorrida"
+tese autoral | tese do autor ou da autora | TJRS p. 107 (108), quadro "Expressões que devem ser evitadas": "tese autoral / tese do autor/da autora"
+apirétic* | sem febre | TJRS p. 34 (35): "paciente se apresenta apirético (sem febre)"
+eritema* | vermelhidão na pele | TJRS p. 34 (35): "com eritemas (vermelhidão na pele)"
+deambula* | caminhar | TJRS p. 34 (35): "dificuldade de deambular (caminhar)"
+torpor | mal-estar | TJRS p. 34 (35): "torpor (mal-estar)"
+transit* em julgado | não é mais possível recorrer do que está decidido | TJRS p. 34 (35): "A sentença transitou em julgado, ou seja, não é mais possível recorrer do que está decidido."
+ilegitimidade passiva | não ter as condições impostas pela lei para ser réu ou ré | TJRS p. 34 (35): "A ré afirma sua ilegitimidade passiva na ação. Isto é, a ré afirma que não tem as condições impostas pela lei para ser ré no caso."
+peticionar | pedir; na Justiça, entrar com uma ação judicial | SES-DF p. 10, "Transforme isso: nisso:": "A entidade chegou a peticionar contra a operação / A entidade chegou a entrar com uma ação judicial contra a operação"; CAPES p. 8 (7), "Dicas de substituições": "Peticionar, Requerer / Pedir"
+câncer hematológico | câncer hematológico (no sangue) | Anvisa p. 12: "O medicamento é indicado para tratar alguns tipos de câncer hematológico (no sangue)."

@@ -314,6 +314,59 @@ link…), o VI aponta 7, todas "login": a CAPES manda trocá-la, mas quem lê
 a achou corrente. A lei só pede evitar a palavra que não é de uso
 corrente; por isso o VI é sinal.
 
+**V, precisão e cobertura (1.6.0, 11/10/2026).** O V aponta o termo
+técnico ou o jargão que um guia manda trocar ou explicar, quando o texto
+não o explica logo depois: 32 entradas, 24 do quadro "Expressões que
+devem ser evitadas" do TJRS (p. 107), 6 dos exemplos de "Jargões e termos
+técnicos" do TJRS (p. 34), "peticionar" (SES-DF p. 10) e "câncer
+hematológico" (Anvisa p. 12). Nas 490 páginas do gov.br já lidas, que não
+serviram para montar o léxico, apontou 9 vezes, todas "peticionar"; uma
+estava na lista "Serviços recomendados para você", fora da conta como
+defeito da leitura do HTML. As 8 do corpo do serviço são acerto nas duas
+passagens. Para achar o jargão jurídico, a medida seguinte foi em 120
+notícias do CNJ, sorteadas antes de baixar (semente 2026101101, entre
+44.930): o V apontou 1 vez ("Carta Magna", acerto). Na cobertura, duas
+passagens às cegas leram 30 dessas notícias e listaram cada termo técnico
+ou jargão sem explicação.
+
+| Medida | Resultado | Intervalo de 95% (Wilson) | Amostra |
+|---|---|---|---|
+| Precisão | amostra pequena (8 / 8) | 68% a 100% | 490 páginas do gov.br |
+| Cobertura | 0% (0 / 77) | 0% a 5% | 30 notícias do CNJ, lidas inteiras |
+
+Os 77 são os termos que as duas passagens listaram sem dúvida; com os
+duvidosos, 0 de 126 (0% a 3%). O jargão real é o do processo ("autos",
+"liminar", "mérito", "precatórios", "embargos de declaração",
+"homologação", "diligências"), e não o do quadro do TJRS, feito de
+fórmulas de petição ("exordial acusatória", "consoante o disposto").
+Quando o V aponta, acerta; quando não aponta, não quer dizer que não há
+jargão.
+
+**IV, precisão (1.6.0, 11/10/2026).** O IV aponta a palavra pouco comum
+que um guia manda trocar por outra mais conhecida: 86 linhas, do quadro
+de palavras complexas do TJRS (p. 31 e 32), das "Dicas de substituições"
+da CAPES (p. 8), da Anvisa (p. 12) e da SES-DF (p. 9), com as formas do
+verbo uma a uma onde o radical pegaria outra palavra ("protocolo",
+"requisito", "expediente"). O léxico saiu só dos guias, e por isso as
+490 páginas do gov.br já lidas servem de amostra: 475 apontamentos, 460
+sem os repetidos, em 205 páginas; 60 sorteados (semente 2026101106). 19
+estavam no cabeçalho ou no fim da página, fora da conta como defeito da
+leitura do HTML; os 41 do corpo do serviço foram anotados com duas
+passagens às cegas (41 dos 41 rótulos iguais).
+
+| Medida | Resultado | Intervalo de 95% (Wilson) | Amostra |
+|---|---|---|---|
+| Precisão | 98% (40 / 41) | 87% a 100% | 490 páginas do gov.br |
+
+O erro é "Protocolar por código de requerimento", nome de uma opção da
+tela, entre aspas. Em 5 dos 40 acertos, a palavra é difícil mas a forma
+do guia não cabe: 4 de "expedir" no sentido de emitir um documento ("a
+licença será expedida"), em que a CAPES dá "mandar, enviar", e 1 de
+"decisão proferida". Os mais apontados: "protocolar" (14 dos 60),
+"requerer" (6), "deferimento" (4). A cobertura do IV não foi medida: o
+que é palavra difícil depende de quem lê (TJRS, p. 31), e a lista do que
+falta pede critério próprio.
+
 **Como se mediu.** 30 páginas sorteadas (semente 20261009) entre as 5.735
 páginas de serviço do sitemap do gov.br de 08/10/2026. Os 621 apontamentos
 viraram 431 sem os repetidos (o modelo do portal se repete em toda página);

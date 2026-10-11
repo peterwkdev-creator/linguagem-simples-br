@@ -538,6 +538,52 @@ def estrangeirismos(texto):
     return sorted(achadas, key=lambda o: o.inicio)
 
 
+# Inciso IV: palavra pouco comum que um guia manda trocar por outra mais
+# conhecida (TJRS p. 31 e 32, CAPES p. 8, Anvisa p. 12, SES-DF p. 9).
+_PALAVRAS_COMPLEXAS = {
+    _padrao_da_expressao(e): forma for e, forma in _ler_lexico("palavras-complexas.txt").items()
+}
+
+
+def palavras_complexas(texto):
+    """Inciso IV: palavra da lista dos guias ("O pedido foi deferido": CAPES
+    p. 8). É sinal: o TJRS (p. 31) diz que depende de quem lê, e quem lê
+    decide."""
+    achadas = [
+        Ocorrencia("IV", m.start(), m.end(), m.group(), f"palavra pouco comum: o guia sugere “{forma}”")
+        for padrao, forma in _PALAVRAS_COMPLEXAS.items() for m in padrao.finditer(texto)
+        if not _em_endereco(texto, m.start(), m.end())
+    ]
+    return sorted(achadas, key=lambda o: o.inicio)
+
+
+# Inciso V: termo técnico ou jargão que um guia manda trocar ou explicar
+# (TJRS p. 34 e 107, SES-DF p. 10, Anvisa p. 12). Explicado é o que tem a
+# explicação logo depois: entre parênteses ("câncer hematológico (no
+# sangue)", Anvisa p. 12) ou com "ou seja" e "isto é" até o começo da frase
+# seguinte (TJRS p. 34). Explicado na primeira vez, vale para o texto todo
+# (TJRS p. 34: "quando colocado pela primeira vez no texto").
+_JARGOES = {_padrao_da_expressao(e): forma for e, forma in _ler_lexico("jargoes.txt").items()}
+_EXPLICACAO = re.compile(r"[^\S\n]*\(|[^.!?\n]*?(?:[.!?][^\S\n]+)?\b(?:ou seja|isto é|quer dizer)\b", re.IGNORECASE)
+
+
+def jargoes(texto):
+    """Inciso V: termo técnico ou jargão da lista dos guias ("exordial
+    acusatória": TJRS p. 107) sem explicação no próprio texto. É sinal: a lei
+    aceita o termo explicado, e quem lê decide."""
+    achadas = []
+    for padrao, forma in _JARGOES.items():
+        ocorrencias = list(padrao.finditer(texto))
+        if not ocorrencias or _EXPLICACAO.match(texto, ocorrencias[0].end()):
+            continue
+        achadas += [
+            Ocorrencia("V", m.start(), m.end(), m.group(),
+                       f"termo técnico ou jargão: o guia sugere “{forma}”, ou explicar no próprio texto")
+            for m in ocorrencias if not _EXPLICACAO.match(texto, m.end())
+        ]
+    return sorted(achadas, key=lambda o: o.inicio)
+
+
 # Inciso XVII: o que o eMAG 3.1 pede no HTML e se confere sem ver a imagem nem
 # seguir o link: texto de link que diz o destino (Recomendação 3.5), texto
 # alternativo na imagem (3.6) e célula de cabeçalho na tabela (3.10). O eMAG

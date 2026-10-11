@@ -1,0 +1,111 @@
+# Inciso IV: palavras pouco comuns que um guia oficial manda trocar por
+# outra mais conhecida.
+# Uma entrada por linha: palavra | sinônimo que o guia dá | fonte.
+# Página do arquivo PDF; entre parênteses, a impressa, quando é outra.
+# "*" no fim de uma palavra vale por qualquer terminação. Onde o radical
+# pegaria outra palavra ("execut*" pega "executivo"; "requisit*",
+# "requisito"; "protocol*", "protocolo"; "expedi*", "expediente";
+# "consum*", "consumo"), as formas do verbo vêm uma a uma, com a fonte do
+# infinitivo. Lista fechada: palavra difícil fora dela passa.
+# Fontes:
+# - TJRS, Guia de Linguagem Simples (Inovajus, 2022), PDF de 108 páginas,
+#   conferido em 10/10/2026: quadro de "palavras complexas com sinônimos
+#   mais simples", p. 31 e 32 (32 e 33). Na p. 32 o PDF desalinha as
+#   colunas; o par certo é o da ordem das linhas (postular / pedir,
+#   solicitar; pugnar / insistir, sustentar; requisitar / solicitar).
+# - CAPES, O uso da Linguagem Simples na CAPES (2026), p. 8 (7), item 7
+#   "Use palavras comuns", "Dicas de substituições".
+# - Anvisa, Guia de Linguagem Simples, 1ª ed., p. 12, item 3 "Prefira
+#   palavras conhecidas".
+# - SES-DF, Guia para simplificar documentos (2024), p. 9, "Passo 5 Use
+#   palavras do cotidiano".
+# De fora: "peticionar" (CAPES p. 8; está no léxico do V, com a SES-DF
+# p. 10); "requer" e "requerem" (no gov.br, quase sempre "exige", e não
+# "pede"); "ensejo" e "postulado" (substantivos de outro sentido); o
+# quadro de formas sintéticas do TJRS (p. 20): é de palavras sobrando.
+ademais | além disso, além do mais | TJRS p. 31 (32), quadro de palavras complexas: "ademais / além disso, além do mais"
+adquir* | comprar | TJRS p. 31 (32), quadro de palavras complexas: "adquirir / comprar"
+azo | motivo, razão | TJRS p. 31 (32), quadro de palavras complexas: "azo / motivo, razão"; p. 31 (32): "A ausência de pagamento deu azo ao corte do fornecimento de água."
+consumar* | concluir, finalizar | TJRS p. 31 (32), quadro de palavras complexas: "consumar / concluir, finalizar"
+consumou | concluir, finalizar | TJRS p. 31 (32), forma de "consumar"
+consumad* | concluir, finalizar | TJRS p. 31 (32), forma de "consumar"
+denominaç* | nome | TJRS p. 31 (32), quadro de palavras complexas: "denominação / nome"
+destarte | assim, desta maneira, dessa forma | TJRS p. 31 (32), quadro de palavras complexas: "destarte/dessarte / assim/desta maneira/dessa forma"
+dessarte | assim, desta maneira, dessa forma | TJRS p. 31 (32), quadro de palavras complexas: "destarte/dessarte / assim/desta maneira/dessa forma"
+distingu* | diferenciar | TJRS p. 31 (32), quadro de palavras complexas: "distinguir / diferenciar"
+ensejar* | causar, possibilitar | TJRS p. 31 (32), quadro de palavras complexas: "ensejar / causar/possibilitar"
+enseja | causar, possibilitar | TJRS p. 31 (32), forma de "ensejar"
+ensejam | causar, possibilitar | TJRS p. 31 (32), forma de "ensejar"
+ensejou | causar, possibilitar | TJRS p. 31 (32), forma de "ensejar"
+ensejad* | causar, possibilitar | TJRS p. 31 (32), forma de "ensejar"
+ensejando | causar, possibilitar | TJRS p. 31 (32), forma de "ensejar"
+executar* | fazer, realizar | TJRS p. 31 (32), quadro de palavras complexas: "executar / fazer, realizar"
+executa | fazer, realizar | TJRS p. 31 (32), forma de "executar"
+executam | fazer, realizar | TJRS p. 31 (32), forma de "executar"
+executou | fazer, realizar | TJRS p. 31 (32), forma de "executar"
+executad* | fazer, realizar | TJRS p. 31 (32), forma de "executar"
+executando | fazer, realizar | TJRS p. 31 (32), forma de "executar"
+execute | fazer, realizar | TJRS p. 31 (32), forma de "executar"
+executem | fazer, realizar | TJRS p. 31 (32), forma de "executar"
+exemplific* | dar exemplo | TJRS p. 31 (32), quadro de palavras complexas: "exemplificar / dar exemplo"
+exími* | excelente | TJRS p. 31 (32), quadro de palavras complexas: "exímio / excelente"
+êxito* | sorte, sucesso | TJRS p. 32 (33), quadro de palavras complexas: "êxito / sorte/sucesso"
+finaliz* | acabar, concluir, terminar | TJRS p. 32 (33), quadro de palavras complexas: "finalizar / acabar, concluir, terminar"
+hígid* | firme | TJRS p. 32 (33), quadro de palavras complexas: "hígido / firme"
+nosocômi* | hospital | TJRS p. 32 (33), quadro de palavras complexas: "nosocômio / hospital"
+outrossim | também, da mesma forma, igualmente | TJRS p. 32 (33), quadro de palavras complexas: "outrossim / da mesma forma, de igual modo, igualmente"; SES-DF p. 9, "Transforme isso: nisso:": "Outrossim / Também"
+perpetr* | realizar | TJRS p. 32 (33), quadro de palavras complexas: "perpetrar / realizar"
+postular* | pedir, solicitar | TJRS p. 32 (33), quadro de palavras complexas: "postular / pedir, solicitar"
+postula | pedir, solicitar | TJRS p. 32 (33), forma de "postular"
+postulam | pedir, solicitar | TJRS p. 32 (33), forma de "postular"
+postulou | pedir, solicitar | TJRS p. 32 (33), forma de "postular"
+postulando | pedir, solicitar | TJRS p. 32 (33), forma de "postular"
+problemática* | problema | TJRS p. 32 (33), quadro de palavras complexas: "problemática / problema"
+pugn* | insistir, sustentar | TJRS p. 32 (33), quadro de palavras complexas: "pugnar / insistir, sustentar"
+requisitar* | solicitar | TJRS p. 32 (33), quadro de palavras complexas: "requisitar / solicitar"
+requisita | solicitar | TJRS p. 32 (33), forma de "requisitar"
+requisitam | solicitar | TJRS p. 32 (33), forma de "requisitar"
+requisitou | solicitar | TJRS p. 32 (33), forma de "requisitar"
+requisitad* | solicitar | TJRS p. 32 (33), forma de "requisitar"
+requisitando | solicitar | TJRS p. 32 (33), forma de "requisitar"
+solver | resolver | TJRS p. 32 (33), quadro de palavras complexas: "solver / resolver"
+requerer* | pedir | CAPES p. 8 (7), "Dicas de substituições": "Peticionar, Requerer / Pedir"
+requereu | pedir | CAPES p. 8 (7), forma de "requerer"
+requerid* | pedir | CAPES p. 8 (7), forma de "requerer"
+requeira* | pedir | CAPES p. 8 (7), forma de "requerer"
+expedir* | mandar, enviar | CAPES p. 8 (7), "Dicas de substituições": "Expedir / Mandar, Enviar"
+expede | mandar, enviar | CAPES p. 8 (7), forma de "expedir"
+expedem | mandar, enviar | CAPES p. 8 (7), forma de "expedir"
+expediu | mandar, enviar | CAPES p. 8 (7), forma de "expedir"
+expedid* | mandar, enviar | CAPES p. 8 (7), forma de "expedir"
+ingressar* | entrar com, apresentar | CAPES p. 8 (7), "Dicas de substituições": "Ingressar, Protocolar / Entrar com, Apresentar"
+ingressa | entrar com, apresentar | CAPES p. 8 (7), forma de "ingressar"
+ingressam | entrar com, apresentar | CAPES p. 8 (7), forma de "ingressar"
+ingressou | entrar com, apresentar | CAPES p. 8 (7), forma de "ingressar"
+ingressando | entrar com, apresentar | CAPES p. 8 (7), forma de "ingressar"
+protocolar* | entrar com, apresentar | CAPES p. 8 (7), "Dicas de substituições": "Ingressar, Protocolar / Entrar com, Apresentar"
+protocola | entrar com, apresentar | CAPES p. 8 (7), forma de "protocolar"
+protocolam | entrar com, apresentar | CAPES p. 8 (7), forma de "protocolar"
+protocolou | entrar com, apresentar | CAPES p. 8 (7), forma de "protocolar"
+protocolad* | entrar com, apresentar | CAPES p. 8 (7), forma de "protocolar"
+protocole | entrar com, apresentar | CAPES p. 8 (7), forma de "protocolar"
+protocolem | entrar com, apresentar | CAPES p. 8 (7), forma de "protocolar"
+deferi* | atender, aceitar | CAPES p. 8 (7), "Dicas de substituições": "Deferir / Atender, Aceitar"; antes e depois: "O pedido foi deferido." / "O pedido foi aceito."
+defere | atender, aceitar | CAPES p. 8 (7), forma de "deferir"
+deferem | atender, aceitar | CAPES p. 8 (7), forma de "deferir"
+no sentido de | para | CAPES p. 8 (7), "Dicas de substituições": "No sentido de / Para"
+proferi* | falar, discursar | CAPES p. 8 (7), "Dicas de substituições": "Proferir / Falar, Discursar"
+profere | falar, discursar | CAPES p. 8 (7), forma de "proferir"
+proferem | falar, discursar | CAPES p. 8 (7), forma de "proferir"
+regressar* | voltar | CAPES p. 8 (7), "Dicas de substituições": "Regressar / Voltar"
+regressa | voltar | CAPES p. 8 (7), forma de "regressar"
+regressam | voltar | CAPES p. 8 (7), forma de "regressar"
+regressou | voltar | CAPES p. 8 (7), forma de "regressar"
+regressando | voltar | CAPES p. 8 (7), forma de "regressar"
+regresso | voltar | CAPES p. 8 (7), forma de "regressar"
+ininterrupt* | seguidos | Anvisa p. 12: "A pomada deve ser aplicada por dez dias ininterruptos. / A pomada deve ser aplicada por dez dias seguidos."
+rol | lista | Anvisa p. 12: "A substância está no rol de drogas proscritas. / A substância está na lista de drogas proibidas."
+proscrit* | proibidos | Anvisa p. 12: "A substância está no rol de drogas proscritas. / A substância está na lista de drogas proibidas."
+procedência | origem | Anvisa p. 12: "Não use medicamentos de procedência desconhecida. / Não use medicamentos de origem desconhecida."
+concomitante* | ao mesmo tempo | SES-DF p. 9, "Transforme isso: nisso:": "Concomitantemente / Ao mesmo tempo"
+subsidiariamente | de forma secundária | SES-DF p. 9, "Transforme isso: nisso:": "Subsidiariamente / De forma secundária"

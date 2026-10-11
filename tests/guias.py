@@ -248,6 +248,46 @@ ENUMERACAO_DOIS_ITENS = (
         "Apresente:\n• Documento de identificação\n• Comprovante de renda"),
 )
 
+# Inciso V. Na SES-DF e na Anvisa, o par do guia; no TJRS (p. 34, impressa
+# 35), só o "depois": o termo com a explicação ("ou seja", "Isto é").
+TJRS = "https://www.trt4.jus.br/portais/media/503273041/Guia-de-Linguagem-Simples-TJRS.pdf"
+_TJRS_34 = Fonte("TJRS, Guia de Linguagem Simples (Inovajus, 2022)", 34, TJRS,
+                 "0dc0637d3d4755a94f12998a13101ac21b3f51e2ecbd414bfac2cc6cca03c05f")
+JARGAO = (
+    Par(Fonte("SES-DF, Guia para simplificar documentos (2024)", 10, SESDF,
+              "1d604fed297a90de6c06a3b546ff009a640699409249ddd51825f5be2a126bd9"),
+        "A entidade chegou a peticionar contra a operação",
+        "A entidade chegou a entrar com uma ação judicial contra a operação"),
+    Par(_ANVISA_12, "O medicamento é indicado para tratar alguns tipos de câncer hematológico.",
+        "O medicamento é indicado para tratar alguns tipos de câncer hematológico (no sangue)."),
+)
+JARGAO_EXPLICADO = (
+    "A sentença transitou em julgado, ou seja, não é mais possível recorrer do que está decidido.",
+    "A ré afirma sua ilegitimidade passiva na ação. Isto é, a ré afirma que não tem as condições "
+    "impostas pela lei para ser ré no caso.",
+    "Se você, como leigo, é atendido em uma emergência hospitalar, provavelmente não entende "
+    "algumas anotações da enfermagem: paciente se apresenta apirético (sem febre) com eritemas "
+    "(vermelhidão na pele), dificuldade de deambular (caminhar), torpor (mal-estar).",
+)
+
+# Inciso IV. O par do guia: CAPES p. 8 ("Use palavras comuns"), Anvisa p. 12
+# ("Prefira palavras conhecidas") e TJRS p. 31 (impressa 32), com "azo"; no
+# PDF do TJRS, o "depois" quebra a linha antes de "de água".
+_CAPES_8 = Fonte("CAPES, O uso da Linguagem Simples na CAPES (2026)", 8, CAPES, _CAPES_SHA)
+_TJRS_31 = Fonte("TJRS, Guia de Linguagem Simples (Inovajus, 2022)", 31, TJRS,
+                 "0dc0637d3d4755a94f12998a13101ac21b3f51e2ecbd414bfac2cc6cca03c05f")
+PALAVRA_COMPLEXA = (
+    Par(_CAPES_8, "O pedido foi deferido.", "O pedido foi aceito."),
+    Par(_ANVISA_12, "A pomada deve ser aplicada por dez dias ininterruptos.",
+        "A pomada deve ser aplicada por dez dias seguidos."),
+    Par(_ANVISA_12, "A substância está no rol de drogas proscritas.",
+        "A substância está na lista de drogas proibidas."),
+    Par(_ANVISA_12, "Não use medicamentos de procedência desconhecida.",
+        "Não use medicamentos de origem desconhecida."),
+    Par(_TJRS_31, "A ausência de pagamento deu azo ao corte do fornecimento de água.",
+        "A ausência de pagamento deu motivo ao corte do fornecimento\nde água."),
+)
+
 # Inciso XVII. O eMAG 3.1 é uma página, não um PDF: "pagina" 0. O HTML foi
 # baixado em 10/10/2026 (o SHA-256 é o dele); os exemplos são o código que a
 # própria página traz, copiado como está (na tabela, sem o recuo das linhas).

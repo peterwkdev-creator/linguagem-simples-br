@@ -7,8 +7,8 @@ from pathlib import Path
 
 from linguagem_simples import detectores, limiares
 from linguagem_simples.detectores import (
-    acessibilidade, enumeracoes, estrangeirismos, frases_intercaladas, frases_longas, paragrafos_longos,
-    redundancias, siglas_sem_nome, substantivos_no_lugar_de_verbos, voz_passiva,
+    acessibilidade, enumeracoes, estrangeirismos, frases_intercaladas, frases_longas, jargoes, palavras_complexas,
+    paragrafos_longos, redundancias, siglas_sem_nome, substantivos_no_lugar_de_verbos, voz_passiva,
 )
 from linguagem_simples.pagina import ler_html
 
@@ -583,6 +583,137 @@ class TestIncisoVI(unittest.TestCase):
             "marketing", "office boy", "blog", "startup", "royalty", "commodity", "design",
             "download", "free shop", "on-line", "iceberg", "menu", "vide", "status", "data venia",
         })
+
+
+class TestIncisoV(unittest.TestCase):
+    def test_plantado(self):
+        achadas = jargoes("O réu foi citado na exordial acusatória.")
+        self.assertEqual([(o.inciso, o.inicio, o.fim, o.trecho) for o in achadas], [("V", 20, 39, "exordial acusatória")])
+        self.assertIn("“denúncia”", achadas[0].mensagem)
+        self.assertIn("explicar no próprio texto", achadas[0].mensagem)
+
+    def test_quadro_do_tjrs(self):
+        texto = ("Com supedâneo na Carta Magna, a decisão vergastada, que TRANSITOU EM JULGADO, "
+                 "ficou na peça-ovo; a tese autoral foi\nestribada no apelo extremo.")
+        self.assertEqual(trechos(jargoes, texto), [
+            "Com supedâneo", "Carta Magna", "decisão vergastada", "TRANSITOU EM JULGADO",
+            "peça-ovo", "tese autoral", "estribada", "apelo extremo",
+        ])
+        self.assertEqual(jargoes("Leu a peça\n\nVestibular de inverno."), [])
+        # "*": o verbo se conjuga e o particípio varia
+        self.assertEqual(trechos(jargoes, "Decisão transitada em julgado; vai transitar em julgado."),
+                         ["transitada em julgado", "transitar em julgado"])
+
+    def test_explicado_no_texto_passa(self):
+        for texto in guias.JARGAO_EXPLICADO + (
+            "A sentença transitou em julgado (não cabe mais recurso).",
+            "A decisão transitou em julgado. Quer dizer, não cabe recurso.",
+        ):
+            with self.subTest(texto[:40]):
+                self.assertEqual(jargoes(texto), [])
+
+    def test_explicado_na_primeira_vez_vale_para_o_resto(self):
+        texto = "O torpor (mal-estar) passou. Depois, o torpor voltou."
+        self.assertEqual(jargoes(texto), [])
+        # sem explicar na primeira vez, aponta as que não têm explicação
+        texto = "O torpor passou. Depois, o torpor (mal-estar) voltou. E o torpor ficou."
+        self.assertEqual([o.inicio for o in jargoes(texto)], [2, 58])
+
+    def test_explicacao_longe_nao_conta(self):
+        # a explicação está duas frases adiante: não é do termo
+        texto = "A sentença transitou em julgado. O prazo acabou. Ou seja, nada mais a fazer."
+        self.assertEqual(trechos(jargoes, texto), ["transitou em julgado"])
+
+    def test_palavra_inteira(self):
+        for texto in ("O torporoso dia.", "Uma lei maiores.", "O apelo extremado.", "Peticionaram ontem."):
+            with self.subTest(texto):
+                self.assertEqual(jargoes(texto), [])
+
+    def test_par_do_guia_e_texto_bom(self):
+        for par in guias.JARGAO:
+            with self.subTest(par.fonte.guia):
+                self.assertEqual((len(jargoes(par.antes)), len(jargoes(par.depois))), (1, 0))
+        # a forma é a do guia: o "depois" da Anvisa é o termo com a explicação
+        self.assertIn("“câncer hematológico (no sangue)”", jargoes(guias.JARGAO[1].antes)[0].mensagem)
+        self.assertIn("“pedir; na Justiça, entrar com uma ação judicial”", jargoes(guias.JARGAO[0].antes)[0].mensagem)
+        bons = [guias.TREAL_PARAGRAFOS, guias.ANVISA_SEI_DEPOIS, guias.FRASE_CAPES.depois,
+                guias.FRASE_ANVISA.depois, guias.FRASE_TJGO.depois, guias.INTERCALADA_CAPES.depois]
+        bons += [p.depois for p in guias.PASSIVA + guias.NOMINALIZACAO + guias.ESTRANGEIRISMO]
+        for texto in bons:
+            with self.subTest(texto[:30]):
+                self.assertEqual(jargoes(texto), [])
+
+    def test_lexico_de_jargoes_tem_fonte(self):
+        caminho = Path(detectores.__file__).parent / "lexicos" / "jargoes.txt"
+        linhas = [l for l in caminho.read_text(encoding="utf-8").splitlines() if l.strip() and not l.startswith("#")]
+        self.assertEqual(len(linhas), 32)
+        for linha in linhas:
+            with self.subTest(linha):
+                termo, forma, fonte = (c.strip() for c in linha.split("|"))
+                self.assertTrue(termo and forma)
+                self.assertRegex(fonte, r'^(?:TJRS p\. 107 \(108\), quadro "Expressões que devem ser evitadas": "|'
+                                        r'TJRS p\. 34 \(35\): "|SES-DF p\. 10, |Anvisa p\. 12: ")')
+                # a fonte cita o termo (sem o "*" da terminação)
+                self.assertIn(termo.split("*")[0].split()[-1].casefold(), fonte.casefold())
+
+
+class TestIncisoIV(unittest.TestCase):
+    def test_plantado(self):
+        achadas = palavras_complexas("O pedido foi deferido.")
+        self.assertEqual([(o.inciso, o.inicio, o.fim, o.trecho) for o in achadas], [("IV", 13, 21, "deferido")])
+        self.assertIn("“atender, aceitar”", achadas[0].mensagem)
+
+    def test_formas_do_verbo(self):
+        texto = "Executou a obra e vai executar outra; o serviço executado. Requisitou e requereu."
+        self.assertEqual(trechos(palavras_complexas, texto),
+                         ["Executou", "executar", "executado", "Requisitou", "requereu"])
+
+    def test_terminacao_qualquer(self):
+        # "*" no fim: o guia dá uma forma ("adquirir", "ininterruptos"), e as outras contam
+        self.assertEqual(trechos(palavras_complexas, "Adquiriu o imóvel em jornada ininterrupta."),
+                         ["Adquiriu", "ininterrupta"])
+
+    def test_radical_de_outra_palavra_passa(self):
+        # o radical do verbo é também o de outra palavra, comum ou de outro sentido
+        texto = ("O Poder Executivo cumpre o requisito. Guarde o protocolo no horário de expediente. "
+                 "O consumo caiu. É um postulado. Aproveito o ensejo. O serviço requer cadastro.")
+        self.assertEqual(palavras_complexas(texto), [])
+
+    def test_palavra_inteira(self):
+        for texto in ("Foi um rolê.", "O solvente.", "Azotado.", "Ademaisz."):
+            with self.subTest(texto):
+                self.assertEqual(palavras_complexas(texto), [])
+
+    def test_endereco_passa(self):
+        self.assertEqual(palavras_complexas("Acesse https://www.gov.br/requerer-beneficio para pedir."), [])
+
+    def test_par_do_guia_e_texto_bom(self):
+        for par in guias.PALAVRA_COMPLEXA:
+            with self.subTest(par.antes[:30]):
+                self.assertEqual((len(palavras_complexas(par.antes)), len(palavras_complexas(par.depois))),
+                                 (2 if "proscritas" in par.antes else 1, 0))
+        # a forma é a do guia
+        self.assertEqual([o.mensagem.split("“")[1].rstrip("”") for o in palavras_complexas(guias.PALAVRA_COMPLEXA[2].antes)],
+                         ["lista", "proibidos"])
+        bons = [guias.TREAL_PARAGRAFOS, guias.ANVISA_SEI_DEPOIS, guias.FRASE_CAPES.depois,
+                guias.FRASE_ANVISA.depois, guias.FRASE_TJGO.depois, guias.INTERCALADA_CAPES.depois]
+        bons += [p.depois for p in guias.PASSIVA + guias.NOMINALIZACAO + guias.ESTRANGEIRISMO + guias.JARGAO]
+        for texto in bons:
+            with self.subTest(texto[:30]):
+                self.assertEqual(palavras_complexas(texto), [])
+
+    def test_lexico_de_palavras_complexas_tem_fonte(self):
+        caminho = Path(detectores.__file__).parent / "lexicos" / "palavras-complexas.txt"
+        linhas = [l for l in caminho.read_text(encoding="utf-8").splitlines() if l.strip() and not l.startswith("#")]
+        self.assertEqual(len(linhas), 86)
+        for linha in linhas:
+            with self.subTest(linha):
+                termo, forma, fonte = (c.strip() for c in linha.split("|"))
+                self.assertTrue(termo and forma)
+                self.assertRegex(fonte, r"^(?:TJRS p\. 3[12] \(3[23]\), |CAPES p\. 8 \(7\), |Anvisa p\. 12: |"
+                                        r"SES-DF p\. 9, )")
+                # a fonte cita o termo ou o infinitivo dele
+                self.assertIn(termo.split("*")[0][:5].casefold(), fonte.casefold())
 
 
 class TestIncisoXV(unittest.TestCase):

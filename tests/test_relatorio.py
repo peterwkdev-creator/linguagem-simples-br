@@ -62,6 +62,18 @@ class TestRelatorio(unittest.TestCase):
         self.assertEqual((por["VI"].inciso.classe, por["VI"].estado), ("sinal", CONFERIDO))
         self.assertEqual([o.trecho for o in por["VI"].ocorrencias], ["login"])
 
+    def test_iv_e_sinal_e_roda(self):
+        # O TJRS (p. 31) diz que a palavra difícil depende de quem lê: quem lê decide.
+        por = {r.inciso.numero: r for r in conferir("O pedido foi deferido.")}
+        self.assertEqual((por["IV"].inciso.classe, por["IV"].estado), ("sinal", CONFERIDO))
+        self.assertEqual([o.trecho for o in por["IV"].ocorrencias], ["deferido"])
+
+    def test_v_e_sinal_e_roda(self):
+        # A lei aceita o termo técnico explicado no próprio texto: quem lê decide.
+        por = {r.inciso.numero: r for r in conferir("A sentença transitou em julgado.")}
+        self.assertEqual((por["V"].inciso.classe, por["V"].estado), ("sinal", CONFERIDO))
+        self.assertEqual([o.trecho for o in por["V"].ocorrencias], ["transitou em julgado"])
+
     def test_xiii_e_sinal_e_roda(self):
         # 31% de precisão (amostra 6): o XIII aponta para quem lê decidir.
         texto = "O documento, que deve ser apresentado pelo requerente, fica no protocolo."

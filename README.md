@@ -30,7 +30,7 @@ só aponta trechos para quem lê decidir. Intervalos em
 Python 3.11 ou mais novo; só a biblioteca padrão, sem outra dependência.
 
 ```bash
-pip install "git+https://github.com/peterwkdev-creator/linguagem-simples-br@v1.5.0"
+pip install "git+https://github.com/peterwkdev-creator/linguagem-simples-br@v1.6.0"
 ```
 
 Também roda sem instalar, de dentro da pasta do repositório.
@@ -78,6 +78,8 @@ a página.
 |---|---|---|---|
 | II | redigir frases curtas | frase longa | mais de 20 palavras |
 | III | desenvolver uma ideia por parágrafo | parágrafo longo, sinal de mais de uma ideia | mais de 8 frases |
+| IV | usar palavras comuns, de fácil compreensão | palavra que um guia oficial manda trocar por outra mais conhecida ("o pedido foi deferido", "dez dias ininterruptos") e a forma que o guia sugere | léxico em `linguagem_simples/lexicos/palavras-complexas.txt`: 86 linhas do TJRS, da CAPES, da Anvisa e da SES-DF, com as formas do verbo |
+| V | usar sinônimos de termos técnicos e de jargões ou explicá-los no próprio texto | termo técnico ou jargão que um guia manda trocar ou explicar ("exordial acusatória", "transitou em julgado"), quando o texto não o explica logo depois (entre parênteses, com "ou seja" ou "isto é") | léxico em `linguagem_simples/lexicos/jargoes.txt`: 32 entradas do TJRS, da SES-DF e da Anvisa |
 | VI | evitar palavras estrangeiras que não sejam de uso corrente | palavra estrangeira que um guia oficial manda trocar ("faça o login", "um checklist") e a forma que o guia sugere | léxico em `linguagem_simples/lexicos/estrangeirismos.txt`: 36 entradas da CAPES, da Anvisa, do TJGO, do TJRS e do Manual de Comunicação do Senado |
 | VIII | redigir o nome completo antes das siglas | primeira vez que a sigla aparece sem o nome antes | léxico de cores em `linguagem_simples/lexicos/`, com a fonte de cada palavra |
 | IX | organizar o texto de forma esquemática, quando couber, com o uso de listas, tabelas e recursos gráficos | frase de parágrafo que anuncia uma série depois dos dois-pontos, com os itens separados por vírgula ou ponto e vírgula ("leve ao atendimento os documentos: RG, CPF e comprovante") | 3 itens ou mais |
@@ -87,14 +89,15 @@ a página.
 | XV | evitar redundâncias e palavras desnecessárias | expressão do léxico com palavras sobrando ("compareça pessoalmente", "a fim de", "de acordo com") e a forma que o guia sugere | léxico em `linguagem_simples/lexicos/redundancias.txt`: 29 entradas do TRE-AL, do CJF e da CAPES, com a página |
 | XVII | usar linguagem acessível à pessoa com deficiência (Lei 13.146/2015) | no HTML, link de texto vago ("clique aqui", "saiba mais"), imagem sem `alt` e tabela sem célula de cabeçalho (`th`); no texto e no Markdown, só o link vago | eMAG 3.1, recomendações 3.5, 3.6 e 3.10; léxico em `linguagem_simples/lexicos/links-vagos.txt`: 46 entradas |
 
-O VI, o IX, o XIII e o XVII são **sinal**, não automáticos: o VI só
-conhece as palavras que um guia manda trocar, e a lei aceita a de uso
-corrente; o IX acerta 73% das vezes, e a lei diz "quando couber"; o XIII
-acerta 31%; o XVII confere só três pontos do que a Lei 13.146/2015 pede.
-Os quatro apontam trechos para quem lê decidir. Os outros seis são
-automáticos.
+O IV, o V, o VI, o IX, o XIII e o XVII são **sinal**, não automáticos: o
+IV, o V e o VI só conhecem as palavras que um guia manda trocar; a palavra
+difícil depende de quem lê (TJRS, p. 31), a lei aceita o termo técnico
+explicado e a palavra estrangeira de uso corrente; o IX acerta 73% das
+vezes, e a lei diz "quando couber"; o XIII acerta 31%; o XVII confere só
+três pontos do que a Lei 13.146/2015 pede. Os seis apontam trechos para
+quem lê decidir. Os outros seis são automáticos.
 
-Os outros 8 incisos aparecem no relatório com a classe de cada um:
+Os outros 6 incisos aparecem no relatório com a classe de cada um:
 **automático** (dá para contar; detector ainda não escrito), **sinal** (dá
 para apontar, quem lê decide) ou **fora do alcance** (X e XVIII: só uma
 pessoa confere). O inciso XI vem desligado por padrão.
@@ -128,6 +131,7 @@ cegas:
 | XII | 100% | 59 / 59 | 94% a 100% | 30 páginas, 09/10/2026 |
 | XV | 98% | 59 / 60 | 91% a 100% | 150 páginas, 10/10/2026 |
 | XVII | 98% | 49 / 50 | 90% a 100% | 150 páginas, 10/10/2026 |
+| IV | 98% | 40 / 41 | 87% a 100% | 490 páginas, 11/10/2026 |
 | VI | 96% | 25 / 26 | 81% a 99% | 120 páginas novas, 10/10/2026 |
 | II | 95% | 57 / 60 | 86% a 98% | 30 páginas, 09/10/2026 |
 | XIV | 88% | 21 / 24 | 69% a 96% | 30 páginas, 09/10/2026 |
@@ -156,6 +160,16 @@ passagens às cegas mandariam trocar em 30 páginas novas ("courier",
 só conhece as que um guia lista. E quase tudo o que ele aponta é "login"
 (96 de 103 nas 120 páginas), que a CAPES manda trocar por "acesso", mas
 que as mesmas passagens deram como de uso corrente: quem lê decide. Cada
+O IV é a palavra que um guia manda trocar ("protocolar",
+"requerer", "deferimento"): o único erro foi o nome de uma opção da tela
+entre aspas; em 5 dos 40 acertos, a forma do guia não cabe ("a licença
+será expedida": cabe "emitida", não "enviada"), e a mensagem diz o que o
+guia sugere, não o que serve no trecho. O V acerta onde aponta (8 de 8
+em páginas de serviço, **amostra pequena**), mas a lista dos guias é
+estreita: em 120 notícias do CNJ ele apontou uma vez, e dos 77 termos
+técnicos que duas passagens às cegas listaram em 30 delas ("autos",
+"liminar", "mérito", "precatórios"), não apontou nenhum (**0%**, de 0% a
+5%). Sem marca do V não quer dizer sem jargão. Cada
 amostra, o método e o que os erros mostram estão em
 [docs/precisao.md](docs/precisao.md).
 
@@ -246,7 +260,9 @@ nº 3, de 07/05/2007), recomendações 3.5, 3.6 e 3.10. Também em 10/10/2026:
 Senado Federal, Manual de Comunicação, verbete "Estrangeirismo" (pares do
 VI e a lista de palavras de uso amplo, que o VI não aponta) e a lista
 "Estrangeirismos grafados sem itálico ou aspas"; TJRS, Guia de Linguagem
-Simples (2022), quadro de expressões estrangeiras (p. 36); TRF3, Escola de
+Simples (2022), quadro de palavras complexas (p. 31 e 32, IV), exemplos de
+jargões e termos técnicos (p. 34) e quadro "Expressões que devem ser
+evitadas" (p. 107, V), quadro de expressões estrangeiras (p. 36); TRF3, Escola de
 Magistrados, "Expressões latinas em textos jurídicos" (2021).
 
 Texto da lei: publicação original no portal da Câmara dos Deputados, DOU de
