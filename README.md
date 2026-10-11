@@ -30,7 +30,13 @@ só aponta trechos para quem lê decidir. Intervalos em
 Python 3.11 ou mais novo; só a biblioteca padrão, sem outra dependência.
 
 ```bash
-pip install "git+https://github.com/peterwkdev-creator/linguagem-simples-br@v1.6.0"
+pip install linguagem-simples-br
+```
+
+Ou direto da tag no GitHub:
+
+```bash
+pip install "git+https://github.com/peterwkdev-creator/linguagem-simples-br@v1.6.1"
 ```
 
 Também roda sem instalar, de dentro da pasta do repositório.

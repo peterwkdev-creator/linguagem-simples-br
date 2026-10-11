@@ -4,6 +4,16 @@ A versão segue `linguagem_simples.__version__`; cada uma tem uma tag
 `vX.Y.Z` no commit que a publicou. O formato do relatório e as opções da
 linha de comando só mudam numa versão 2; detector novo sai numa 1.x.
 
+## 1.6.1 — 11/10/2026
+
+- No PyPI: `pip install linguagem-simples-br`. Publicado pela publicação
+  confiável (sem token), a cada Release, depois da aprovação do dono; a
+  instalação pela tag continua.
+- A cada push, o CI monta o pacote, instala num ambiente limpo e roda um
+  exemplo do README que lê um léxico: arquivo de dados fora do pacote
+  quebra no push, não na Release.
+- Sem mudança no que o verificador aponta.
+
 ## 1.6.0 — 11/10/2026
 
 - Detector do inciso IV (palavras comuns, classe **sinal**): aponta a
