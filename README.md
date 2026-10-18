@@ -487,7 +487,6 @@ página pública, sem dado de pessoa. Para mandar código, veja o
 | [claude-context-cost](https://github.com/peterwkdev-creator/claude-context-cost) · [site](https://peterwkdev-creator.github.io/claude-context-cost/) | Quanto cada fonte (CLAUDE.md, regras, skills, memória) custa no contexto de uma sessão do Claude Code |
 | [vra-anac](https://github.com/peterwkdev-creator/vra-anac) | Pontualidade dos voos domésticos do Brasil pelo VRA da ANAC |
 | [numerasheets-site](https://github.com/peterwkdev-creator/numerasheets-site) · [site](https://numerasheets.com) | Vitrine da loja NumeraSheets: modelos de planilha e calculadoras grátis |
-| [kerbo-releases](https://github.com/peterwkdev-creator/kerbo-releases) | Versões assinadas do Kerbo, segunda opinião de segurança, rede e disco no Windows |
 <!-- outros-projetos:fim -->
 
 ## Licença
