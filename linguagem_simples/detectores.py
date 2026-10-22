@@ -28,11 +28,13 @@ class Ocorrencia:
     no_html: tuple = ()  # (início, fim) no HTML, quando o achado é marcação (XVII)
 
 
-def frases_longas(texto, max_palavras=None):
-    """Inciso II: frase com mais palavras que o limiar."""
+def frases_longas(texto, max_palavras=None, blocos_lidos=None):
+    """Inciso II: frase com mais palavras que o limiar. ``blocos_lidos`` é
+    o ``blocos(texto)`` já lido (o relatório lê uma vez para quatro
+    detectores); sem ele, o detector lê."""
     limite = limiares.valor("II", max_palavras)
     achadas = []
-    for bloco in blocos(texto):
+    for bloco in blocos(texto) if blocos_lidos is None else blocos_lidos:
         for frase in bloco.frases:
             trecho = frase.em(texto)
             n = len(palavras(trecho))
@@ -44,12 +46,12 @@ def frases_longas(texto, max_palavras=None):
     return achadas
 
 
-def paragrafos_longos(texto, max_frases=None):
+def paragrafos_longos(texto, max_frases=None, blocos_lidos=None):
     """Inciso III: parágrafo com mais frases que o limiar. É um sinal de mais
     de uma ideia; item de lista e título não contam como parágrafo."""
     limite = limiares.valor("III", max_frases)
     achadas = []
-    for bloco in blocos(texto):
+    for bloco in blocos(texto) if blocos_lidos is None else blocos_lidos:
         n = len(bloco.frases)
         if bloco.tipo == PARAGRAFO and n > limite:
             achadas.append(Ocorrencia(
@@ -59,17 +61,24 @@ def paragrafos_longos(texto, max_frases=None):
     return achadas
 
 
-def _ler_lexico(nome):
-    """Léxico em ``lexicos/``: uma entrada por linha, "palavra | dado |
-    fonte" (o dado é o verbo, a classe...); linha com # é comentário."""
-    entradas = {}
-    caminho = Path(__file__).parent / "lexicos" / nome
-    for linha in caminho.read_text(encoding="utf-8").splitlines():
+def _ler_lexico(nome, pasta=None):
+    """Léxico em ``lexicos/`` (ou em ``pasta``): uma entrada por linha,
+    "palavra | dado | fonte" (o dado é o verbo, a classe...); linha com # é
+    comentário. Linha sem os três campos e palavra repetida param a leitura,
+    com o arquivo e a linha: a repetida trocaria o dado sem aviso."""
+    entradas, onde = {}, {}
+    caminho = (pasta or Path(__file__).parent / "lexicos") / nome
+    for numero, linha in enumerate(caminho.read_text(encoding="utf-8").splitlines(), 1):
         linha = linha.strip()
         if not linha or linha.startswith("#"):
             continue
-        palavra, dado, _fonte = (c.strip() for c in linha.split("|", 2))
-        entradas[palavra] = dado
+        campos = [c.strip() for c in linha.split("|", 2)]
+        if len(campos) != 3:
+            raise ValueError(f"{caminho}:{numero}: a linha precisa de três campos, \"palavra | dado | fonte\"")
+        palavra, dado, _fonte = campos
+        if palavra in entradas:
+            raise ValueError(f"{caminho}:{numero}: \"{palavra}\" repetida (já está na linha {onde[palavra]})")
+        entradas[palavra], onde[palavra] = dado, numero
     return entradas
 
 
@@ -204,7 +213,7 @@ def _palavra_comum(texto, sigla, palavras):
 def _iniciais_batem(sigla, palavras_nome):
     """As letras da sigla aparecem, em ordem, nas iniciais das palavras do
     nome? ("Secretaria Especial da Receita Federal do Brasil" serve a RFB.)"""
-    letras = [c for c in _sem_acento(sigla).upper() if c.isalpha()]
+    letras = _letras_da_sigla(sigla)
     i = 0
     for p in palavras_nome:
         if i < len(letras) and _sem_acento(p)[0].upper() == letras[i]:
@@ -219,7 +228,7 @@ def _prefixos_batem(sigla, palavras_nome):
     pula no máximo duas palavras que não sejam conectivo ("Departamento de
     Operações de Comércio Exterior" serve a DECEX; "Coordenação-Geral de
     Autorização para Transferência, Cisão e Retirada", a CGTR)."""
-    letras = "".join(c for c in _sem_acento(sigla).upper() if c.isalpha())
+    letras = _letras_da_sigla(sigla)
     estados = {(0, 0)}  # (letras da sigla já saídas do nome, palavras puladas)
     for palavra in palavras_nome:
         p = _sem_acento(palavra).upper()
@@ -443,14 +452,14 @@ def _itens(serie):
     return n, comecos
 
 
-def enumeracoes(texto, min_itens=None):
+def enumeracoes(texto, min_itens=None, blocos_lidos=None):
     """Inciso IX: frase de parágrafo com dois-pontos e uma série de itens na
     mesma linha. É um sinal: a lei diz "quando couber", e quem lê decide se
     vira lista ou tabela. Série com um item por linha, item de lista,
     título e rótulo de campo não contam."""
     limite = limiares.valor("IX", min_itens)
     achadas = []
-    for bloco in blocos(texto):
+    for bloco in blocos(texto) if blocos_lidos is None else blocos_lidos:
         if bloco.tipo != PARAGRAFO:
             continue
         for frase in bloco.frases:
@@ -493,9 +502,10 @@ def voz_passiva(texto):
         regular = _REGULAR.fullmatch(m.group(1))
         if regular and _sem_acento(regular.group(1)) != regular.group(1):
             continue
-        resto = texto[m.end():]
-        fim = _FIM_DA_ORACAO.search(resto)
-        if _AGENTE.search(resto[:fim.start() if fim else len(resto)]):
+        # Busca no próprio texto, até o fim da oração: copiar o resto do
+        # texto a cada passiva crescia com o quadrado do tamanho.
+        fim = _FIM_DA_ORACAO.search(texto, m.end())
+        if _AGENTE.search(texto, m.end(), fim.start() if fim else len(texto)):
             mensagem = "voz passiva com agente: na voz ativa, quem faz a ação vira sujeito"
         else:
             mensagem = "voz passiva sem agente: a frase não diz quem faz a ação"
@@ -507,12 +517,12 @@ _VIRGULA = re.compile(r",(?=\s)")
 _RELATIVO = frozenset({"que", "qual", "quais", "cujo", "cuja", "cujos", "cujas", "onde"})
 
 
-def frases_intercaladas(texto):
+def frases_intercaladas(texto, blocos_lidos=None):
     """Inciso XIII: trecho entre vírgulas, no meio da frase, com pronome
     relativo nas três primeiras palavras ("O documento, que deve ser
     apresentado pelo requerente, é obrigatório": CAPES p. 10)."""
     achadas = []
-    for bloco in blocos(texto):
+    for bloco in blocos(texto) if blocos_lidos is None else blocos_lidos:
         for frase in bloco.frases:
             virgulas = [v.start() for v in _VIRGULA.finditer(texto, frase.inicio, frase.fim)]
             for a, b in zip(virgulas, virgulas[1:]):
@@ -604,14 +614,22 @@ def _padrao_da_expressao(expressao):
 _REDUNDANCIAS = {_padrao_da_expressao(e): forma for e, forma in _ler_lexico("redundancias.txt").items()}
 
 
+def _do_lexico(texto, inciso, lexico, mensagem, fora_de_endereco=True):
+    """Cada expressão do léxico achada no texto, em ordem de posição.
+    ``mensagem`` recebe a forma que o guia sugere no lugar de "{}"; com
+    ``fora_de_endereco``, a que está dentro de URL ou e-mail não conta."""
+    achadas = [
+        Ocorrencia(inciso, m.start(), m.end(), m.group(), mensagem.format(forma))
+        for padrao, forma in lexico.items() for m in padrao.finditer(texto)
+        if not (fora_de_endereco and _em_endereco(texto, m.start(), m.end()))
+    ]
+    return sorted(achadas, key=lambda o: o.inicio)
+
+
 def redundancias(texto):
     """Inciso XV: expressão redundante ou com palavras sobrando, do léxico
     ("Compareça pessoalmente ao local": CAPES p. 11)."""
-    achadas = [
-        Ocorrencia("XV", m.start(), m.end(), m.group(), f"palavras sobrando: o guia sugere “{forma}”")
-        for padrao, forma in _REDUNDANCIAS.items() for m in padrao.finditer(texto)
-    ]
-    return sorted(achadas, key=lambda o: o.inicio)
+    return _do_lexico(texto, "XV", _REDUNDANCIAS, "palavras sobrando: o guia sugere “{}”", fora_de_endereco=False)
 
 
 # Inciso VI: palavra estrangeira que um guia manda trocar. A barra fica de
@@ -627,12 +645,7 @@ def estrangeirismos(texto):
     """Inciso VI: palavra estrangeira da lista dos guias ("Faça um checklist
     antes de enviar": CAPES p. 9). É sinal: a lei só pede evitar a que não é
     de uso corrente, e quem lê decide."""
-    achadas = [
-        Ocorrencia("VI", m.start(), m.end(), m.group(), f"palavra estrangeira: o guia sugere “{forma}”")
-        for padrao, forma in _ESTRANGEIRISMOS.items() for m in padrao.finditer(texto)
-        if not _em_endereco(texto, m.start(), m.end())
-    ]
-    return sorted(achadas, key=lambda o: o.inicio)
+    return _do_lexico(texto, "VI", _ESTRANGEIRISMOS, "palavra estrangeira: o guia sugere “{}”")
 
 
 # Inciso IV: palavra pouco comum que um guia manda trocar por outra mais
@@ -646,12 +659,7 @@ def palavras_complexas(texto):
     """Inciso IV: palavra da lista dos guias ("O pedido foi deferido": CAPES
     p. 8). É sinal: o TJRS (p. 31) diz que depende de quem lê, e quem lê
     decide."""
-    achadas = [
-        Ocorrencia("IV", m.start(), m.end(), m.group(), f"palavra pouco comum: o guia sugere “{forma}”")
-        for padrao, forma in _PALAVRAS_COMPLEXAS.items() for m in padrao.finditer(texto)
-        if not _em_endereco(texto, m.start(), m.end())
-    ]
-    return sorted(achadas, key=lambda o: o.inicio)
+    return _do_lexico(texto, "IV", _PALAVRAS_COMPLEXAS, "palavra pouco comum: o guia sugere “{}”")
 
 
 # Inciso V: termo técnico ou jargão que um guia manda trocar ou explicar

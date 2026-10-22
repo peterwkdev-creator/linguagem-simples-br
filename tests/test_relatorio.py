@@ -372,5 +372,55 @@ class TestLinhaDeComando(unittest.TestCase):
         self.assertIn("relatório dos 18 incisos", saida)
 
 
+class TestAuditoria(unittest.TestCase):
+    """Linha e coluna sem recontar o texto, limiar novo, UTF-16 corrompido e
+    caractere de controle na tela."""
+
+    rodar_bytes = TestLinhaDeComando.rodar_bytes
+
+    def test_linha_e_coluna_com_inicios_dao_o_mesmo(self):
+        from linguagem_simples.relatorio import inicios_de_linha
+        for texto in ("", "sem quebra", "a\nb\r\n\r\nc\n", "\n\nLeve ao INSS.\n"):
+            inicios = inicios_de_linha(texto)
+            for posicao in range(len(texto) + 1):
+                with self.subTest(texto=texto, posicao=posicao):
+                    self.assertEqual(linha_coluna(texto, posicao, inicios), linha_coluna(texto, posicao))
+
+    def test_limiar_novo_nao_quebra_o_relatorio(self):
+        from linguagem_simples import limiares
+        with mock.patch.dict(limiares.LIMIARES, {"XII": limiares.Limiar(3, "guia de teste, p. 1")}):
+            xii = next(r for r in conferir("O pedido foi feito.") if r.inciso.numero == "XII")
+        self.assertEqual((xii.limiar, xii.fonte_do_limiar, len(xii.ocorrencias)), (3, "guia de teste, p. 1", 1))
+
+    def test_utf16_corrompido_tem_mensagem_propria(self):
+        codigo, _, erro = self.rodar_bytes(b"\xff\xfeO\x00l\x00\x00\xd8a\x00")
+        self.assertEqual(codigo, 2)
+        self.assertIn("começa como Unicode (UTF-16)", erro)
+        self.assertNotIn("não está em UTF-8", erro)
+
+    def test_controle_sai_so_da_tela(self):
+        dados = "Texto com \x1b[2J e \x07 sino.\tFim aqui.".encode()
+        codigo, saida, _ = self.rodar_bytes(dados, "--max-palavras", "2")
+        self.assertEqual(codigo, 1)
+        self.assertNotIn("\x1b", saida)
+        self.assertNotIn("\x07", saida)
+        self.assertIn("“Texto com [2J e  sino.”", saida)
+        _, saida, _ = self.rodar_bytes(dados, "--max-palavras", "2", "--json")
+        trechos = [o["trecho"] for i in json.loads(saida)["incisos"] for o in i.get("ocorrencias", ())]
+        self.assertIn("Texto com \x1b[2J e \x07 sino.", trechos)
+        with tempfile.TemporaryDirectory() as pasta:
+            destino = Path(pasta) / "relatorio.txt"
+            self.rodar_bytes(dados, "--max-palavras", "2", "--saida", str(destino))
+            self.assertIn("\x1b[2J", destino.read_text(encoding="utf-8"))
+
+    def test_marca_de_direcao_sai_so_da_tela(self):
+        dados = "Texto com ‮odnum invertido aqui.".encode()
+        _, saida, _ = self.rodar_bytes(dados, "--max-palavras", "2")
+        self.assertNotIn("‮", saida)
+        self.assertIn("“Texto com odnum invertido aqui.”", saida)
+        _, saida, _ = self.rodar_bytes(dados, "--max-palavras", "2", "--json")
+        self.assertIn("‮", json.loads(saida)["incisos"][1]["ocorrencias"][0]["trecho"])
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -4,6 +4,8 @@ não se confere nesta versão, inciso por inciso. Não há nota única: a saída
 jurídico e não certifica que um texto cumpre a lei.
 """
 
+import bisect
+import re
 from dataclasses import dataclass
 
 from . import limiares
@@ -13,6 +15,7 @@ from .detectores import (
 )
 from .incisos import FONTE_LEI, FORA_DO_ALCANCE, INCISOS, POR_NUMERO, Inciso
 from .pagina import Pagina
+from .texto import blocos
 
 AVISO = (
     "O resultado aponta trechos para revisão. Não é parecer jurídico e não "
@@ -51,21 +54,24 @@ def conferir(texto, max_palavras=None, max_frases=None, ignorar_siglas=(), ligar
     pagina = texto if isinstance(texto, Pagina) else None
     if pagina:
         texto = pagina.texto
+    lidos = blocos(texto)  # lidos uma vez só para os quatro detectores que olham a frase
     rodar = {
-        "II": lambda: frases_longas(texto, max_palavras),
-        "III": lambda: paragrafos_longos(texto, max_frases),
+        "II": lambda: frases_longas(texto, max_palavras, lidos),
+        "III": lambda: paragrafos_longos(texto, max_frases, lidos),
         "IV": lambda: palavras_complexas(texto),
         "V": lambda: jargoes(texto),
         "VI": lambda: estrangeirismos(texto),
         "VIII": lambda: siglas_sem_nome(texto, ignorar_siglas),
-        "IX": lambda: enumeracoes(texto),
+        "IX": lambda: enumeracoes(texto, blocos_lidos=lidos),
         "XII": lambda: voz_passiva(texto),
-        "XIII": lambda: frases_intercaladas(texto),
+        "XIII": lambda: frases_intercaladas(texto, lidos),
         "XIV": lambda: substantivos_no_lugar_de_verbos(texto),
         "XV": lambda: redundancias(texto),
         "XVII": lambda: acessibilidade(pagina or texto),
     }
-    informado = {"II": max_palavras, "III": max_frases, "IX": None}
+    # Limiar sem opção na linha de comando fica no padrão: limiar novo em
+    # limiares.py não precisa de entrada aqui.
+    informado = {"II": max_palavras, "III": max_frases}
     resultados = []
     for inciso in INCISOS:
         n = inciso.numero
@@ -78,8 +84,8 @@ def conferir(texto, max_palavras=None, max_frases=None, ignorar_siglas=(), ligar
         else:
             limiar, fonte = None, ""
             if n in limiares.LIMIARES:
-                limiar = limiares.valor(n, informado[n])
-                fonte = limiares.LIMIARES[n].fonte if informado[n] is None else "informado por quem usa"
+                limiar = limiares.valor(n, informado.get(n))
+                fonte = limiares.LIMIARES[n].fonte if informado.get(n) is None else "informado por quem usa"
             resultados.append(Resultado(inciso, CONFERIDO, tuple(rodar[n]()), limiar, fonte))
     return resultados
 
@@ -92,25 +98,42 @@ def _numeros(incisos):
     return numeros
 
 
-def linha_coluna(texto, posicao):
-    """Linha e coluna (a partir de 1) de uma posição do texto."""
+def linha_coluna(texto, posicao, inicios=None):
+    """Linha e coluna (a partir de 1) de uma posição do texto. ``inicios``
+    é o de ``inicios_de_linha(texto)``: com ele, a conta não relê o texto."""
+    if inicios is not None:
+        linha = bisect.bisect_right(inicios, posicao)
+        return linha, posicao - inicios[linha - 1] + 1
     linha = texto.count("\n", 0, posicao) + 1
     coluna = posicao - texto.rfind("\n", 0, posicao)
     return linha, coluna
 
 
-def no_arquivo(o, texto):
+def inicios_de_linha(texto):
+    """Onde começa cada linha do texto, para ``linha_coluna``. Contar as
+    quebras desde o começo a cada ocorrência crescia com o quadrado do
+    tamanho."""
+    return [0] + [m.end() for m in re.finditer("\n", texto)]
+
+
+def no_arquivo(o, texto, inicios=None):
     """Início, fim, linha e coluna de uma ocorrência no arquivo lido. Com
-    uma ``Pagina`` no lugar do texto, a posição é a do HTML."""
+    uma ``Pagina`` no lugar do texto, a posição é a do HTML. ``inicios``
+    são os de ``inicios_de_linha`` do arquivo lido."""
     if isinstance(texto, Pagina):
         inicio, fim = o.no_html or texto.na_fonte(o.inicio, o.fim)
-        return (inicio, fim) + linha_coluna(texto.fonte, inicio)
-    return (o.inicio, o.fim) + linha_coluna(texto, o.inicio)
+        return (inicio, fim) + linha_coluna(texto.fonte, inicio, inicios)
+    return (o.inicio, o.fim) + linha_coluna(texto, o.inicio, inicios)
+
+
+def _inicios(texto):
+    return inicios_de_linha(texto.fonte if isinstance(texto, Pagina) else texto)
 
 
 def como_dict(resultados, texto):
     """Relatório pronto para ``json.dumps``. ``texto`` é o texto conferido
     ou a ``Pagina`` de onde ele saiu."""
+    inicios = _inicios(texto)
     incisos = []
     for r in resultados:
         item = {
@@ -123,13 +146,13 @@ def como_dict(resultados, texto):
             if r.limiar is not None:
                 item["limiar"] = r.limiar
                 item["fonte_do_limiar"] = r.fonte_do_limiar
-            item["ocorrencias"] = [_ocorrencia(o, texto) for o in r.ocorrencias]
+            item["ocorrencias"] = [_ocorrencia(o, texto, inicios) for o in r.ocorrencias]
         incisos.append(item)
     return {"lei": FONTE_LEI, "aviso": AVISO, "incisos": incisos}
 
 
-def _ocorrencia(o, texto):
-    inicio, fim, linha, coluna = no_arquivo(o, texto)
+def _ocorrencia(o, texto, inicios=None):
+    inicio, fim, linha, coluna = no_arquivo(o, texto, inicios)
     return {
         "inicio": inicio, "fim": fim, "linha": linha, "coluna": coluna,
         "trecho": o.trecho, "mensagem": o.mensagem, "medida": o.medida,
@@ -148,10 +171,11 @@ def como_texto(resultados, texto):
         resumo(resultados),
         LEGENDA,
     ]
+    inicios = _inicios(texto)
     for r in resultados:
         linhas += ["", f"{r.inciso.numero}. {r.inciso.texto}", "   " + _situacao(r)]
         for o in r.ocorrencias:
-            _, _, linha, coluna = no_arquivo(o, texto)
+            _, _, linha, coluna = no_arquivo(o, texto, inicios)
             linhas.append(f"   - linha {linha}, coluna {coluna}: {o.mensagem}: “{_curto(o.trecho)}”")
     return "\n".join(linhas)
 

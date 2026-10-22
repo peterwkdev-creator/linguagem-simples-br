@@ -83,6 +83,22 @@ def _positivo(valor):
     return n
 
 
+class _Utf16Corrompido(Exception):
+    """O arquivo abre com a marca do UTF-16, mas os bytes não formam texto."""
+
+
+# Caractere de controle (categoria Cc, menos \n e \t) do texto conferido: o
+# ESC muda a cor ou apaga a tela do terminal. Também as marcas de direção
+# (U+200E, U+200F, U+202A a U+202E, U+2066 a U+2069), que mostram o trecho
+# de trás para frente, e os separadores U+2028 e U+2029. Sai só da tela; o
+# JSON e o arquivo gravado ficam com o trecho como está.
+_CONTROLE = re.compile(r"[\x00-\x08\x0b-\x1f\x7f-\x9f‎‏ -‮⁦-⁩]")
+
+
+def _para_tela(relatorio):
+    return _CONTROLE.sub("", relatorio)
+
+
 def _ler(arquivo, html):
     """O que conferir (o próprio texto ou, no HTML, a ``Pagina``) e, se o
     texto não estava em UTF-8, a codificação em que foi lido."""
@@ -91,7 +107,10 @@ def _ler(arquivo, html):
         if dados.startswith(assinatura):
             raise _NaoETexto(nome)
     if dados.startswith((b"\xff\xfe", b"\xfe\xff")):  # o "Unicode" do Bloco de Notas
-        dados = dados.decode("utf-16").encode("utf-8")
+        try:
+            dados = dados.decode("utf-16").encode("utf-8")
+        except UnicodeError as erro:
+            raise _Utf16Corrompido from erro
     if html or Path(arquivo).suffix.lower() in (".html", ".htm") or parece_html(dados):
         return ler_html(decodificar(dados)), None
     try:
@@ -194,6 +213,10 @@ def main(argv=None):
                 "da pasta em que você está; nome com espaço vai entre aspas: \"meu texto.txt\")")
     except OSError as erro:
         p.error(f"não consegui ler {a.arquivo}: {erro.strerror or erro}")
+    except _Utf16Corrompido:
+        p.error(f"{a.arquivo} começa como Unicode (UTF-16), mas tem bytes que não formam texto: o arquivo "
+                "pode estar cortado ou corrompido. Abra no Bloco de Notas e salve de novo com Arquivo > "
+                "Salvar como > Codificação: UTF-8")
     except UnicodeDecodeError:
         p.error(f"{a.arquivo} não está em UTF-8 (nem no charset que declara, se for HTML): abra no "
                 "Bloco de Notas e salve de novo com Arquivo > Salvar como > Codificação: UTF-8")
@@ -222,7 +245,7 @@ def main(argv=None):
             p.error(f"não consegui gravar {a.saida}: {erro.strerror or erro}")
         print(f"Relatório gravado em {a.saida}. {resumo(resultados)}")
     else:
-        print(relatorio)
+        print(relatorio if a.json else _para_tela(relatorio))
     return 1 if any(r.ocorrencias for r in resultados) else 0
 
 
@@ -256,7 +279,7 @@ def _reescrever(p, a, origem):
     if a.json:
         print(json.dumps(reescrita.como_dict(r), ensure_ascii=False, indent=2))
     else:
-        print(reescrita.como_texto(r, destino))
+        print(_para_tela(reescrita.como_texto(r, destino)))
     return codigo
 
 

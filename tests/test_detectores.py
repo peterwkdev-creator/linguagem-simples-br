@@ -2,10 +2,12 @@
 que o guia oficial dá como bom. E, em cada par do guia, o "antes" conta mais
 que o "depois"."""
 
+import tempfile
 import unittest
 from pathlib import Path
 
 from linguagem_simples import detectores, limiares
+from linguagem_simples.texto import blocos
 from linguagem_simples.detectores import (
     acessibilidade, enumeracoes, estrangeirismos, frases_intercaladas, frases_longas, jargoes, palavras_complexas,
     paragrafos_longos, redundancias, siglas_sem_nome, substantivos_no_lugar_de_verbos, voz_passiva,
@@ -916,6 +918,83 @@ class TestIncisoXVII(unittest.TestCase):
                 textos.append(texto)
         self.assertEqual([origens.count(o) for o in ("lista", "regra", "verbo", "plataforma")], [6, 16, 19, 5])
         self.assertEqual(len(set(textos)), len(textos))
+
+
+def _voz_passiva_antiga(texto):
+    """A conta de antes, que copiava o resto do texto a cada passiva."""
+    achadas = []
+    for m in detectores._PASSIVA.finditer(texto):
+        regular = detectores._REGULAR.fullmatch(m.group(1))
+        if regular and detectores._sem_acento(regular.group(1)) != regular.group(1):
+            continue
+        resto = texto[m.end():]
+        fim = detectores._FIM_DA_ORACAO.search(resto)
+        achadas.append((m.start(), m.end(), bool(detectores._AGENTE.search(resto[:fim.start() if fim else len(resto)]))))
+    return achadas
+
+
+class TestMesmoResultado(unittest.TestCase):
+    """O que foi reescrito para texto grande acha o mesmo que a conta antiga."""
+
+    PASSIVAS = (
+        "O pedido foi analisado pela equipe. Foi feito por meio de lei. É feito por todos",
+        "Foi entregue pelo\nórgão; foram vistos. Seria concedido pelo, Eram feitas!por eles",
+        "Os documentos serão conferidos pelos fiscais e foram assinados por",
+        "foi analisado porque sim. Foi deferido pela",
+    )
+
+    def test_voz_passiva_igual_a_antiga(self):
+        for texto in self.PASSIVAS + ("\n\n".join(self.PASSIVAS) * 20,):
+            with self.subTest(texto[:30]):
+                novas = [(o.inicio, o.fim, "com agente" in o.mensagem) for o in voz_passiva(texto)]
+                self.assertEqual(novas, _voz_passiva_antiga(texto))
+                self.assertTrue(novas)
+
+    def test_blocos_lidos_dao_o_mesmo(self):
+        texto = "\n\n".join(self.PASSIVAS) + "\n\nLeve estes papéis ao posto amanhã: documento, comprovante, certidão e protocolo.\n\n- item"
+        lidos = blocos(texto)
+        self.assertEqual(frases_longas(texto, 3, lidos), frases_longas(texto, 3))
+        self.assertEqual(paragrafos_longos(texto, 1, lidos), paragrafos_longos(texto, 1))
+        self.assertEqual(enumeracoes(texto, blocos_lidos=lidos), enumeracoes(texto))
+        self.assertEqual(frases_intercaladas(texto, lidos), frases_intercaladas(texto))
+        self.assertTrue(frases_longas(texto, 3) and paragrafos_longos(texto, 1) and enumeracoes(texto))
+
+    def test_lexicos_iv_vi_xv_iguais_ao_laco_antigo(self):
+        casos = (
+            (palavras_complexas, "IV", detectores._PALAVRAS_COMPLEXAS, "palavra pouco comum", True),
+            (estrangeirismos, "VI", detectores._ESTRANGEIRISMOS, "palavra estrangeira", True),
+            (redundancias, "XV", detectores._REDUNDANCIAS, "palavras sobrando", False),
+        )
+        texto = (" e ".join(e.replace("*", "") for nome in ("palavras-complexas.txt", "estrangeirismos.txt", "redundancias.txt")
+                            for e in detectores._ler_lexico(nome))
+                 + ". Veja https://x.gov.br/checklist e o checklist.")
+        for detector, inciso, lexico, mensagem, fora_de_endereco in casos:
+            antigo = sorted((
+                detectores.Ocorrencia(inciso, m.start(), m.end(), m.group(), f"{mensagem}: o guia sugere “{forma}”")
+                for padrao, forma in lexico.items() for m in padrao.finditer(texto)
+                if not (fora_de_endereco and detectores._em_endereco(texto, m.start(), m.end()))
+            ), key=lambda o: o.inicio)
+            with self.subTest(inciso):
+                self.assertEqual(detector(texto), antigo)
+                self.assertGreaterEqual(len(antigo), len(lexico))
+
+
+class TestLerLexico(unittest.TestCase):
+    def ler(self, conteudo):
+        with tempfile.TemporaryDirectory() as pasta:
+            (Path(pasta) / "teste.txt").write_text(conteudo, encoding="utf-8")
+            return detectores._ler_lexico("teste.txt", Path(pasta))
+
+    def test_le_entradas_e_pula_comentario(self):
+        self.assertEqual(self.ler("# comentário\n\nchecklist | lista | CAPES p. 9\n"), {"checklist": "lista"})
+
+    def test_linha_sem_os_tres_campos_diz_arquivo_e_linha(self):
+        with self.assertRaisesRegex(ValueError, r"teste\.txt:3: a linha precisa de três campos"):
+            self.ler("# comentário\nchecklist | lista | CAPES p. 9\nfeedback | retorno\n")
+
+    def test_palavra_repetida_e_recusada(self):
+        with self.assertRaisesRegex(ValueError, r"teste\.txt:4: \"checklist\" repetida \(já está na linha 1\)"):
+            self.ler("checklist | lista | CAPES p. 9\nfeedback | retorno | CAPES p. 9\n\nchecklist | roteiro | outra\n")
 
 
 if __name__ == "__main__":
