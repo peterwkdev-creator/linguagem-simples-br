@@ -5,6 +5,22 @@ A versão segue `linguagem_simples.__version__`; cada uma tem uma tag
 tem, os campos do JSON e as opções da linha de comando só mudam numa
 versão 2; detector novo, linha nova, campo novo e opção nova saem numa 1.x.
 
+## 1.13.1 — 22/10/2026
+
+Correções de uma auditoria do código, com os mesmos apontamentos (354
+comparações contra a conta antiga):
+
+- Texto grande mais rápido: linha e coluna sem recontar o texto, voz
+  passiva sem copiar o resto do texto, blocos lidos uma vez por
+  conferência. O relatório em texto de 440 KB caiu de 0,68 s para 0,02 s.
+- Léxico com linha sem os três campos ou palavra repetida para com o
+  arquivo e a linha; limiar novo em `limiares.py` não quebra o relatório.
+- Linha de comando: arquivo UTF-16 corrompido tem mensagem própria, e o
+  relatório e a reescrita na tela saem sem caractere de controle nem marca
+  de direção do texto (o JSON e o arquivo gravado ficam como estão).
+- Manutenção: a conta das letras da sigla e o laço dos léxicos (IV, VI,
+  XV) num lugar só; o checkout dos testes no CI não guarda a credencial.
+
 ## 1.13.0 — 11/10/2026
 
 A reescrita por IA (`--reescrever`) confere também os nomes da tela:

@@ -55,7 +55,7 @@ python -m pip install linguagem-simples-br
 Ou uma versão exata, direto da tag no GitHub:
 
 ```bash
-python -m pip install "git+https://github.com/peterwkdev-creator/linguagem-simples-br@v1.13.0"
+python -m pip install "git+https://github.com/peterwkdev-creator/linguagem-simples-br@v1.13.1"
 ```
 
 ## Uso
