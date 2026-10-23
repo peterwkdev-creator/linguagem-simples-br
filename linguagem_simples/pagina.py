@@ -31,6 +31,17 @@ _VAZIO = frozenset({
     "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta",
     "param", "source", "track", "wbr",
 })
+# Fim implícito (HTML): o elemento aberto fecha quando começa um destes.
+_FECHA_P = frozenset({
+    "address", "article", "aside", "blockquote", "details", "dialog", "div",
+    "dl", "fieldset", "figcaption", "figure", "footer", "form", "h1", "h2",
+    "h3", "h4", "h5", "h6", "header", "hgroup", "hr", "main", "menu", "nav",
+    "ol", "p", "pre", "section", "table", "ul",
+})
+_FECHA = {
+    "p": _FECHA_P, "li": {"li"}, "dt": {"dt", "dd"}, "dd": {"dt", "dd"},
+    "td": {"td", "th", "tr"}, "th": {"td", "th", "tr"}, "tr": {"tr"},
+}
 _CHARSET = re.compile(rb"<meta[^>]+charset\s*=\s*[\"']?([\w-]+)", re.IGNORECASE)
 _PARECE_HTML = re.compile(rb"(?:\xef\xbb\xbf)?\s*<(?:!doctype\s+html|html)\b", re.IGNORECASE)
 
@@ -112,6 +123,7 @@ class _Leitor(HTMLParser):
         self.fonte = fonte
         self.pedacos = []  # (tipo, texto, inicio, fim, dentro do main)
         self.fora = []     # elementos abertos dentro de um trecho que não conta
+        self.abertos = []  # elementos abertos fora desse trecho
         self.main = 0
         self.tem_main = False
         self.elementos = []  # (Elemento, dentro do main)
@@ -129,10 +141,16 @@ class _Leitor(HTMLParser):
                 self.links[-1][2].append(texto)
 
     def handle_starttag(self, tag, attrs):
+        # Um <p hidden> ou <li hidden> sem fechamento termina onde o HTML o
+        # termina, e não leva junto o resto da página.
+        _fechar_implicito(self.fora, tag)
         if self.fora or tag in _FORA or any(nome == "hidden" for nome, _ in attrs):
             if tag not in _VAZIO:
                 self.fora.append(tag)
             return
+        _fechar_implicito(self.abertos, tag)
+        if tag not in _VAZIO:
+            self.abertos.append(tag)
         inicio = self._pos()
         fim = inicio + len(self.get_starttag_text())
         if tag == "main":
@@ -158,8 +176,13 @@ class _Leitor(HTMLParser):
     def handle_endtag(self, tag):
         if self.fora:
             if tag in self.fora:
-                del self.fora[len(self.fora) - 1 - self.fora[::-1].index(tag):]
-            return
+                _fechar(self.fora, tag)
+                return
+            if tag not in self.abertos:
+                return
+            self.fora = []  # o pai fechou: o trecho oculto acabou junto
+        if tag in self.abertos:
+            _fechar(self.abertos, tag)
         if tag in _BLOCO:
             inicio = self._pos()
             self._guardar("bloco", "", inicio, inicio)
@@ -191,6 +214,16 @@ class _Leitor(HTMLParser):
 
     def handle_charref(self, name):
         self._entidade("&#", name)
+
+
+def _fechar(pilha, tag):
+    """Fecha o ``tag`` aberto mais recente e o que ficou aberto dentro dele."""
+    del pilha[len(pilha) - 1 - pilha[::-1].index(tag):]
+
+
+def _fechar_implicito(pilha, tag):
+    while pilha and tag in _FECHA.get(pilha[-1], ()):
+        pilha.pop()
 
 
 def _montar(fonte, pedacos, elementos=()):

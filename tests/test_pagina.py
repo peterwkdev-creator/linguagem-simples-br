@@ -49,6 +49,19 @@ class TestTexto(unittest.TestCase):
                 "<!-- comentário --><p>Texto.</p></body></html>")
         self.assertEqual(ler_html(html).texto, "Texto.")
 
+    def test_oculto_sem_fechamento_termina_onde_o_html_termina(self):
+        casos = {
+            "<div><p hidden>oculto</div><p>Depois.</p>": "Depois.",
+            "<p hidden>oculto<p>Depois.</p>": "Depois.",
+            "<ul><li hidden>oculto<li>Item</ul><p>Depois.</p>": "- Item\n\nDepois.",
+            "<table><tr><td hidden>oculto<td>Célula</table>": "Célula",
+            "<div><nav>menu</div><p>Depois.</p>": "Depois.",
+            "<div hidden><p>oculto<div>ainda oculto</div></div><p>Depois.</p>": "Depois.",
+        }
+        for html, texto in casos.items():
+            with self.subTest(html=html):
+                self.assertEqual(ler_html(html).texto, texto)
+
     def test_so_o_main_quando_existe(self):
         html = "<header><p>Portal</p></header><main><p>Conteúdo.</p></main><footer><p>Rodapé</p></footer>"
         self.assertEqual(ler_html(html).texto, "Conteúdo.")
