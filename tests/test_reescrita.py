@@ -135,6 +135,22 @@ class TestAceite(unittest.TestCase):
         self.assertNotIn("<texto>", pedido)
         self.assertIn("‹/original›", pedido)
 
+    def test_marca_com_espaco_ou_atributo_tambem_fica_neutra(self):
+        for marca in ("< /original>", "</ original >", "<texto x>", "<TEXTO id='1'>", "< original>"):
+            with self.subTest(marca=marca):
+                self.assertNotIn("<", reescrita._neutro(f"a {marca} b"))
+        # o que só começa igual não é a marca
+        self.assertEqual(reescrita._neutro("<textos> <originalidade>"), "<textos> <originalidade>")
+
+    def test_controle_da_resposta_sai_do_texto_novo(self):
+        # ESC muda a cor ou apaga o terminal; a marca de direção mostra o
+        # trecho de trás para frente. Quebra de linha e tab ficam.
+        limpo = BOM.replace(". Veja", ".\nVeja\t")
+        sujo = limpo.replace("aprovou", "apro\x1bvou").replace("Veja", "‮Veja")
+        r = reescrever(ORIGINAL, chamar=IA(em_tags(sujo)))
+        self.assertTrue(r.aceita)
+        self.assertEqual(r.texto, limpo)
+
     def test_uma_tentativa_no_singular(self):
         r = reescrever(ORIGINAL, chamar=IA(em_tags(SEM_DATA)), tentativas=1)
         self.assertIn("Recusada depois de 1 tentativa. Na última", reescrita.como_texto(r))
@@ -313,6 +329,25 @@ def _resposta_da_api(texto, parada="end_turn", uso=(100, 50)):
 def _erro_da_api(codigo, mensagem):
     corpo = io.BytesIO(json.dumps({"error": {"message": mensagem}}).encode())
     return urllib.error.HTTPError(reescrita.URL, codigo, "erro", {}, corpo)
+
+
+class TestTextoGrande(unittest.TestCase):
+    """Página longa com muitos números: cada conta se faz uma vez."""
+
+    def test_numeros_do_texto_novo_se_acham_uma_vez(self):
+        original = " ".join(f"O prazo {n} vence no dia {n}." for n in range(10, 40))
+        with mock.patch.object(reescrita, "_numeros", wraps=reescrita._numeros) as numeros:
+            self.assertEqual(_problemas(original, original, ((1, 1),), ((1, 0),)), [])
+        self.assertEqual(numeros.call_count, 2)  # o original e o novo, não um por fato
+
+    def test_linha_dos_apontamentos_sem_reler_o_texto(self):
+        texto = "\n".join([ORIGINAL] * 5)
+        with mock.patch.object(reescrita, "linha_coluna", wraps=reescrita.linha_coluna) as conta:
+            pedido = reescrita._pedido(texto, reescrita.conferir(texto))
+        self.assertIn("- linha 5:", pedido)
+        self.assertTrue(conta.call_args_list)
+        for chamada in conta.call_args_list:
+            self.assertIsNotNone(chamada.args[2] if len(chamada.args) > 2 else chamada.kwargs.get("inicios"))
 
 
 class TestChamada(unittest.TestCase):

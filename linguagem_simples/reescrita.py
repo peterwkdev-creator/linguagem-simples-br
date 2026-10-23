@@ -29,7 +29,7 @@ from dataclasses import dataclass
 
 from .incisos import FONTE_LEI
 from .pagina import Pagina
-from .relatorio import AVISO, CONFERIDO, conferir, linha_coluna
+from .relatorio import AVISO, CONFERIDO, CONTROLE, conferir, inicios_de_linha, linha_coluna
 from .texto import blocos, frases
 
 URL = "https://api.anthropic.com/v1/messages"
@@ -193,11 +193,13 @@ def _problemas(original, novo, antes, depois, links=None):
     for inciso, n in antes:
         if depois.get(inciso, 0) > n:
             problemas.append(f"o inciso {inciso} piorou ({n} → {depois[inciso]})")
-    sumiram = [t for t in fatos(original) if not _contem(novo, t)]
+    numeros_novo = _numeros(novo)
+    no_novo = set(numeros_novo)
+    sumiram = [t for t in fatos(original) if not _contem(novo, t, no_novo)]
     if sumiram:
         problemas.append("sumiu do texto: " + ", ".join(sumiram))
     do_original = set(_numeros(original))
-    novos = [t for t in _numeros(novo) if t not in do_original]
+    novos = [t for t in numeros_novo if t not in do_original]
     if novos:
         problemas.append("número que o original não tem: " + ", ".join(novos))
     perdidas = _alternativas_perdidas(original, novo)
@@ -354,19 +356,22 @@ def _sem_endereco(texto):
     return _MARCA_DE_ITEM.sub(" ", _ENDERECO.sub(" ", texto))
 
 
-def _contem(texto, fato):
+def _contem(texto, fato, numeros=None):
     # O número se acha como foi extraído, inteiro: o "29" de "Art.29." e o
-    # "2" de "2ª" contam, o "5" de "1.5" não.
+    # "2" de "2ª" contam, o "5" de "1.5" não. ``numeros`` é o
+    # ``set(_numeros(texto))``, para não procurar de novo a cada fato.
     if _NUMERO.fullmatch(fato):
-        return fato in _numeros(texto)
+        return fato in (_numeros(texto) if numeros is None else numeros)
     # Sem diferença de caixa: "PRAZO" de título que vira "Prazo" não é fato
     # perdido; a sigla que some de todo, sim. O ponto antes vale: "Fala.BR".
     return re.search(r"(?<!\w)%s(?!\w)" % re.escape(fato), texto, re.I) is not None
 
 
 def _extrair(resposta):
+    # O controle que a IA devolve (ESC, marca de direção) sai do texto novo:
+    # ele vai à tela e ao arquivo de quem usa.
     m = _TEXTO.search(resposta)
-    return m.group(1) if m else None
+    return CONTROLE.sub("", m.group(1)) if m else None
 
 
 _SISTEMA = (
@@ -404,7 +409,9 @@ _SISTEMA = (
 )
 
 
-_MARCA_DO_PEDIDO = re.compile(r"<(/?\s*(?:original|texto)\s*)>", re.I)
+# Com espaço antes ou depois da barra e com atributo: "< /original>",
+# "<texto x>". "<textos>" não é a marca.
+_MARCA_DO_PEDIDO = re.compile(r"<(\s*/?\s*(?:original|texto)\b[^<>]*)>", re.I)
 
 
 def _neutro(texto):
@@ -430,13 +437,13 @@ def _de_novo(motivo, resultados, novo):
 
 
 def _apontamentos(resultados, texto):
-    linhas = []
+    linhas, inicios = [], inicios_de_linha(texto)
     for r in resultados:
         if r.estado != CONFERIDO or not r.ocorrencias:
             continue
         linhas.append(f"Inciso {r.inciso.numero} ({r.inciso.texto}):")
         for o in r.ocorrencias:
-            linha, _ = linha_coluna(texto, o.inicio)
+            linha, _ = linha_coluna(texto, o.inicio, inicios)
             linhas.append(f"- linha {linha}: {o.mensagem}: “{' '.join(o.trecho.split())}”")
     return "\n".join(linhas)
 

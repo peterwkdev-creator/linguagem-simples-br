@@ -27,6 +27,13 @@ SEM_DETECTOR = "sem detector nesta versão"
 NAO_CONFERIDO = "não conferido"
 DESLIGADO = "desligado"
 
+# Caractere de controle (categoria Cc, menos \n e \t): o ESC muda a cor ou
+# apaga a tela do terminal. Também as marcas de direção (U+200E, U+200F,
+# U+202A a U+202E, U+2066 a U+2069), que mostram o trecho de trás para
+# frente, e os separadores U+2028 e U+2029. Sai da tela e do texto que a IA
+# devolve; o JSON e o arquivo conferido ficam com o trecho como está.
+CONTROLE = re.compile(r"[\x00-\x08\x0b-\x1f\x7f-\x9f\u200e\u200f\u2028-\u202e\u2066-\u2069]")
+
 LEGENDA = (
     "Classes: automático, regra que o verificador confere; sinal, indício para quem lê decidir; "
     "fora do alcance, só uma pessoa confere. Num sinal, nenhuma ocorrência não garante que o "

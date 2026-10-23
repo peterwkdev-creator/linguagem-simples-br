@@ -17,7 +17,7 @@ from pathlib import Path
 
 from . import __version__, reescrita
 from .pagina import decodificar, ler_html, parece_html
-from .relatorio import AVISO, como_dict, como_texto, conferir, resumo
+from .relatorio import AVISO, CONTROLE, como_dict, como_texto, conferir, resumo
 
 
 ISSUES = "https://github.com/peterwkdev-creator/linguagem-simples-br/issues"
@@ -87,16 +87,9 @@ class _Utf16Corrompido(Exception):
     """O arquivo abre com a marca do UTF-16, mas os bytes não formam texto."""
 
 
-# Caractere de controle (categoria Cc, menos \n e \t) do texto conferido: o
-# ESC muda a cor ou apaga a tela do terminal. Também as marcas de direção
-# (U+200E, U+200F, U+202A a U+202E, U+2066 a U+2069), que mostram o trecho
-# de trás para frente, e os separadores U+2028 e U+2029. Sai só da tela; o
-# JSON e o arquivo gravado ficam com o trecho como está.
-_CONTROLE = re.compile(r"[\x00-\x08\x0b-\x1f\x7f-\x9f‎‏ -‮⁦-⁩]")
-
-
 def _para_tela(relatorio):
-    return _CONTROLE.sub("", relatorio)
+    # só a tela: o JSON fica com o trecho como está
+    return CONTROLE.sub("", relatorio)
 
 
 def _ler(arquivo, html):
