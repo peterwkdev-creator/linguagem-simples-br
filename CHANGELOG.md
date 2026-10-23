@@ -5,6 +5,18 @@ A versão segue `linguagem_simples.__version__`; cada uma tem uma tag
 tem, os campos do JSON e as opções da linha de comando só mudam numa
 versão 2; detector novo, linha nova, campo novo e opção nova saem numa 1.x.
 
+## 1.13.2 — 22/10/2026
+
+Correções na reescrita por IA (`--reescrever`), com a mesma saída da 1.13.1
+no acervo (1.574 comparações):
+
+- O texto reescrito sai sem caractere de controle nem marca de direção
+  que a IA devolva, também no arquivo gravado com `--saida`.
+- A marca que fecha o bloco do texto no pedido (`</original>`) fica neutra
+  também com espaço ou atributo (`< /original>`, `<texto x>`).
+- Página longa mais rápida: os números do texto novo e a linha de cada
+  apontamento se contam uma vez.
+
 ## 1.13.1 — 22/10/2026
 
 Correções de uma auditoria do código, com os mesmos apontamentos (354
