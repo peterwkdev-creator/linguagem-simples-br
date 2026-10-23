@@ -5,6 +5,15 @@ A versão segue `linguagem_simples.__version__`; cada uma tem uma tag
 tem, os campos do JSON e as opções da linha de comando só mudam numa
 versão 2; detector novo, linha nova, campo novo e opção nova saem numa 1.x.
 
+## 1.13.4 — 22/10/2026
+
+Mais rápida, com a mesma saída:
+
+- Os detectores de léxico (incisos IV, V, VI e XV) só procuram a
+  expressão no texto que tem a palavra mais longa dela. Mesmos
+  apontamentos em 379 textos do corpus; as 10 páginas da medida 6 passam
+  de 0,32 a 0,11 s, e um texto de 440 KB de 2,1 a 0,7 s.
+
 ## 1.13.3 — 22/10/2026
 
 Correção na leitura de HTML:
