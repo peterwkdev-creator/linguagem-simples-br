@@ -619,3 +619,48 @@ ganha quem faz a ação ("A autorização deve ser encaminhada" virou "O
 solicitante deve encaminhar"), que nenhuma conferência pega. Nenhuma
 página mudou só por explicar termo técnico. 143.055 tokens de entrada e
 58.561 de saída, 294 s.
+
+**Aspas, nomes e "pode não seguir" no pedido (medida de 22/10/2026, não
+entrou).** Duas mudanças só no pedido à IA, medidas juntas: copiar igual
+todo texto entre aspas e todo nome com maiúscula, sem sinônimo nem
+palavra acrescentada no meio; e a lista de apontamentos passa a dizer o
+inciso que cada trecho "pode não seguir", em vez de "descumpre". Regra
+escrita antes de rodar: o pedido novo fica se as aceitas não caírem
+abaixo de 8 de 10, o mesmo sentido não cair abaixo de 4 de 10 e as
+recusas por nome não passarem de 2. Mesmas 10 páginas, achadas de novo
+no gov.br (7 com o mesmo texto extraído; 06, 07 e 10 diferem só na
+moldura: serviço recomendado e número de avaliações), mesmo critério de
+sentido, 2 passagens, a 2ª às cegas (semente 20261021; as 9 classes
+iguais).
+
+| Medida | 1.13.0 | Pedido novo |
+|---|---|---|
+| Longas: aceitas | 10 / 10 | 9 / 10 (a 08 recusada pelo XII) |
+| Longas: apontamentos (nas aceitas) | 378 → 159 | 380 → 126 |
+| Longas: mesmo sentido | 40% (17% a 69%) | **30% (11% a 60%)** |
+| Longas com quem faz a ação acrescentado | 4 / 10 | 5 / 10 |
+| Longas com outra mudança | 3 / 10 | 4 / 10 |
+| Longas com rótulo da tela trocado | 0 / 10 | 2 / 10 |
+| Recusas por nome | 2 | 2 |
+
+O pedido novo não entrou: o mesmo sentido ficou abaixo de 4 de 10, e o
+pedido continua o da 1.13.0. A regra das aspas não evitou a troca de
+título de etapa ("Aguardar processamento de matrícula" virou "Aguardar o
+andamento da matrícula"; a sigla do IPHAN foi por extenso dentro de
+"Aguardar Análise do IPHAN"), e o "pode não seguir" não reduziu a frase
+que ganha quem faz a ação. Com 10 páginas os intervalos se sobrepõem: a
+medida não diz que piorou, só que não melhorou. 235.549 tokens de
+entrada e 80.796 de saída (65% mais que na 1.13.0, pelas tentativas a
+mais), 403 s.
+
+As 10 páginas, em `https://www.gov.br/pt-br/servicos/` seguido de: 01
+`participar-do-programa-crianca-feliz`; 02
+`matricular-se-em-curso-de-educacao-superior-de-graduacao-licenciatura-tecnologia-e-bacharelado-ifsp`;
+03 `certificado-nacional-de-vacinacao-covid-19`; 04
+`devolver-mercadoria-importada-ao-exterior`; 05
+`obter-a-aplicacao-prorrogacao-ou-alteracao-de-medida-de-salvaguarda-por-meio-dos-procedimentos-previstos-no-decreto-n-1-488-de-11-de-maio-de-1995`;
+06 `obter-duplicacao-de-materiais-filmicos-e-nao-filmicos-da-cinemateca-brasileira`;
+07 `revalidar-habilitacao-para-piloto-voo-por-instrumentos-aviao-ifra-ou-helicoptero-ifrh`;
+08 `obter-passaporte-comum-para-brasileiro`; 09
+`inventariar-linguas-como-referencia-cultural-brasileira-indl`; 10
+`autorizar-para-o-exercicio-da-atividade-de-distribuicao-de-gas-natural-comprimido-a-granel-gnc`.
