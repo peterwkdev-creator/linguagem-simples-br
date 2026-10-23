@@ -605,10 +605,31 @@ def substantivos_no_lugar_de_verbos(texto):
 # espaço ou uma quebra de linha; parágrafo novo, não.
 _ESPACO = r"(?:[^\S\n]+|[^\S\n]*\n[^\S\n]*)"
 
+# Pré-filtro: a expressão só se procura no texto que tem a palavra mais longa
+# dela. O texto se dobra como o re.IGNORECASE casa as letras dos léxicos: o
+# casefold basta, menos no i turco ("İ" e "ı"), que o re casa com "i".
+_I_TURCO = str.maketrans("İı", "ii")
+_CHAVE = {}  # padrão compilado -> palavra que o texto precisa ter
+
+
+def _dobrar(texto):
+    return texto.translate(_I_TURCO).casefold()
+
+
+def _com_chave(padrao, expressao):
+    _CHAVE[padrao] = _dobrar(max(expressao.replace("*", "").split(), key=len))
+    return padrao
+
+
+def _presentes(texto, lexico):
+    """As entradas do léxico cuja palavra mais longa está no texto."""
+    dobrado = _dobrar(texto)
+    return [(padrao, forma) for padrao, forma in lexico.items() if _CHAVE[padrao] in dobrado]
+
 
 def _padrao_da_expressao(expressao):
     partes = [re.escape(p[:-1]) + r"\w*" if p.endswith("*") else re.escape(p) for p in expressao.split()]
-    return re.compile(r"(?<!\w)" + _ESPACO.join(partes) + r"(?!\w)", re.IGNORECASE)
+    return _com_chave(re.compile(r"(?<!\w)" + _ESPACO.join(partes) + r"(?!\w)", re.IGNORECASE), expressao)
 
 
 _REDUNDANCIAS = {_padrao_da_expressao(e): forma for e, forma in _ler_lexico("redundancias.txt").items()}
@@ -620,7 +641,7 @@ def _do_lexico(texto, inciso, lexico, mensagem, fora_de_endereco=True):
     ``fora_de_endereco``, a que está dentro de URL ou e-mail não conta."""
     achadas = [
         Ocorrencia(inciso, m.start(), m.end(), m.group(), mensagem.format(forma))
-        for padrao, forma in lexico.items() for m in padrao.finditer(texto)
+        for padrao, forma in _presentes(texto, lexico) for m in padrao.finditer(texto)
         if not (fora_de_endereco and _em_endereco(texto, m.start(), m.end()))
     ]
     return sorted(achadas, key=lambda o: o.inicio)
@@ -636,7 +657,8 @@ def redundancias(texto):
 # fora como letra ("gov.br/login"): é caminho de endereço, que quem escreve
 # o texto não escolhe.
 _ESTRANGEIRISMOS = {
-    re.compile(r"(?<![\w/])" + _ESPACO.join(map(re.escape, e.split())) + r"(?![\w/])", re.IGNORECASE): forma
+    _com_chave(re.compile(r"(?<![\w/])" + _ESPACO.join(map(re.escape, e.split())) + r"(?![\w/])", re.IGNORECASE),
+               e): forma
     for e, forma in _ler_lexico("estrangeirismos.txt").items()
 }
 
@@ -677,7 +699,7 @@ def jargoes(texto):
     acusatória": TJRS p. 107) sem explicação no próprio texto. É sinal: a lei
     aceita o termo explicado, e quem lê decide."""
     achadas = []
-    for padrao, forma in _JARGOES.items():
+    for padrao, forma in _presentes(texto, _JARGOES):
         ocorrencias = list(padrao.finditer(texto))
         if not ocorrencias or _EXPLICACAO.match(texto, ocorrencias[0].end()):
             continue

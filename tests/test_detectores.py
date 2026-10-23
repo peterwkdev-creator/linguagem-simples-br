@@ -2,6 +2,7 @@
 que o guia oficial dá como bom. E, em cada par do guia, o "antes" conta mais
 que o "depois"."""
 
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -977,6 +978,23 @@ class TestMesmoResultado(unittest.TestCase):
             with self.subTest(inciso):
                 self.assertEqual(detector(texto), antigo)
                 self.assertGreaterEqual(len(antigo), len(lexico))
+
+    def test_pre_filtro_dobra_como_o_re(self):
+        # Todo caractere que o re.IGNORECASE casa com uma letra dos léxicos
+        # dobra igual a ela: o pré-filtro nunca pula uma expressão presente.
+        letras = {c for nome in ("palavras-complexas.txt", "jargoes.txt", "estrangeirismos.txt", "redundancias.txt")
+                  for e in detectores._ler_lexico(nome) for c in e if c not in "* "}
+        todos = "".join(chr(c) for c in range(0x110000) if not 0xD800 <= c <= 0xDFFF)
+        for letra in sorted(letras):
+            for c in set(re.findall(re.escape(letra), todos, re.IGNORECASE)):
+                with self.subTest(letra=letra, c=hex(ord(c))):
+                    self.assertEqual(detectores._dobrar(c), detectores._dobrar(letra))
+
+    def test_i_turco_passa_pelo_pre_filtro(self):
+        # O re casa "ı" e "İ" com "i"; o casefold sozinho pularia a expressão.
+        for texto in ("A exordial acusatórıa chegou.", "A EXORDIAL ACUSATÓRİA CHEGOU."):
+            with self.subTest(texto):
+                self.assertEqual(len(jargoes(texto)), 1)
 
 
 class TestLerLexico(unittest.TestCase):
