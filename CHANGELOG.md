@@ -5,6 +5,15 @@ A versão segue `linguagem_simples.__version__`; cada uma tem uma tag
 tem, os campos do JSON e as opções da linha de comando só mudam numa
 versão 2; detector novo, linha nova, campo novo e opção nova saem numa 1.x.
 
+## 1.13.3 — 22/10/2026
+
+Correção na leitura de HTML:
+
+- Um trecho oculto sem fechamento (`<p hidden>`, `<li hidden>`, `<nav>`
+  dentro de um `<div>`) não apaga mais o resto da página: termina onde o
+  HTML o termina. Nas 10 páginas da medida 6 não há caso assim e a saída
+  é a mesma.
+
 ## 1.13.2 — 22/10/2026
 
 Correções na reescrita por IA (`--reescrever`), com a mesma saída da 1.13.1
